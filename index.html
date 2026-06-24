@@ -322,6 +322,38 @@
   .card{transition:transform .22s ease,box-shadow .22s ease;}
   @media (prefers-reduced-motion: reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important;}.reveal{opacity:1!important;transform:none!important;}}
 
+  /* address + map */
+  .addr-wrap{position:relative;}
+  .ac-box{position:absolute;left:0;right:0;top:100%;z-index:20;background:var(--surface);border:1px solid var(--line-2);border-radius:12px;margin-top:4px;box-shadow:var(--sh-h);overflow:hidden;max-height:240px;overflow-y:auto;}
+  .ac-item{display:block;width:100%;text-align:left;padding:10px 13px;font-size:13.5px;color:var(--ink);border-bottom:1px solid var(--line);line-height:1.4;}
+  .ac-item:last-child{border-bottom:none;}
+  .ac-item:hover{background:var(--coral-soft);color:var(--coral-deep);}
+  .wiz-map,.mapcard.live{height:220px;border-radius:var(--r-lg);overflow:hidden;border:1px solid var(--line-2);margin-bottom:12px;background:#E7ECEF;position:relative;}
+  .map-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--faint);font-weight:500;font-size:14px;}
+  .leaflet-container{font-family:inherit;}
+  /* full calendar */
+  .cal-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;}
+  .cal-title{font-weight:700;font-size:14.5px;}
+  .cal-nav{width:32px;height:32px;border-radius:9px;border:1px solid var(--line-2);font-size:18px;line-height:1;color:var(--ink);background:var(--surface);}
+  .cal-nav:hover{border-color:var(--coral);color:var(--coral-deep);background:var(--coral-soft);}
+  .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+  .cd{aspect-ratio:1;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;background:var(--surface);border:1px solid var(--line-2);color:var(--muted);cursor:pointer;transition:.12s;}
+  .cd.muted{opacity:0;border:none;cursor:default;background:none;}
+  .cd:hover:not(.muted){border-color:var(--coral);color:var(--ink);}
+  .cd.booked{background:var(--coral);color:#fff;border-color:var(--coral-deep);font-weight:700;}
+  .cd.today{box-shadow:inset 0 0 0 2px var(--coral-soft);}
+  .cd.sel{outline:2px solid var(--ink);outline-offset:1px;}
+  .cd small{font-size:8.5px;margin-top:1px;}
+  .cal-day{margin-top:14px;}
+  .cal-day-h{font-weight:700;font-size:14px;margin-bottom:7px;}
+  .cal-bk{font-size:13.5px;color:var(--muted);padding:8px 12px;background:var(--surface);border:1px solid var(--line-2);border-radius:9px;margin-bottom:6px;}
+  /* sharper edges */
+  .stat{border-color:var(--line-2);box-shadow:var(--sh);}
+  .space-card{border-color:var(--line-2);box-shadow:var(--sh);}
+  /* smoother reveal */
+  .reveal{transform:translateY(24px) scale(.985);transition:opacity .75s cubic-bezier(.16,1,.3,1),transform .75s cubic-bezier(.16,1,.3,1);}
+  .reveal.in{transform:none;}
+  .page-overlay{transform:translateY(14px);transition:opacity .4s cubic-bezier(.16,1,.3,1),transform .4s cubic-bezier(.16,1,.3,1);}
   .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:12px 20px;border-radius:999px;font-size:14px;font-weight:600;box-shadow:var(--sh-h);opacity:0;transition:.25s;z-index:200;pointer-events:none;max-width:90vw;text-align:center;}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
@@ -523,7 +555,7 @@ function render(){
   $("#count").textContent=`${r.length} ${plural(r.length,"место","места","мест")}`;
   if(!r.length){grid.innerHTML=`<div class="nores">Ничего не нашлось под эти фильтры. <button onclick="resetFilters()">Сбросить</button></div>`;return;}
   r.forEach((s,i)=>{
-    const u=photo(s),el=document.createElement("article");el.className="card reveal";el.style.transitionDelay=(i%4*50)+"ms";
+    const u=photo(s),el=document.createElement("article");el.className="card reveal";el.style.transitionDelay=(i%4*70)+"ms";
     el.innerHTML=`<div class="pic"><div class="ph-bg">${room(WALL[s.cat]??30,s.id)}</div>${u?`<img class="ph-img" src="${u}" loading="lazy" onerror="this.remove()">`:""}<button class="heart ${favs.has(s.id)?'on':''}" aria-label="Сохранить">♥</button><span class="tag">${s.use}</span></div><div class="cbody"><div class="crow"><span class="cname">${s.name}</span>${s.isNew?'<span class="rate" style="color:var(--coral-deep)">новое</span>':`<span class="rate">★ ${s.rating}</span>`}</div><div class="cmeta">${s.catName} · ${s.loc} · у ${s.host}</div><div class="cprice"><b>₾${s.rate}</b><span> / час · до ${s.cap}</span></div></div>`;
     el.querySelector(".heart").onclick=e=>{e.stopPropagation();const b=e.currentTarget;favs.has(s.id)?favs.delete(s.id):favs.add(s.id);b.classList.toggle("on",favs.has(s.id));const c=$("#cnt");c.textContent=favs.size;c.classList.toggle("show",favs.size>0);};
     el.onclick=()=>goSpace(s.id);
@@ -571,7 +603,7 @@ function detailHTML(s){
        <section id="sec-about" class="detail-sec reveal"><h3 class="detail-h3">О месте</h3><p class="detail-desc">${d.desc}</p><div class="facet-grid">${FACETS.map(f=>`<div class="facet"><div class="facet-k">${f[0]}</div><div class="facet-v">${f[1]}</div></div>`).join("")}</div></section>
        <section id="sec-amen" class="detail-sec reveal"><h3 class="detail-h3">Что включено</h3>${d.amen.length?`<div class="feat-grid">${d.amen.map(a=>`<div class="feat">✓ ${a}</div>`).join("")}</div>`:`<p class="muted2">Хозяин добавит удобства чуть позже.</p>`}</section>
        <section id="sec-addons" class="detail-sec reveal"><h3 class="detail-h3">Услуги хозяина</h3><p class="muted2" style="margin-bottom:12px;">Добавишь при бронировании — по желанию.</p><div class="addon-grid">${ADDONS.map((a,i)=>`<div class="addon"><div class="addon-pic"><div class="ph-bg">${room((WALL[s.cat]??30)+i*22,s.id+i+5)}</div></div><div><b>${a[0]}</b><div class="muted2">${a[1]}</div></div></div>`).join("")}</div></section>
-       <section id="sec-loc" class="detail-sec reveal"><h3 class="detail-h3">Расположение</h3><div class="mapcard"><div class="map-grid"></div><div class="map-pin">📍</div><div class="map-lbl">${s.loc}, Тбилиси</div></div><p class="muted2" style="margin-top:10px;">Точный адрес появится после подтверждения брони.</p><div class="hours"><b>Часы работы</b><span>${late?"Пн–Вс · до 02:00":"Пн–Вс · 09:00–22:00"}</span></div></section>
+       <section id="sec-loc" class="detail-sec reveal"><h3 class="detail-h3">Расположение</h3>${s.lat?`<div id="detmap" class="mapcard live"></div>${s.addr?`<p style="margin-top:10px;font-weight:600;">${s.addr}</p>`:""}`:`<div class="mapcard"><div class="map-grid"></div><div class="map-pin">📍</div><div class="map-lbl">${s.loc}, Тбилиси</div></div><p class="muted2" style="margin-top:10px;">Точный адрес появится после подтверждения брони.</p>`}<div class="hours"><b>Часы работы</b><span>${late?"Пн–Вс · до 02:00":"Пн–Вс · 09:00–22:00"}</span></div></section>
        <section id="sec-know" class="detail-sec reveal"><h3 class="detail-h3">Важно знать</h3><div class="know"><div><b>Отмена</b><p class="muted2">Бесплатно за 24 часа до начала — вернём оплату и залог полностью.</p></div><div><b>Залог</b><p class="muted2">Возвратный, вернётся в течение суток после встречи.</p></div><div><b>Чистота</b><p class="muted2">Хозяин убирает между бронями. Оставь место таким же.</p></div></div></section>
        <section class="detail-sec reveal"><h3 class="detail-h3">${s.isNew?"Отзывы":`★ ${s.rating} · ${rc} отзывов`}</h3>${d.rev.length?d.rev.map(r=>`<div class="review"><div class="rh"><span class="ra" style="background:${HCV[r[0].length%HCV.length]}">${r[0][0]}</span><span class="rn">${r[0]}</span><span class="rd">${r[1]}</span></div><p>${r[2]}</p></div>`).join(""):`<p class="muted2">Пока без отзывов — будь первым, кто здесь побывает.</p>`}</section>
      </div>
@@ -611,6 +643,7 @@ function wireDetail(){
   $("#bkB").onclick=()=>{if(!bk.slot)return toast("Выбери время начала");pageView="pay";renderPage();window.scrollTo(0,0);};
   $("#page").querySelectorAll(".subnav button").forEach(b=>b.onclick=()=>{const t=document.getElementById(b.dataset.sec);if(t)t.scrollIntoView({behavior:"smooth",block:"start"});});
   const mh=$("#msgHost");if(mh)mh.onclick=()=>toast("Чат с хозяином появится с подключением бэкенда");
+  if(current.lat)showMap("detmap",current.lat,current.lon);
   reveal($("#page"));
   calc();
 }
@@ -643,7 +676,22 @@ function remindTomorrow(){const t=tomorrowStr(),b=myBookings().find(x=>x.date===
 /* ---------- host seed + dashboard ---------- */
 function seedDemoBookings(s){const n=new Date(),y=n.getFullYear(),m=n.getMonth(),dn=[["Анна","anna@demo.ge"],["Гиорги","gio@demo.ge"],["Лана","lana@demo.ge"]],used=new Set();for(let i=0;i<3;i++){let day;do{day=2+Math.floor(Math.random()*26);}while(used.has(day));used.add(day);const date=new Date(y,m,day).toISOString().slice(0,10),hours=2+Math.floor(Math.random()*3),guests=Math.min(s.cap,2+Math.floor(Math.random()*8)),sub=s.rate*hours,dep=Math.max(50,Math.round(s.rate*0.8/10)*10);bookings.push({id:Date.now()+i,spaceId:s.id,spaceName:s.name,hostEmail:s.ownerEmail,renterEmail:dn[i][1],renterName:dn[i][0],date,slot:10+i*2,hours,guests,sub,dep,total:sub+dep});}saveBookings();}
 function delSpace(id){const i=SPACES.findIndex(s=>s.id===id);if(i>-1)SPACES.splice(i,1);bookings=bookings.filter(b=>b.spaceId!==id);saveSpaces();saveBookings();render();renderDash();toast("Пространство удалено.");}
-function calendarHTML(spaceId){const n=new Date(),y=n.getFullYear(),m=n.getMonth(),first=new Date(y,m,1),startDow=(first.getDay()+6)%7,days=new Date(y,m+1,0).getDate(),byDay={};bookings.forEach(b=>{if(b.spaceId!==spaceId)return;const d=new Date(b.date);if(d.getFullYear()===y&&d.getMonth()===m)byDay[d.getDate()]=(byDay[d.getDate()]||0)+b.guests;});let cells="";for(let i=0;i<startDow;i++)cells+=`<div class="cd muted"></div>`;for(let d=1;d<=days;d++){const g=byDay[d];cells+=`<div class="cd ${g?"booked":""}">${d}${g?`<small>${g} чел</small>`:""}</div>`;}const mn=["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"][m];return `<div class="cal-wrap"><div class="cal-title">Календарь занятости · ${mn} ${y}</div><div class="cal-head">${["Пн","Вт","Ср","Чт","Пт","Сб","Вс"].map(x=>`<span>${x}</span>`).join("")}</div><div class="cal">${cells}</div></div>`;}
+let calState={},leafletReady=null,acTimer=null,acItems=[];
+function loadLeaflet(){if(leafletReady)return leafletReady;leafletReady=new Promise((res,rej)=>{if(window.L)return res(window.L);const css=document.createElement("link");css.rel="stylesheet";css.href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";document.head.appendChild(css);const sc=document.createElement("script");sc.src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";sc.onload=()=>res(window.L);sc.onerror=rej;document.head.appendChild(sc);});return leafletReady;}
+async function showMap(elId,lat,lon){try{const L=await loadLeaflet();const el=document.getElementById(elId);if(!el)return;el.innerHTML="";const map=L.map(el,{zoomControl:true,scrollWheelZoom:false,attributionControl:false}).setView([lat,lon],15);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(map);L.marker([lat,lon]).addTo(map);setTimeout(()=>map.invalidateSize(),120);}catch(e){}}
+function addrSearch(q,box,onPick){clearTimeout(acTimer);if(!q||q.trim().length<3){box.innerHTML="";return;}acTimer=setTimeout(async()=>{try{const r=await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=5&accept-language=ru&q=${encodeURIComponent(q+", Тбилиси, Грузия")}`);acItems=await r.json();box.innerHTML=acItems.map((d,i)=>`<button type="button" class="ac-item" data-i="${i}">${d.display_name}</button>`).join("");box.querySelectorAll(".ac-item").forEach(b=>b.onclick=()=>onPick(acItems[+b.dataset.i]));}catch(e){box.innerHTML="";}},380);}
+
+function calInner(spaceId){
+  const st=calState[spaceId]||(calState[spaceId]={y:new Date().getFullYear(),m:new Date().getMonth()}),{y,m}=st;
+  const first=new Date(y,m,1),startDow=(first.getDay()+6)%7,days=new Date(y,m+1,0).getDate(),today=new Date(),byDay={};
+  bookings.forEach(b=>{if(b.spaceId!==spaceId)return;const d=new Date(b.date);if(d.getFullYear()===y&&d.getMonth()===m)(byDay[d.getDate()]=byDay[d.getDate()]||[]).push(b);});
+  const mn=["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"][m];
+  let cells="";for(let i=0;i<startDow;i++)cells+=`<div class="cd muted"></div>`;
+  for(let d=1;d<=days;d++){const arr=byDay[d],g=arr?arr.reduce((a,b)=>a+b.guests,0):0,tdy=y===today.getFullYear()&&m===today.getMonth()&&d===today.getDate();cells+=`<button class="cd ${g?'booked':''} ${tdy?'today':''}" data-day="${d}">${d}${g?`<small>${g} чел</small>`:""}</button>`;}
+  return `<div class="cal-top"><div class="cal-title">${mn} ${y}</div><div style="display:flex;gap:6px;"><button class="cal-nav" data-nav="-1">‹</button><button class="cal-nav" data-nav="1">›</button></div></div><div class="cal-head">${["Пн","Вт","Ср","Чт","Пт","Сб","Вс"].map(x=>`<span>${x}</span>`).join("")}</div><div class="cal">${cells}</div><div class="cal-day" id="calday-${spaceId}"></div>`;
+}
+function calendarHTML(spaceId){return `<div class="cal-wrap" id="cal-${spaceId}" data-sp="${spaceId}">${calInner(spaceId)}</div>`;}
+function wireCals(){document.querySelectorAll(".cal-wrap").forEach(w=>{const sp=+w.dataset.sp;w.onclick=e=>{const nav=e.target.closest(".cal-nav");if(nav){const st=calState[sp];st.m+=+nav.dataset.nav;if(st.m<0){st.m=11;st.y--;}if(st.m>11){st.m=0;st.y++;}w.innerHTML=calInner(sp);return;}const cd=e.target.closest(".cd[data-day]");if(cd){const day=+cd.dataset.day,st=calState[sp],ds=new Date(st.y,st.m,day).toISOString().slice(0,10),list=bookings.filter(b=>b.spaceId===sp&&b.date===ds);w.querySelectorAll(".cd").forEach(x=>x.classList.remove("sel"));cd.classList.add("sel");const det=document.getElementById("calday-"+sp),mn=["янв","фев","мар","апр","мая","июн","июл","авг","сен","окт","ноя","дек"][st.m];det.innerHTML=list.length?`<div class="cal-day-h">${day} ${mn} — ${list.length} ${plural(list.length,"бронь","брони","броней")}</div>${list.map(b=>`<div class="cal-bk">${b.slot}:00–${b.slot+b.hours}:00 · ${b.renterName} · ${b.guests} чел.</div>`).join("")}`:`<div class="cal-day-h">${day} ${mn} — свободно</div>`;}};});}
 function bookingItem(b,isTom){const sp=SPACES.find(s=>s.id===b.spaceId),u=sp?photo(sp):null;return `<div class="bk-item"><div class="bk-thumb">${sp?`<div class="ph-bg">${room(WALL[sp.cat]??30,b.spaceId)}</div>${u?`<img class="ph-img" src="${u}" onerror="this.remove()">`:""}`:""}</div><div style="flex:1;"><div style="font-weight:700;">${b.spaceName}${isTom?`<span class="tom">завтра</span>`:""}</div><div style="color:var(--muted);font-size:14px;">${b.date.split("-").reverse().join(".")} · ${b.slot}:00–${b.slot+b.hours}:00 · ${b.guests} чел.</div></div><div style="font-weight:700;">₾${b.total||b.sub}</div></div>`;}
 
 let dashTab="overview",wiz=null;
@@ -673,13 +721,14 @@ function renderDash(){
   $("#dash").querySelectorAll(".del").forEach(b=>b.onclick=()=>delSpace(+b.dataset.id));
   const qf=$("#qFind");if(qf)qf.onclick=()=>{closeDash();$("#grid-wrap").scrollIntoView({behavior:"smooth"});};
   const lb=$("#logoutBtn");if(lb)lb.onclick=logout;
+  wireCals();
   if(dashTab==="add")wireWiz();
 }
 
 /* ---------- listing wizard (Peerspace-style) ---------- */
 const WSTEPS=["Тип","Адрес","Что внутри","Описание","Цена"];
 const TA="width:100%;border:1.5px solid var(--line-2);background:var(--bg);border-radius:11px;padding:11px 13px;font-family:inherit;font-size:15px;color:var(--ink);outline:none;resize:vertical;";
-function startWiz(){wiz={step:0,type:"",name:"",loc:DISTRICTS[1],cap:"",rate:"",use:"",amen:[],desc:""};}
+function startWiz(){wiz={step:0,type:"",name:"",loc:DISTRICTS[1],addr:"",lat:null,lon:null,cap:"",rate:"",use:"",amen:[],desc:""};}
 function wizHTML(){
   const s=wiz.step;
   const prog=`<div class="wiz-prog">${WSTEPS.map((l,i)=>`<div class="wstep ${i===s?'on':''} ${i<s?'done':''}"><span>${i<s?'✓':i+1}</span>${l}</div>`).join("")}</div>`;
@@ -687,7 +736,7 @@ function wizHTML(){
   if(s===0){
     body=`<h2 class="wiz-h">Что за пространство?</h2><p class="wiz-sub">Выбери тип — это поможет гостям найти тебя.</p><div class="type-grid">${CATS.filter(c=>c.id!=="all").map(c=>`<button class="type-tile ${wiz.type===c.id?'sel':''}" data-type="${c.id}"><div class="ph-bg">${room(WALL[c.id]??30,3)}</div><img class="ph-img" src="${PX((PXMAP[c.id]||[17181935])[0])}" onerror="this.remove()"><span>${c.n}</span></button>`).join("")}</div><div class="bkf" style="margin-top:18px;"><label>Название места</label><input id="wName" value="${wiz.name}" placeholder="Например, Светлая студия «Окна»"></div>`;
   }else if(s===1){
-    body=`<h2 class="wiz-h">Где находится?</h2><p class="wiz-sub">Район Тбилиси и сколько человек вмещает.</p><div class="bkf"><label>Район</label><select id="wLoc">${DISTRICTS.filter(d=>d!=="Все районы").map(d=>`<option ${d===wiz.loc?'selected':''}>${d}</option>`).join("")}</select></div><div class="bkf"><label>Вместимость, чел.</label><input id="wCap" inputmode="numeric" value="${wiz.cap}" placeholder="например, 15"></div>`;
+    body=`<h2 class="wiz-h">Где находится?</h2><p class="wiz-sub">Начни вводить адрес — подскажем варианты и покажем на карте.</p><div class="bkf"><label>Район</label><select id="wLoc">${DISTRICTS.filter(d=>d!=="Все районы").map(d=>`<option ${d===wiz.loc?'selected':''}>${d}</option>`).join("")}</select></div><div class="bkf addr-wrap"><label>Адрес</label><input id="wAddr" value="${wiz.addr||''}" placeholder="улица, дом…" autocomplete="off"><div class="ac-box" id="acBox"></div></div><div id="wizMap" class="wiz-map">${wiz.lat?"":`<div class="map-empty">Карта появится, когда выберешь адрес</div>`}</div><div class="bkf"><label>Вместимость, чел.</label><input id="wCap" inputmode="numeric" value="${wiz.cap}" placeholder="например, 15"></div>`;
   }else if(s===2){
     body=`<h2 class="wiz-h">Что внутри?</h2><p class="wiz-sub">Отметь, что есть — и для чего подходит место.</p><div class="amen-grid">${AMEN.map(a=>`<button class="amen-chip ${wiz.amen.includes(a)?'sel':''}" data-am="${a}">${a}</button>`).join("")}</div><div class="bkf" style="margin-top:18px;"><label>Что обычно проходит</label><input id="wUse" value="${wiz.use}" placeholder="съёмки, классы, встречи…"></div>`;
   }else if(s===3){
@@ -700,8 +749,10 @@ function wizHTML(){
   return `${prog}<div class="wiz-body">${body}</div><div class="wiz-nav">${back}<div style="flex:1"></div>${next}</div><div id="wErr" class="wiz-err"></div>`;
 }
 function wireWiz(){
-  const save=()=>{if($("#wName"))wiz.name=$("#wName").value;if($("#wLoc"))wiz.loc=$("#wLoc").value;if($("#wCap"))wiz.cap=($("#wCap").value||"").replace(/\D/g,"");if($("#wUse"))wiz.use=$("#wUse").value;if($("#wDesc"))wiz.desc=$("#wDesc").value;if($("#wRate"))wiz.rate=($("#wRate").value||"").replace(/\D/g,"");};
+  const save=()=>{if($("#wName"))wiz.name=$("#wName").value;if($("#wLoc"))wiz.loc=$("#wLoc").value;if($("#wAddr"))wiz.addr=$("#wAddr").value;if($("#wCap"))wiz.cap=($("#wCap").value||"").replace(/\D/g,"");if($("#wUse"))wiz.use=$("#wUse").value;if($("#wDesc"))wiz.desc=$("#wDesc").value;if($("#wRate"))wiz.rate=($("#wRate").value||"").replace(/\D/g,"");};
   const err=m=>{const e=$("#wErr");e.textContent=m;e.style.display="block";};
+  const wa=$("#wAddr");
+  if(wa){const box=$("#acBox");wa.addEventListener("input",e=>{wiz.addr=e.target.value;addrSearch(e.target.value,box,d=>{wiz.addr=d.display_name;wiz.lat=+d.lat;wiz.lon=+d.lon;wa.value=d.display_name;box.innerHTML="";const mp=$("#wizMap");if(mp)mp.innerHTML="";showMap("wizMap",wiz.lat,wiz.lon);});});if(wiz.lat)showMap("wizMap",wiz.lat,wiz.lon);}
   $("#dash").querySelectorAll(".type-tile").forEach(b=>b.onclick=()=>{save();wiz.type=b.dataset.type;renderDash();});
   $("#dash").querySelectorAll(".amen-chip").forEach(b=>b.onclick=()=>{save();const a=b.dataset.am;wiz.amen.includes(a)?wiz.amen=wiz.amen.filter(x=>x!==a):wiz.amen.push(a);renderDash();});
   const nb=$("#wNext");if(nb)nb.onclick=()=>{save();if(wiz.step===0&&(!wiz.type||!wiz.name.trim()))return err("Выбери тип и впиши название.");if(wiz.step===1&&!(parseInt(wiz.cap)>0))return err("Укажи вместимость.");wiz.step++;renderDash();};
@@ -710,7 +761,7 @@ function wireWiz(){
 }
 function publishWiz(){
   const id=Math.max(0,...SPACES.map(s=>s.id))+1,catName=(CATS.find(c=>c.id===wiz.type)||{}).n||"Пространство";
-  const ns={id,name:wiz.name.trim(),cat:wiz.type,catName,use:wiz.use.trim()||"разные форматы",loc:wiz.loc,cap:parseInt(wiz.cap)||0,rate:parseInt(wiz.rate)||0,rating:0,host:curUser().name.split(" ")[0],ownerEmail:session,isNew:true,desc:wiz.desc.trim(),amen:wiz.amen.slice()};
+  const ns={id,name:wiz.name.trim(),cat:wiz.type,catName,use:wiz.use.trim()||"разные форматы",loc:wiz.loc,addr:wiz.addr||"",lat:wiz.lat,lon:wiz.lon,cap:parseInt(wiz.cap)||0,rate:parseInt(wiz.rate)||0,rating:0,host:curUser().name.split(" ")[0],ownerEmail:session,isNew:true,desc:wiz.desc.trim(),amen:wiz.amen.slice()};
   SPACES.unshift(ns);saveSpaces();seedDemoBookings(ns);
   cat="all";fLoc="Все районы";fQ="";fCap=0;render();
   wiz=null;dashTab="spaces";renderDash();toast("Готово! Место опубликовано.");
