@@ -6,488 +6,381 @@
 <title>Lumi — пространства Тбилиси по часам</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#FBFAF7;--surface:#FFFFFF;--ink:#1B1A17;--muted:#6E6A62;--faint:#9A958B;
-    --line:#ECE9E2;--line-2:#E3DFD6;--coral:#E1543B;--coral-deep:#C7432E;--coral-soft:#FCEEEA;--star:#F2A33C;
-    --sh:0 1px 2px rgba(27,26,23,.04),0 8px 24px -12px rgba(27,26,23,.12);
-    --sh-h:0 2px 4px rgba(27,26,23,.05),0 16px 40px -16px rgba(27,26,23,.2);
-    --r:14px;--r-lg:18px;
+    --bg:#FFFFFF;--soft:#F6F7F9;--ink:#15171A;--muted:#5B6168;--faint:#8A9099;
+    --line:#ECEEF1;--line-2:#DDE0E4;
+    --accent:#1E5DFF;--accent-deep:#1646C7;--accent-soft:#EEF3FF;
+    --r:10px;--r-lg:14px;--maxw:1180px;
+    --sh:0 1px 2px rgba(21,23,26,.05);--sh-h:0 10px 30px -12px rgba(21,23,26,.18);
   }
   *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;}
+  body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased;letter-spacing:-.01em;}
   a{color:inherit;text-decoration:none;}
   button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
   img{display:block;max-width:100%;}
-  .wrap{max-width:1200px;margin:0 auto;padding:0 24px;}
-  .muted2{color:var(--faint);font-size:13.5px;font-weight:500;}
-  .dot{display:inline-block;width:3px;height:3px;border-radius:50%;background:var(--faint);margin:0 9px;vertical-align:middle;}
-  .rate{font-weight:700;color:var(--ink);white-space:nowrap;}
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-weight:600;font-size:14.5px;padding:10px 17px;border-radius:999px;transition:.15s;white-space:nowrap;}
-  .btn-coral{background:var(--coral);color:#fff;}
-  .btn-coral:hover{background:var(--coral-deep);}
-  .btn-ghost{background:var(--surface);border:1px solid var(--line-2);color:var(--ink);}
-  .btn-ghost:hover{border-color:var(--faint);}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px;}
+  .muted{color:var(--muted);}
+  .faint{color:var(--faint);font-size:13.5px;}
+  .link{color:var(--accent);font-weight:600;}
+  .link:hover{color:var(--accent-deep);}
+  .dot{display:inline-block;width:3px;height:3px;border-radius:50%;background:var(--faint);margin:0 8px;vertical-align:middle;}
+  h1,h2,h3{letter-spacing:-.025em;line-height:1.12;}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:600;font-size:14.5px;padding:11px 18px;border-radius:var(--r);transition:.15s;white-space:nowrap;}
+  .btn-primary{background:var(--ink);color:#fff;}
+  .btn-primary:hover{background:#000;}
+  .btn-blue{background:var(--accent);color:#fff;}
+  .btn-blue:hover{background:var(--accent-deep);}
+  .btn-ghost{background:#fff;border:1px solid var(--line-2);color:var(--ink);}
+  .btn-ghost:hover{border-color:var(--ink);}
+  .btn:active{transform:translateY(1px);}
   .ph-bg{position:absolute;inset:0;}
   .ph-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
   .room{width:100%;height:100%;display:block;}
 
-  /* NAV */
-  nav{position:sticky;top:0;z-index:50;background:rgba(251,250,247,.86);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);}
-  .nav-in{display:flex;align-items:center;gap:18px;height:66px;}
-  .brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:21px;letter-spacing:-.02em;}
-  .spark{width:20px;height:20px;border-radius:6px;background:linear-gradient(135deg,var(--coral),#F2A33C);display:inline-block;box-shadow:0 2px 8px -2px var(--coral);}
-  .nav-link{font-weight:600;font-size:14.5px;color:var(--muted);}
-  .nav-link:hover{color:var(--ink);}
+  /* HEADER */
+  header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);}
+  .nav{display:flex;align-items:center;gap:6px;height:64px;}
+  .brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:20px;letter-spacing:-.04em;margin-right:14px;}
+  .mark{width:16px;height:16px;border-radius:5px;background:var(--accent);display:inline-block;}
+  .nlink{font-weight:500;font-size:14.5px;color:var(--muted);padding:8px 12px;border-radius:8px;}
+  .nlink:hover{color:var(--ink);}
+  .nlink.active{color:var(--ink);font-weight:600;}
   .nav-sp{flex:1;}
-  .fav-btn{position:relative;font-size:18px;color:var(--muted);padding:6px;}
-  .fav-cnt{position:absolute;top:-2px;right:-4px;background:var(--coral);color:#fff;font-size:10px;font-weight:700;min-width:15px;height:15px;border-radius:999px;display:none;align-items:center;justify-content:center;padding:0 3px;}
-  .fav-cnt.show{display:flex;}
-  @media(max-width:760px){.nav-hide{display:none!important;}}
+  .nav-r{display:flex;align-items:center;gap:8px;}
+  .hide-m{display:inline-flex;}
+  @media(max-width:880px){.nav-links{display:none;}}
+  @media(max-width:560px){.brand{margin-right:6px;}.nav-r .btn{padding:9px 12px;font-size:13.5px;}}
+
+  /* FOOTER */
+  footer{border-top:1px solid var(--line);margin-top:64px;padding:48px 0 32px;background:var(--soft);}
+  .foot{display:flex;justify-content:space-between;gap:36px;flex-wrap:wrap;}
+  .foot-note{color:var(--muted);font-size:14px;margin-top:12px;max-width:300px;}
+  .foot-cols{display:flex;gap:54px;flex-wrap:wrap;}
+  .foot-col h5{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);margin-bottom:14px;font-weight:700;}
+  .foot-col a{display:block;color:var(--ink);font-size:14.5px;margin-bottom:10px;}
+  .foot-col a:hover{color:var(--accent);}
+  .foot-bot{border-top:1px solid var(--line-2);margin-top:36px;padding-top:22px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--faint);}
 
   /* HERO */
-  .hero{padding:46px 0 22px;}
-  .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:46px;align-items:center;}
-  .eyebrow{display:inline-flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:var(--muted);background:var(--surface);border:1px solid var(--line);padding:6px 13px 6px 8px;border-radius:999px;margin-bottom:18px;}
-  .avs{display:flex;}
-  .avs i{width:21px;height:21px;border-radius:50%;border:2px solid var(--bg);margin-right:-7px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;font-style:normal;}
-  h1.hero-h{font-size:clamp(34px,5vw,52px);line-height:1.05;letter-spacing:-.03em;font-weight:800;}
-  h1.hero-h em{font-style:normal;color:var(--coral);}
-  .hero-sub{font-size:clamp(16px,2vw,18px);color:var(--muted);font-weight:500;margin-top:18px;max-width:480px;}
-  .collage{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:12px;height:380px;}
-  .collage .ph{position:relative;border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);}
-  .collage .ph:first-child{grid-row:1/3;}
-
-  /* SEARCH */
-  .search{display:flex;gap:8px;background:var(--surface);border:1px solid var(--line-2);border-radius:16px;padding:8px;box-shadow:var(--sh);margin-top:28px;max-width:560px;flex-wrap:wrap;}
-  .sf{flex:1;min-width:120px;display:flex;flex-direction:column;padding:6px 12px;border-radius:11px;}
-  .sf:hover{background:var(--bg);}
-  .sf label{font-size:11px;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:.04em;}
-  .sf input,.sf select{border:none;background:none;outline:none;font-family:inherit;font-size:14.5px;color:var(--ink);font-weight:500;padding:2px 0;width:100%;}
-  #goBtn{align-self:stretch;padding:0 22px;border-radius:12px;}
-  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px;}
-  .chip{font-size:13.5px;font-weight:600;color:var(--muted);background:var(--surface);border:1px solid var(--line-2);padding:8px 15px;border-radius:999px;transition:.15s;}
+  .hero{padding:72px 0 30px;}
+  .eyebrow{display:inline-block;font-size:13px;font-weight:600;color:var(--accent);background:var(--accent-soft);padding:5px 12px;border-radius:999px;margin-bottom:20px;}
+  h1.hero-h{font-size:clamp(38px,6vw,62px);font-weight:800;max-width:14ch;}
+  .hero-sub{font-size:clamp(16px,2vw,19px);color:var(--muted);margin-top:18px;max-width:520px;font-weight:450;}
+  .search{display:flex;gap:8px;background:#fff;border:1px solid var(--line-2);border-radius:14px;padding:8px;box-shadow:var(--sh);margin-top:30px;max-width:640px;flex-wrap:wrap;}
+  .sf{flex:1;min-width:130px;display:flex;flex-direction:column;padding:7px 13px;border-radius:9px;}
+  .sf:hover{background:var(--soft);}
+  .sf label{font-size:11px;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:.05em;}
+  .sf input,.sf select{border:none;background:none;outline:none;font-family:inherit;font-size:15px;color:var(--ink);font-weight:500;padding:2px 0;width:100%;}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px;}
+  .chip{font-size:13.5px;font-weight:500;color:var(--muted);background:#fff;border:1px solid var(--line-2);padding:8px 15px;border-radius:999px;transition:.15s;}
+  .chip:hover{border-color:var(--ink);color:var(--ink);}
   .chip[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink);}
 
-  /* SECTIONS */
-  .section{padding:30px 0;}
-  .sec-head{margin:0 0 22px;}
-  .sec-head h2{font-size:clamp(23px,3vw,32px);letter-spacing:-.02em;}
-  .sec-head p{color:var(--muted);font-size:15px;font-weight:500;margin-top:5px;}
-  #count{color:var(--faint);font-size:14px;font-weight:600;margin-top:6px;}
+  .section{padding:46px 0;}
+  .sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:26px;}
+  .sec-head h2{font-size:clamp(24px,3.4vw,34px);font-weight:700;}
+  .sec-head p{color:var(--muted);margin-top:6px;}
+  #count{color:var(--faint);font-size:14px;font-weight:500;}
 
   /* GRID CARDS */
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:22px;}
-  .card{cursor:pointer;border-radius:var(--r);background:var(--surface);transition:.2s;}
-  .card:hover{transform:translateY(-3px);}
-  .card .pic{position:relative;aspect-ratio:4/3;border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);}
-  .card .pic .ph-img{transition:transform .4s ease;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:26px;}
+  .card{cursor:pointer;}
+  .card .pic{position:relative;aspect-ratio:4/3;border-radius:var(--r-lg);overflow:hidden;background:var(--soft);}
+  .card .pic .ph-img{transition:transform .5s ease;}
   .card:hover .pic .ph-img{transform:scale(1.04);}
-  .heart{position:absolute;top:10px;right:10px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.92);color:var(--faint);font-size:15px;display:flex;align-items:center;justify-content:center;z-index:2;box-shadow:var(--sh);}
-  .heart.on{color:var(--coral);}
-  .tag{position:absolute;left:10px;bottom:10px;background:rgba(27,26,23,.78);color:#fff;font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:999px;z-index:2;}
-  .cbody{padding:13px 4px 4px;}
+  .heart{position:absolute;top:11px;right:11px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.95);color:var(--muted);font-size:15px;display:flex;align-items:center;justify-content:center;z-index:2;box-shadow:var(--sh);}
+  .heart.on{color:var(--accent);}
+  .tag{position:absolute;left:11px;bottom:11px;background:rgba(21,23,26,.8);color:#fff;font-size:11.5px;font-weight:500;padding:4px 10px;border-radius:999px;z-index:2;}
+  .cbody{padding:13px 2px 2px;}
   .crow{display:flex;justify-content:space-between;gap:10px;align-items:baseline;}
-  .cname{font-weight:700;font-size:15.5px;}
-  .cmeta{color:var(--muted);font-size:13.5px;font-weight:500;margin-top:3px;}
-  .cprice{margin-top:8px;font-size:14px;}
-  .cprice b{font-size:16px;}
-  .cprice span{color:var(--faint);font-weight:500;}
-  .nores{grid-column:1/-1;padding:54px 0;text-align:center;color:var(--muted);font-weight:500;}
-  .nores button{color:var(--coral);font-weight:600;}
+  .cname{font-weight:600;font-size:15.5px;}
+  .cmeta{color:var(--muted);font-size:13.5px;margin-top:3px;}
+  .cprice{margin-top:9px;font-size:14px;}
+  .cprice b{font-size:15.5px;font-weight:700;}
+  .cprice span{color:var(--faint);}
+  .rate{font-weight:600;white-space:nowrap;font-size:14px;}
+  .rate.new{color:var(--accent);}
+  .nores{grid-column:1/-1;padding:54px 0;text-align:center;color:var(--muted);}
+  .nores button{color:var(--accent);font-weight:600;}
 
+  /* category tiles */
   .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:16px;}
-  .cat-tile{position:relative;aspect-ratio:3/2;border-radius:var(--r);overflow:hidden;cursor:pointer;box-shadow:var(--sh);}
-  .cat-tile .ph-img{transition:transform .4s ease;}
+  .cat-tile{position:relative;aspect-ratio:3/2;border-radius:var(--r-lg);overflow:hidden;cursor:pointer;}
+  .cat-tile .ph-img{transition:transform .5s ease;}
   .cat-tile:hover .ph-img{transform:scale(1.05);}
-  .cat-tile .ov{position:absolute;inset:0;background:linear-gradient(180deg,rgba(27,26,23,0) 38%,rgba(27,26,23,.62));}
-  .cat-tile span{position:absolute;left:15px;bottom:13px;color:#fff;font-weight:700;font-size:17px;z-index:2;}
-  .dist-wrap{display:flex;flex-wrap:wrap;gap:10px;}
-  .dist{font-size:14.5px;font-weight:600;color:var(--ink);background:var(--surface);border:1px solid var(--line-2);padding:11px 18px;border-radius:999px;cursor:pointer;transition:.15s;}
-  .dist:hover{border-color:var(--coral);color:var(--coral-deep);background:var(--coral-soft);}
+  .cat-tile .ov{position:absolute;inset:0;background:linear-gradient(180deg,rgba(21,23,26,0) 40%,rgba(21,23,26,.6));}
+  .cat-tile span{position:absolute;left:15px;bottom:13px;color:#fff;font-weight:600;font-size:16px;z-index:2;}
 
-  .quotes{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:20px;}
-  .quote{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:24px;box-shadow:var(--sh);}
-  .quote>p{font-size:15.5px;line-height:1.6;color:var(--ink);font-weight:500;}
-  .qh{display:flex;align-items:center;gap:11px;margin-top:16px;}
-  .qa,.ra{width:38px;height:38px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex:none;text-transform:uppercase;}
-  .qn{font-weight:700;font-size:14.5px;}
-  .qr{font-size:13px;color:var(--faint);}
+  /* filters bar (catalog) */
+  .filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:24px;}
+  .filters .fctl{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line-2);border-radius:10px;padding:6px 12px;min-width:150px;}
+  .filters label{font-size:10.5px;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:.05em;}
+  .filters input,.filters select{border:none;background:none;outline:none;font-family:inherit;font-size:14.5px;color:var(--ink);font-weight:500;}
 
-  .how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
-  .hcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:24px;}
-  .hi{width:42px;height:42px;border-radius:11px;background:var(--coral-soft);color:var(--coral-deep);display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
-  .hi svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
-  .hcard h4{font-size:16.5px;margin-bottom:6px;}
-  .hcard p{color:var(--muted);font-size:14.5px;font-weight:500;}
+  /* steps / how */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .step{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);padding:24px;}
+  .step .num{width:30px;height:30px;border-radius:8px;background:var(--accent-soft);color:var(--accent-deep);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px;margin-bottom:14px;}
+  .step h4{font-size:16.5px;margin-bottom:6px;}
+  .step p{color:var(--muted);font-size:14.5px;}
+  @media(max-width:760px){.steps{grid-template-columns:1fr;}}
 
-  .host{display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:center;background:linear-gradient(135deg,#FFF7F4,#FBF3EE);border:1px solid var(--line-2);border-radius:24px;padding:34px;}
-  .host-in h2{font-size:clamp(24px,3vw,32px);letter-spacing:-.02em;}
-  .host-in p{color:var(--muted);font-weight:500;margin:10px 0 18px;}
-  .host-stats{display:flex;gap:26px;margin-top:20px;}
-  .host-stats div b{font-size:19px;font-weight:800;display:block;}
-  .host-stats div span{font-size:12.5px;color:var(--faint);}
-  .host-pic{position:relative;aspect-ratio:4/3;border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--sh);}
-  @media(max-width:760px){.host{grid-template-columns:1fr;}.host-pic{order:-1;}}
+  /* host band */
+  .band{background:var(--ink);color:#fff;border-radius:20px;padding:46px;display:grid;grid-template-columns:1.3fr 1fr;gap:30px;align-items:center;}
+  .band h2{font-size:clamp(24px,3.4vw,34px);}
+  .band p{color:#C9CDD3;margin:12px 0 22px;max-width:46ch;}
+  .band .btn-blue{background:var(--accent);}
+  .band-stats{display:flex;gap:30px;justify-content:flex-end;}
+  .band-stats b{font-size:22px;font-weight:800;display:block;}
+  .band-stats span{font-size:12.5px;color:#9AA0A8;}
+  @media(max-width:760px){.band{grid-template-columns:1fr;padding:30px;}.band-stats{justify-content:flex-start;}}
 
-  .faq{max-width:760px;}
+  /* generic article page */
+  .page-head{padding:56px 0 8px;}
+  .page-head h1{font-size:clamp(30px,4.4vw,46px);font-weight:800;}
+  .page-head p{color:var(--muted);font-size:17px;margin-top:14px;max-width:60ch;}
+  .prose{max-width:720px;}
+  .prose h3{font-size:21px;margin:34px 0 10px;}
+  .prose p{color:var(--muted);font-size:16px;margin-bottom:14px;}
+  .principles{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:18px;}
+  .principle{border:1px solid var(--line);border-radius:var(--r-lg);padding:22px;}
+  .principle b{font-size:16px;}
+  .principle p{color:var(--muted);font-size:14.5px;margin-top:6px;}
+  @media(max-width:760px){.principles{grid-template-columns:1fr;}}
+
+  /* FAQ */
+  .faq{max-width:780px;}
   .faq-item{border-bottom:1px solid var(--line);}
-  .faq-q{width:100%;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:19px 0;font-size:16.5px;font-weight:600;text-align:left;color:var(--ink);}
-  .faq-q .pl{flex:none;width:20px;height:20px;position:relative;}
-  .faq-q .pl::before,.faq-q .pl::after{content:"";position:absolute;background:var(--coral);border-radius:2px;}
-  .faq-q .pl::before{left:0;right:0;top:9px;height:2px;}
-  .faq-q .pl::after{top:0;bottom:0;left:9px;width:2px;transition:opacity .2s;}
+  .faq-q{width:100%;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:20px 0;font-size:17px;font-weight:600;text-align:left;}
+  .faq-q .pl{flex:none;width:18px;height:18px;position:relative;}
+  .faq-q .pl::before,.faq-q .pl::after{content:"";position:absolute;background:var(--accent);border-radius:2px;}
+  .faq-q .pl::before{left:0;right:0;top:8px;height:2px;}
+  .faq-q .pl::after{top:0;bottom:0;left:8px;width:2px;transition:opacity .2s;}
   .faq-item.open .pl::after{opacity:0;}
   .faq-a{max-height:0;overflow:hidden;transition:max-height .28s ease;}
-  .faq-a div{padding:0 0 19px;color:var(--muted);font-size:15px;line-height:1.6;font-weight:500;max-width:68ch;}
+  .faq-a div{padding:0 0 20px;color:var(--muted);font-size:15.5px;max-width:68ch;}
 
-  footer{margin-top:40px;border-top:1px solid var(--line);padding:36px 0 28px;}
-  .foot-in{display:flex;justify-content:space-between;gap:30px;flex-wrap:wrap;}
-  .foot-note{color:var(--muted);font-size:14px;font-weight:500;margin-top:12px;max-width:300px;}
-  .foot-cols{display:flex;gap:50px;flex-wrap:wrap;}
-  .foot-col h5{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--faint);margin-bottom:12px;}
-  .foot-col a{display:block;color:var(--ink);font-size:14.5px;font-weight:500;margin-bottom:9px;}
-  .foot-col a:hover{color:var(--coral);}
-  .foot-bottom{border-top:1px solid var(--line);margin-top:30px;padding-top:22px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--faint);}
-  .foot-bottom a{color:var(--faint);}
-  .foot-bottom a:hover{color:var(--ink);}
-
-  /* FORM fields */
-  .bkf{margin-bottom:12px;}
-  .bkf label,.bkf-label{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin-bottom:5px;}
-  .bkf input,.bkf select,.bkf textarea{width:100%;border:1.5px solid var(--line-2);background:var(--bg);border-radius:11px;padding:11px 13px;font-family:inherit;font-size:15px;color:var(--ink);outline:none;}
-  .bkf input:focus,.bkf select:focus,.bkf textarea:focus{border-color:var(--coral);}
+  /* form fields */
+  .bkf{margin-bottom:13px;}
+  .bkf label,.bkf-label{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:6px;}
+  .bkf input,.bkf select,.bkf textarea{width:100%;border:1px solid var(--line-2);background:#fff;border-radius:10px;padding:11px 13px;font-family:inherit;font-size:15px;color:var(--ink);outline:none;}
+  .bkf input:focus,.bkf select:focus,.bkf textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
   .cardgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-  .bkcta{width:100%;margin-top:8px;padding:13px;font-size:15.5px;}
-  .amen{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 6px;}
-  .amen span{font-size:13.5px;font-weight:600;color:var(--ink);background:var(--surface);border:1px solid var(--line-2);padding:7px 13px;border-radius:999px;}
-  .review{padding:14px 0;border-top:1px solid var(--line);}
-  .rh{display:flex;align-items:center;gap:9px;margin-bottom:6px;}
-  .rn{font-weight:700;font-size:14px;}.rd{font-size:12.5px;color:var(--faint);}
-  .review p{color:var(--muted);font-size:14.5px;font-weight:500;}
 
-  /* PAGE (detail/pay/confirm) */
-  .page-overlay{position:fixed;inset:0;z-index:70;background:var(--bg);overflow-y:auto;opacity:0;visibility:hidden;}
-  .page-overlay.open{opacity:1;visibility:visible;}
-  .page-top{display:flex;align-items:center;gap:12px;height:64px;padding:0 24px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(251,250,247,.92);backdrop-filter:blur(10px);z-index:5;}
-  .page-wrap{max-width:1120px;margin:0 auto;padding:24px;}
-  .gallery{display:grid;grid-template-columns:2fr 1fr;gap:10px;height:380px;margin-bottom:26px;border-radius:var(--r-lg);overflow:hidden;}
-  .g-cell{position:relative;overflow:hidden;}
+  /* DETAIL */
+  .subnav{position:sticky;top:64px;z-index:4;display:flex;gap:4px;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);margin:0 0 22px;padding:10px 0;overflow-x:auto;scrollbar-width:none;}
+  .subnav::-webkit-scrollbar{display:none;}
+  .subnav button{font-size:14px;font-weight:500;color:var(--muted);padding:7px 13px;border-radius:8px;white-space:nowrap;}
+  .subnav button:hover{background:var(--soft);color:var(--ink);}
+  .back-row{padding:18px 0 4px;}
+  .back-row button{font-weight:600;color:var(--muted);font-size:14.5px;}
+  .back-row button:hover{color:var(--ink);}
+  .gallery{display:grid;grid-template-columns:2fr 1fr;gap:10px;height:400px;border-radius:var(--r-lg);overflow:hidden;margin-bottom:26px;}
+  .g-cell{position:relative;overflow:hidden;background:var(--soft);}
   .g-side{display:grid;grid-template-rows:1fr 1fr;gap:10px;}
-  .detail-grid{display:grid;grid-template-columns:1fr 360px;gap:36px;}
-  .detail-h1{font-size:clamp(24px,3vw,32px);letter-spacing:-.02em;}
-  .detail-meta{color:var(--muted);font-size:14.5px;font-weight:500;margin:8px 0 18px;}
-  .detail-desc{color:var(--ink);font-size:15.5px;line-height:1.65;white-space:pre-wrap;}
-  .detail-h3{font-size:18px;margin:24px 0 10px;}
-  .host-row{display:flex;align-items:center;gap:12px;}
-  .book-card{position:sticky;top:88px;height:max-content;border:1px solid var(--line-2);border-radius:var(--r-lg);padding:20px;box-shadow:var(--sh);background:var(--surface);}
-  .bc-price{font-size:15px;color:var(--muted);margin-bottom:14px;}
-  .bc-price b{font-size:24px;color:var(--ink);font-weight:800;}
+  .detail-grid{display:grid;grid-template-columns:1fr 360px;gap:40px;}
+  .detail-h1{font-size:clamp(26px,3.4vw,36px);font-weight:800;}
+  .detail-loc{color:var(--muted);font-weight:500;margin:8px 0 16px;}
+  .detail-loc a{color:var(--accent);}
+  .facts{display:flex;flex-wrap:wrap;gap:8px 22px;padding:16px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:14.5px;color:var(--muted);}
+  .facts b{color:var(--ink);}
+  .badge{font-size:11px;font-weight:700;color:var(--accent-deep);background:var(--accent-soft);padding:2px 9px;border-radius:999px;}
+  .host-row{display:flex;align-items:center;gap:12px;padding:20px 0;}
+  .ra{width:40px;height:40px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex:none;text-transform:uppercase;}
+  .detail-sec{padding:24px 0;border-top:1px solid var(--line);scroll-margin-top:130px;}
+  .detail-h3{font-size:19px;font-weight:700;margin-bottom:12px;}
+  .detail-desc{color:var(--muted);font-size:16px;line-height:1.7;white-space:pre-wrap;}
+  .facet-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 28px;margin-top:16px;}
+  .facet-k{font-weight:600;font-size:14.5px;}
+  .facet-v{color:var(--muted);font-size:14px;}
+  .feat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:11px;}
+  .feat{font-weight:500;font-size:14.5px;}
+  .addon-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .addon{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:12px;padding:12px;}
+  .addon-pic{width:52px;height:52px;border-radius:9px;overflow:hidden;position:relative;flex:none;background:var(--soft);}
+  .addon b{font-size:14.5px;}
+  .mapcard{position:relative;height:220px;border-radius:var(--r-lg);overflow:hidden;border:1px solid var(--line-2);background:#EAEEF3;}
+  .mapcard.live{background:#EAEEF3;}
+  .map-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(21,23,26,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(21,23,26,.07) 1px,transparent 1px);background-size:30px 30px;}
+  .map-pin{position:absolute;top:50%;left:50%;transform:translate(-50%,-65%);font-size:28px;}
+  .map-lbl{position:absolute;left:14px;bottom:13px;background:#fff;border:1px solid var(--line-2);border-radius:999px;padding:6px 13px;font-weight:600;font-size:13.5px;box-shadow:var(--sh);}
+  .hours{display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding:14px 16px;background:var(--soft);border:1px solid var(--line);border-radius:12px;font-size:14.5px;}
+  .know{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .know b{font-size:15px;}.know p{margin-top:5px;}
+  .review{padding:16px 0;border-top:1px solid var(--line);}
+  .rh{display:flex;align-items:center;gap:9px;margin-bottom:6px;}
+  .rn{font-weight:600;font-size:14px;}.rd{font-size:12.5px;color:var(--faint);}
+  .review p{color:var(--muted);font-size:14.5px;}
+  .book-card{position:sticky;top:84px;height:max-content;border:1px solid var(--line-2);border-radius:var(--r-lg);padding:22px;box-shadow:var(--sh);}
+  .bc-price{font-size:14.5px;color:var(--muted);margin-bottom:14px;}
+  .bc-price b{font-size:25px;color:var(--ink);font-weight:800;}
   .slots{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:4px 0 12px;}
-  .slot{padding:8px 0;border:1px solid var(--line-2);border-radius:9px;font-size:13px;font-weight:600;background:var(--bg);color:var(--ink);}
-  .slot:hover:not(.off){border-color:var(--coral);}
-  .slot.on{background:var(--coral);color:#fff;border-color:var(--coral);}
-  .slot.off{opacity:.35;text-decoration:line-through;cursor:not-allowed;}
+  .slot{padding:9px 0;border:1px solid var(--line-2);border-radius:8px;font-size:13px;font-weight:500;background:#fff;}
+  .slot:hover{border-color:var(--accent);}
+  .slot.on{background:var(--accent);color:#fff;border-color:var(--accent);}
   .calc{margin:6px 0 12px;}
   .crow2{display:flex;justify-content:space-between;padding:5px 0;font-size:14.5px;color:var(--muted);}
   .crow2 b{color:var(--ink);}
   .crow2.tot{border-top:1px solid var(--line-2);margin-top:5px;padding-top:10px;color:var(--ink);font-weight:800;font-size:16.5px;}
-  .pay-wrap,.confirm{max-width:520px;margin:0 auto;}
-  .pay-sum{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;margin:16px 0;}
-  .ps-row{display:flex;justify-content:space-between;font-size:14px;color:var(--muted);font-weight:600;padding-bottom:8px;margin-bottom:8px;border-bottom:1px solid var(--line);}
+  .bkcta{width:100%;margin-top:8px;padding:13px;font-size:15px;}
+  .amen{display:flex;flex-wrap:wrap;gap:8px;}
+  .pay-wrap,.confirm{max-width:540px;margin:0 auto;padding:10px 0 30px;}
+  .pay-sum{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:16px;margin:16px 0;}
+  .ps-row{display:flex;justify-content:space-between;font-size:14px;color:var(--muted);font-weight:500;padding-bottom:8px;margin-bottom:8px;border-bottom:1px solid var(--line-2);}
   .pay-methods{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
-  .pm{flex:1;min-width:90px;padding:11px;border:1.5px solid var(--line-2);border-radius:12px;font-weight:600;font-size:14px;background:var(--bg);}
-  .pm.sel{border-color:var(--coral);background:var(--coral-soft);color:var(--coral-deep);}
-  .confirm{text-align:center;padding-top:20px;}
-  .ico2{width:64px;height:64px;border-radius:50%;background:var(--coral-soft);color:var(--coral-deep);font-size:30px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
-  @media(max-width:820px){.detail-grid{grid-template-columns:1fr;}.gallery{grid-template-columns:1fr;height:auto;}.g-side{grid-template-rows:none;grid-template-columns:1fr 1fr;height:130px;}.g-cell.main{height:220px;}}
+  .pm{flex:1;min-width:90px;padding:11px;border:1px solid var(--line-2);border-radius:10px;font-weight:600;font-size:14px;background:#fff;}
+  .pm.sel{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-deep);}
+  .confirm{text-align:center;}
+  .ico2{width:62px;height:62px;border-radius:50%;background:var(--accent-soft);color:var(--accent-deep);font-size:28px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
+  @media(max-width:860px){.detail-grid{grid-template-columns:1fr;}.gallery{grid-template-columns:1fr;height:auto;}.g-side{grid-template-rows:none;grid-template-columns:1fr 1fr;height:130px;}.g-cell.main{height:230px;}.facet-grid,.addon-grid,.know{grid-template-columns:1fr;}}
 
-  /* AUTH */
-  .scrim{position:fixed;inset:0;z-index:90;background:rgba(27,26,23,.4);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;visibility:hidden;transition:.2s;}
+  /* AUTH modal */
+  .scrim{position:fixed;inset:0;z-index:90;background:rgba(21,23,26,.42);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;visibility:hidden;transition:.2s;}
   .scrim.open{opacity:1;visibility:visible;}
-  .authcard{background:var(--bg);width:min(440px,100%);border-radius:22px;padding:28px;box-shadow:0 40px 90px -30px rgba(27,26,23,.55);transform:translateY(14px) scale(.99);transition:transform .28s cubic-bezier(.2,.8,.2,1);}
+  .authcard{background:#fff;width:min(420px,100%);border-radius:18px;padding:26px;box-shadow:var(--sh-h);transform:translateY(12px);transition:transform .25s cubic-bezier(.2,.8,.2,1);}
   .scrim.open .authcard{transform:none;}
-  .authcard h2{font-size:23px;}
-  .auth-tabs{display:flex;gap:5px;background:var(--surface);border:1px solid var(--line-2);border-radius:12px;padding:4px;margin:16px 0 4px;}
-  .auth-tab{flex:1;padding:9px;border-radius:9px;font-weight:600;font-size:14.5px;color:var(--muted);}
-  .auth-tab.active{background:var(--coral-soft);color:var(--coral-deep);}
-  .sheet-close{width:34px;height:34px;border-radius:50%;background:var(--surface);border:1px solid var(--line-2);font-size:15px;color:var(--muted);}
+  .authcard h2{font-size:22px;}
+  .auth-tabs{display:flex;gap:4px;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:4px;margin:16px 0 6px;}
+  .auth-tab{flex:1;padding:9px;border-radius:8px;font-weight:600;font-size:14px;color:var(--muted);}
+  .auth-tab.active{background:#fff;color:var(--ink);box-shadow:var(--sh);}
+  .x{width:32px;height:32px;border-radius:50%;background:var(--soft);font-size:14px;color:var(--muted);}
 
   /* DASHBOARD */
-  .dash-page{position:fixed;inset:0;z-index:80;background:var(--bg);overflow-y:auto;opacity:0;visibility:hidden;}
-  .dash-page.open{opacity:1;visibility:visible;}
-  .dash-top{display:flex;align-items:center;gap:14px;padding:0 24px;height:64px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(251,250,247,.92);backdrop-filter:blur(10px);z-index:5;}
+  .dash{position:fixed;inset:0;z-index:80;background:var(--bg);overflow-y:auto;opacity:0;visibility:hidden;}
+  .dash.open{opacity:1;visibility:visible;}
+  .dash-top{display:flex;align-items:center;gap:14px;padding:0 24px;height:64px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(255,255,255,.9);backdrop-filter:blur(10px);z-index:5;}
   .dash-user{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14.5px;}
-  .dash-av{width:48px;height:48px;border-radius:50%;background:var(--coral);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;flex:none;text-transform:uppercase;}
-  .dash-av.sm{width:32px;height:32px;font-size:14px;}
-  .dash-shell{display:grid;grid-template-columns:230px 1fr;max-width:1080px;margin:0 auto;gap:26px;padding:26px 24px;}
-  .dash-side{display:flex;flex-direction:column;gap:4px;position:sticky;top:90px;height:max-content;}
-  .dnav{display:flex;align-items:center;gap:11px;padding:11px 14px;border-radius:11px;font-weight:600;font-size:15px;color:var(--muted);text-align:left;}
+  .dash-av{width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;text-transform:uppercase;}
+  .dash-shell{display:grid;grid-template-columns:230px 1fr;max-width:1060px;margin:0 auto;gap:26px;padding:26px 24px;}
+  .dash-side{display:flex;flex-direction:column;gap:3px;position:sticky;top:88px;height:max-content;}
+  .dnav{display:flex;align-items:center;gap:11px;padding:11px 14px;border-radius:10px;font-weight:500;font-size:15px;color:var(--muted);text-align:left;}
   .dnav span{font-size:16px;width:18px;text-align:center;}
-  .dnav:hover{background:var(--surface);color:var(--ink);}
-  .dnav.active{background:var(--coral-soft);color:var(--coral-deep);}
+  .dnav:hover{background:var(--soft);color:var(--ink);}
+  .dnav.active{background:var(--accent-soft);color:var(--accent-deep);font-weight:600;}
   .dash-main{min-width:0;}
-  .dash-h1{font-size:clamp(23px,3vw,30px);margin-bottom:18px;}
+  .dash-h1{font-size:clamp(22px,3vw,28px);font-weight:700;margin-bottom:18px;}
   .dash-h1row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap;}
   .dash-h1row .dash-h1{margin:0;}
   .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:6px 0 14px;}
-  .stat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:15px;}
-  .stat b{font-size:23px;font-weight:800;display:block;letter-spacing:-.02em;}
+  .stat{background:#fff;border:1px solid var(--line-2);border-radius:12px;padding:16px;}
+  .stat b{font-size:23px;font-weight:800;display:block;letter-spacing:-.03em;}
   .stat span{font-size:12.5px;color:var(--faint);}
   .quick{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;}
-  .space-card{border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px;background:var(--surface);}
-  .sc-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;}
+  .space-card{border:1px solid var(--line-2);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:var(--sh);}
+  .sc-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
   .sc-head b{font-size:17px;}
   .sc-head span{color:var(--faint);font-size:13.5px;flex:1;}
-  .del{font-size:13px;font-weight:600;color:var(--coral-deep);border:1px solid var(--line-2);padding:7px 13px;border-radius:999px;}
-  .del:hover{background:var(--coral-soft);border-color:var(--coral);}
-  .cal-wrap{margin-top:14px;}
-  .cal-title{font-weight:700;font-size:13.5px;margin-bottom:9px;}
-  .cal-head{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:5px;}
-  .cal-head span{text-align:center;font-size:11px;color:var(--faint);font-weight:600;}
-  .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
-  .cd{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12.5px;background:var(--bg);border:1px solid var(--line);color:var(--muted);}
-  .cd.muted{opacity:0;border:none;}
-  .cd.booked{background:var(--coral);color:#fff;border-color:var(--coral);font-weight:700;}
-  .cd small{font-size:8.5px;margin-top:1px;}
-  .reminder{background:var(--coral-soft);border:1px solid var(--coral);color:var(--coral-deep);border-radius:12px;padding:13px 15px;font-weight:600;font-size:14.5px;margin-bottom:16px;}
+  .del{font-size:13px;font-weight:600;color:#C7432E;border:1px solid var(--line-2);padding:7px 13px;border-radius:999px;}
+  .del:hover{background:#FCEEEA;border-color:#E1543B;}
+  .reminder{background:var(--accent-soft);border:1px solid var(--accent);color:var(--accent-deep);border-radius:12px;padding:13px 15px;font-weight:600;font-size:14.5px;margin-bottom:16px;}
   .bk-item{display:flex;gap:13px;align-items:center;padding:13px 0;border-bottom:1px solid var(--line);}
-  .bk-thumb{width:66px;height:50px;border-radius:10px;overflow:hidden;position:relative;flex:none;background:var(--line-2);}
-  .tom{font-size:11px;font-weight:700;color:#fff;background:var(--coral);padding:2px 8px;border-radius:999px;margin-left:8px;}
-  .empty2{color:var(--muted);font-weight:500;padding:24px 0;}
+  .bk-thumb{width:66px;height:50px;border-radius:9px;overflow:hidden;position:relative;flex:none;background:var(--soft);}
+  .tom{font-size:11px;font-weight:700;color:#fff;background:var(--accent);padding:2px 8px;border-radius:999px;margin-left:8px;}
+  .empty2{color:var(--muted);padding:24px 0;}
   .form-wrap{max-width:560px;}
-  .backlink{font-size:14px;font-weight:600;color:var(--muted);margin-bottom:12px;display:inline-block;}
+  .backlink{font-size:14px;font-weight:600;color:var(--muted);margin-bottom:14px;display:inline-block;}
   .backlink:hover{color:var(--ink);}
 
-  /* WIZARD */
-  .wiz-prog{display:flex;gap:14px;margin-bottom:24px;flex-wrap:wrap;}
-  .wstep{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--faint);}
-  .wstep span{width:22px;height:22px;border-radius:50%;background:var(--surface);border:1px solid var(--line-2);display:flex;align-items:center;justify-content:center;font-size:12px;}
-  .wstep.on{color:var(--ink);}.wstep.on span{background:var(--coral);color:#fff;border-color:var(--coral);}
-  .wstep.done span{background:var(--coral-soft);color:var(--coral-deep);border-color:var(--coral-soft);}
-  .wiz-h{font-size:23px;}
-  .wiz-sub{color:var(--muted);font-weight:500;margin:5px 0 18px;}
-  .type-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;}
-  .type-tile{position:relative;aspect-ratio:4/3;border-radius:12px;overflow:hidden;border:2px solid transparent;}
-  .type-tile.sel{border-color:var(--coral);}
-  .type-tile::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 38%,rgba(0,0,0,.5));}
-  .type-tile span{position:absolute;left:11px;bottom:9px;color:#fff;font-weight:700;z-index:2;}
-  .amen-grid{display:flex;flex-wrap:wrap;gap:8px;}
-  .amen-chip{padding:9px 14px;border:1px solid var(--line-2);border-radius:999px;font-weight:600;font-size:14px;background:var(--surface);}
-  .amen-chip.sel{background:var(--coral-soft);border-color:var(--coral);color:var(--coral-deep);}
-  .wiz-nav{display:flex;align-items:center;gap:10px;margin-top:26px;}
-  .wiz-err{color:var(--coral-deep);font-weight:600;font-size:13.5px;margin-top:10px;display:none;}
-  .wiz-pre{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:14px;font-weight:500;color:var(--muted);}
-
-  /* detail enrich */
-  .subnav{position:sticky;top:64px;z-index:4;display:flex;gap:4px;background:rgba(251,250,247,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);margin:0 -24px 20px;padding:9px 24px;overflow-x:auto;scrollbar-width:none;}
-  .subnav::-webkit-scrollbar{display:none;}
-  .subnav button{font-size:14px;font-weight:600;color:var(--muted);padding:7px 13px;border-radius:999px;white-space:nowrap;transition:.15s;}
-  .subnav button:hover{background:var(--surface);color:var(--ink);}
-  .detail-loc{color:var(--muted);font-weight:600;font-size:15px;margin:7px 0 14px;}
-  .detail-loc a{color:var(--coral-deep);text-decoration:underline;text-underline-offset:2px;}
-  .facts{display:flex;flex-wrap:wrap;gap:8px 20px;padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:14.5px;color:var(--muted);}
-  .fact b{color:var(--ink);}
-  .badge{font-size:11px;font-weight:700;color:var(--coral-deep);background:var(--coral-soft);padding:2px 9px;border-radius:999px;}
-  .host-row{display:flex;align-items:center;gap:12px;padding:18px 0;}
-  .detail-sec{padding:22px 0;border-top:1px solid var(--line);scroll-margin-top:124px;}
-  .facet-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 26px;margin-top:16px;}
-  .facet-k{font-weight:700;font-size:14px;margin-bottom:2px;}
-  .facet-v{color:var(--muted);font-size:14px;font-weight:500;}
-  .feat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:11px;}
-  .feat{font-weight:600;font-size:14.5px;color:var(--ink);}
-  .addon-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-  .addon{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--surface);}
-  .addon-pic{width:54px;height:54px;border-radius:10px;overflow:hidden;position:relative;flex:none;}
-  .addon b{font-size:14.5px;}
-  .mapcard{position:relative;height:210px;border-radius:var(--r-lg);overflow:hidden;border:1px solid var(--line-2);background:linear-gradient(135deg,#EAF0EC,#E7ECEF);}
-  .map-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(110,106,98,.13) 1px,transparent 1px),linear-gradient(90deg,rgba(110,106,98,.13) 1px,transparent 1px);background-size:30px 30px;}
-  .map-pin{position:absolute;top:50%;left:50%;transform:translate(-50%,-65%);font-size:30px;filter:drop-shadow(0 5px 7px rgba(0,0,0,.22));}
-  .map-lbl{position:absolute;left:14px;bottom:13px;background:var(--surface);border:1px solid var(--line-2);border-radius:999px;padding:6px 13px;font-weight:600;font-size:13.5px;box-shadow:var(--sh);}
-  .hours{display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:12px;font-size:14.5px;}
-  .know{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;}
-  .know b{font-size:15px;}.know p{margin-top:4px;}
-  @media(max-width:680px){.facet-grid,.addon-grid,.know{grid-template-columns:1fr;}}
-
-  /* motion */
-  .reveal{opacity:0;transform:translateY(16px);transition:opacity .6s cubic-bezier(.2,.7,.2,1),transform .6s cubic-bezier(.2,.7,.2,1);}
-  .reveal.in{opacity:1;transform:none;}
-  .page-overlay{transform:translateY(10px);transition:opacity .3s ease,transform .3s ease;}
-  .page-overlay.open{transform:none;}
-  .g-cell .ph-img{transition:transform .5s ease;}
-  .g-cell:hover .ph-img{transform:scale(1.04);}
-  .btn{transition:.16s;}.btn:active{transform:translateY(1px);}
-  .card{transition:transform .22s ease,box-shadow .22s ease;}
-  @media (prefers-reduced-motion: reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important;}.reveal{opacity:1!important;transform:none!important;}}
-
-  /* address + map */
+  /* address + calendar */
   .addr-wrap{position:relative;}
-  .ac-box{position:absolute;left:0;right:0;top:100%;z-index:20;background:var(--surface);border:1px solid var(--line-2);border-radius:12px;margin-top:4px;box-shadow:var(--sh-h);overflow:hidden;max-height:240px;overflow-y:auto;}
-  .ac-item{display:block;width:100%;text-align:left;padding:10px 13px;font-size:13.5px;color:var(--ink);border-bottom:1px solid var(--line);line-height:1.4;}
+  .ac-box{position:absolute;left:0;right:0;top:100%;z-index:20;background:#fff;border:1px solid var(--line-2);border-radius:12px;margin-top:4px;box-shadow:var(--sh-h);overflow:hidden;max-height:240px;overflow-y:auto;}
+  .ac-item{display:block;width:100%;text-align:left;padding:10px 13px;font-size:13.5px;border-bottom:1px solid var(--line);line-height:1.4;}
   .ac-item:last-child{border-bottom:none;}
-  .ac-item:hover{background:var(--coral-soft);color:var(--coral-deep);}
-  .wiz-map,.mapcard.live{height:220px;border-radius:var(--r-lg);overflow:hidden;border:1px solid var(--line-2);margin-bottom:12px;background:#E7ECEF;position:relative;}
-  .map-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--faint);font-weight:500;font-size:14px;}
-  .leaflet-container{font-family:inherit;}
-  /* full calendar */
+  .ac-item:hover{background:var(--accent-soft);color:var(--accent-deep);}
+  .wiz-map{height:220px;border-radius:var(--r-lg);overflow:hidden;border:1px solid var(--line-2);margin-bottom:12px;background:#EAEEF3;position:relative;}
+  .map-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--faint);font-size:14px;}
   .cal-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;}
   .cal-title{font-weight:700;font-size:14.5px;}
-  .cal-nav{width:32px;height:32px;border-radius:9px;border:1px solid var(--line-2);font-size:18px;line-height:1;color:var(--ink);background:var(--surface);}
-  .cal-nav:hover{border-color:var(--coral);color:var(--coral-deep);background:var(--coral-soft);}
+  .cal-nav{width:32px;height:32px;border-radius:9px;border:1px solid var(--line-2);font-size:18px;line-height:1;background:#fff;}
+  .cal-nav:hover{border-color:var(--accent);color:var(--accent-deep);background:var(--accent-soft);}
+  .cal-head{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px;}
+  .cal-head span{text-align:center;font-size:11px;color:var(--faint);font-weight:600;}
   .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
-  .cd{aspect-ratio:1;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;background:var(--surface);border:1px solid var(--line-2);color:var(--muted);cursor:pointer;transition:.12s;}
+  .cd{aspect-ratio:1;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;background:#fff;border:1px solid var(--line-2);color:var(--muted);cursor:pointer;transition:.12s;}
   .cd.muted{opacity:0;border:none;cursor:default;background:none;}
-  .cd:hover:not(.muted){border-color:var(--coral);color:var(--ink);}
-  .cd.booked{background:var(--coral);color:#fff;border-color:var(--coral-deep);font-weight:700;}
-  .cd.today{box-shadow:inset 0 0 0 2px var(--coral-soft);}
+  .cd:hover:not(.muted){border-color:var(--accent);color:var(--ink);}
+  .cd.booked{background:var(--accent);color:#fff;border-color:var(--accent-deep);font-weight:700;}
+  .cd.today{box-shadow:inset 0 0 0 2px var(--accent-soft);}
   .cd.sel{outline:2px solid var(--ink);outline-offset:1px;}
   .cd small{font-size:8.5px;margin-top:1px;}
   .cal-day{margin-top:14px;}
   .cal-day-h{font-weight:700;font-size:14px;margin-bottom:7px;}
-  .cal-bk{font-size:13.5px;color:var(--muted);padding:8px 12px;background:var(--surface);border:1px solid var(--line-2);border-radius:9px;margin-bottom:6px;}
-  /* sharper edges */
-  .stat{border-color:var(--line-2);box-shadow:var(--sh);}
-  .space-card{border-color:var(--line-2);box-shadow:var(--sh);}
-  /* smoother reveal */
-  .reveal{transform:translateY(24px) scale(.985);transition:opacity .75s cubic-bezier(.16,1,.3,1),transform .75s cubic-bezier(.16,1,.3,1);}
-  .reveal.in{transform:none;}
-  .page-overlay{transform:translateY(14px);transition:opacity .4s cubic-bezier(.16,1,.3,1),transform .4s cubic-bezier(.16,1,.3,1);}
-  @media(max-width:760px){
-    .nav-in{gap:8px;}
-    .nav-in .btn{padding:8px 12px;font-size:13px;}
-    .brand{font-size:18px;}
-    .hero{padding:30px 0 14px;}
-    .hero-grid{grid-template-columns:1fr;gap:24px;}
-    .collage{height:240px;order:2;}
-    .search{max-width:none;}
-    .how-grid{grid-template-columns:1fr;}
-    .facts{gap:6px 14px;}
-    .page-wrap,.page-top{padding-left:16px;padding-right:16px;}
-    .subnav{margin-left:-16px;margin-right:-16px;padding-left:16px;padding-right:16px;}
-  }
+  .cal-bk{font-size:13.5px;color:var(--muted);padding:8px 12px;background:#fff;border:1px solid var(--line-2);border-radius:9px;margin-bottom:6px;}
+
+  /* wizard */
+  .wiz-prog{display:flex;gap:14px;margin-bottom:24px;flex-wrap:wrap;}
+  .wstep{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:500;color:var(--faint);}
+  .wstep span{width:22px;height:22px;border-radius:50%;background:#fff;border:1px solid var(--line-2);display:flex;align-items:center;justify-content:center;font-size:12px;}
+  .wstep.on{color:var(--ink);}.wstep.on span{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .wstep.done span{background:var(--accent-soft);color:var(--accent-deep);border-color:var(--accent-soft);}
+  .wiz-h{font-size:23px;font-weight:700;}
+  .wiz-sub{color:var(--muted);margin:5px 0 18px;}
+  .type-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;}
+  .type-tile{position:relative;aspect-ratio:4/3;border-radius:11px;overflow:hidden;border:2px solid transparent;}
+  .type-tile.sel{border-color:var(--accent);}
+  .type-tile::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.5));}
+  .type-tile span{position:absolute;left:11px;bottom:9px;color:#fff;font-weight:600;z-index:2;}
+  .amen-grid{display:flex;flex-wrap:wrap;gap:8px;}
+  .amen-chip{padding:9px 14px;border:1px solid var(--line-2);border-radius:999px;font-weight:500;font-size:14px;background:#fff;}
+  .amen-chip.sel{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-deep);}
+  .wiz-nav{display:flex;align-items:center;gap:10px;margin-top:26px;}
+  .wiz-err{color:#C7432E;font-weight:600;font-size:13.5px;margin-top:10px;display:none;}
+  .wiz-pre{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:14px;color:var(--muted);}
+
+  .reveal{opacity:0;transform:translateY(20px);transition:opacity .7s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1);}
+  .reveal.in{opacity:1;transform:none;}
+  @media (prefers-reduced-motion: reduce){*{transition-duration:.001ms!important;}.reveal{opacity:1!important;transform:none!important;}}
+
   .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:12px 20px;border-radius:999px;font-size:14px;font-weight:600;box-shadow:var(--sh-h);opacity:0;transition:.25s;z-index:200;pointer-events:none;max-width:90vw;text-align:center;}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
 </head>
 <body>
 
-<nav>
-  <div class="wrap nav-in">
-    <a class="brand" href="#" id="homeLogo"><span class="spark"></span>Lumi</a>
-    <a class="nav-link nav-hide" href="#grid-wrap">Места</a>
-    <a class="nav-link nav-hide" href="#cats">По типам</a>
-    <a class="nav-link nav-hide" href="#how">Как это работает</a>
-    <a class="nav-link nav-hide" href="#faq">Вопросы</a>
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="#" data-go="home"><span class="mark"></span>Lumi</a>
+    <nav class="nav-links" style="display:flex;gap:2px;">
+      <a class="nlink" href="#" data-go="spaces">Пространства</a>
+      <a class="nlink" href="#" data-go="how">Как это работает</a>
+      <a class="nlink" href="#" data-go="about">О нас</a>
+      <a class="nlink" href="#" data-go="faq">Вопросы</a>
+    </nav>
     <div class="nav-sp"></div>
-    <button class="fav-btn nav-hide" id="favBtn" aria-label="Сохранённые">♥<span class="fav-cnt" id="cnt">0</span></button>
-    <button class="btn btn-ghost" id="loginBtn">Войти</button>
-    <button class="btn btn-ghost" id="dashBtn" style="display:none;">Кабинет</button>
-    <button class="btn btn-coral" id="navHost">Сдать пространство</button>
-  </div>
-</nav>
-
-<header class="hero wrap">
-  <div class="hero-grid">
-    <div>
-      <span class="eyebrow"><span class="avs"><i style="background:#C7432E">Н</i><i style="background:#1F6B52">Г</i><i style="background:#3A6EA5">Д</i></span>Более 140 пространств в Тбилиси</span>
-      <h1 class="hero-h">Место под <em>любое дело</em>.</h1>
-      <p class="hero-sub">Находи и бронируй студии, мастерские и залы для съёмок, занятий и встреч — по часам, без долгой аренды.</p>
-      <div class="search">
-        <div class="sf"><label>Что</label><input id="q" placeholder="студия, зал, кухня…"></div>
-        <div class="sf"><label>Район</label><select id="loc"></select></div>
-        <div class="sf"><label>Сколько вас</label><select id="cap">
-          <option value="0">Любое количество</option><option value="10">до 10</option><option value="20">до 20</option><option value="40">до 40</option><option value="100">больше 40</option>
-        </select></div>
-        <button class="btn btn-coral" id="goBtn">Найти место</button>
-      </div>
-      <div class="chips" id="chips"></div>
+    <div class="nav-r">
+      <button class="btn btn-ghost" id="loginBtn">Войти</button>
+      <button class="btn btn-ghost" id="dashBtn" style="display:none;">Кабинет</button>
+      <button class="btn btn-primary" id="navHost">Сдать пространство</button>
     </div>
-    <div class="collage" id="collage"><div class="ph"></div><div class="ph"></div><div class="ph"></div></div>
   </div>
 </header>
 
-<main class="wrap section" id="grid-wrap">
-  <div class="sec-head"><h2>Популярные пространства</h2><div id="count"></div></div>
-  <div class="grid" id="grid"></div>
-</main>
-
-<section class="wrap section" id="cats">
-  <div class="sec-head"><h2>Загляни по типам</h2><p>Выбери, что нужно — покажем подходящие места.</p></div>
-  <div class="cat-grid" id="catGrid"></div>
-</section>
-
-<section class="wrap section" id="districts">
-  <div class="sec-head"><h2>Пространства по районам</h2><p>От Ваке до Чугурети — выбирай свой район Тбилиси.</p></div>
-  <div class="dist-wrap" id="distWrap"></div>
-</section>
-
-<section class="wrap section">
-  <div class="sec-head"><h2>С Lumi уже находят места</h2><p>Что говорят те, кто бронировал и сдавал.</p></div>
-  <div class="quotes">
-    <div class="quote"><p>«Нашла студию для съёмки за десять минут — раньше на это уходил день переписок по чатам.»</p><div class="qh"><span class="qa" style="background:#C7432E">М</span><div><div class="qn">Марика</div><div class="qr">фотограф · Ваке</div></div></div></div>
-    <div class="quote"><p>«Сдаю мастерскую по утрам, когда сама не занимаюсь. Выходит приятная прибавка, и люди приходят хорошие.»</p><div class="qh"><span class="qa" style="background:#1F6B52">К</span><div><div class="qn">Кетеван</div><div class="qr">хозяйка «Глины» · Сололаки</div></div></div></div>
-    <div class="quote"><p>«Провели читку в уютном зале. Цену, время и что внутри было видно заранее — никаких сюрпризов на месте.»</p><div class="qh"><span class="qa" style="background:#3A6EA5">Д</span><div><div class="qn">Давид</div><div class="qr">книжный клуб · Мтацминда</div></div></div></div>
-  </div>
-</section>
-
-<section class="wrap section" id="how">
-  <div class="sec-head"><h2>Почему через Lumi проще</h2></div>
-  <div class="how-grid">
-    <div class="hcard"><div class="hi"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></div><h4>Бронируй по часам</h4><p>Видишь свободное время и цену сразу — бронируешь онлайн за пару минут, без звонков и переписок.</p></div>
-    <div class="hcard"><div class="hi"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.2 7.8-8 9-4.8-1.2-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div><h4>Оплата под защитой</h4><p>Платёж и залог проходят через Lumi и уходят хозяину после встречи.</p></div>
-    <div class="hcard"><div class="hi"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg></div><h4>Знаешь, к кому идёшь</h4><p>Профиль хозяина, что у него обычно проходит и отзывы тех, кто уже бывал.</p></div>
-  </div>
-</section>
-
-<section class="wrap section">
-  <div class="host">
-    <div class="host-in">
-      <h2>Заработай на своём пространстве.</h2>
-      <p>Сдавай студию, зал или мастерскую по часам. Ты задаёшь цену и правила — Lumi приводит гостей.</p>
-      <button class="btn btn-coral" id="hostCta">Разместить пространство</button>
-      <div class="host-stats">
-        <div><b>бесплатно</b><span>разместить место</span></div>
-        <div><b>ты</b><span>задаёшь цену и правила</span></div>
-        <div><b>~сутки</b><span>до первой брони</span></div>
-      </div>
-    </div>
-    <div class="host-pic" id="hostPic"></div>
-  </div>
-</section>
-
-<section class="wrap section" id="faq">
-  <div class="sec-head"><h2>Частые вопросы</h2></div>
-  <div class="faq" id="faqList">
-    <div class="faq-item"><button class="faq-q">Как забронировать пространство?<span class="pl"></span></button><div class="faq-a"><div>Открой место, выбери дату, время и число часов — цену увидишь сразу. Нажми «Забронировать» и оплати; адрес и контакты хозяина откроются после оплаты.</div></div></div>
-    <div class="faq-item"><button class="faq-q">Что с оплатой и залогом?<span class="pl"></span></button><div class="faq-a"><div>Оплата и залог проходят через Lumi. Деньги уходят хозяину после встречи, а залог возвращается в течение суток, если всё в порядке.</div></div></div>
-    <div class="faq-item"><button class="faq-q">Можно ли отменить бронь?<span class="pl"></span></button><div class="faq-a"><div>Да. При отмене заранее оплата и залог возвращаются полностью. Точные условия указаны на странице каждого места.</div></div></div>
-    <div class="faq-item"><button class="faq-q">Как сдать своё пространство?<span class="pl"></span></button><div class="faq-a"><div>Нажми «Сдать пространство», пройди короткий мастер из нескольких шагов — тип, адрес, что внутри, описание и цена — и место появится в каталоге. Ты задаёшь цену и правила.</div></div></div>
-  </div>
-</section>
+<main id="view"></main>
 
 <footer>
   <div class="wrap">
-    <div class="foot-in">
+    <div class="foot">
       <div style="max-width:300px;">
-        <a class="brand" href="#" style="font-size:22px;"><span class="spark"></span>Lumi</a>
+        <a class="brand" href="#" data-go="home"><span class="mark"></span>Lumi</a>
         <p class="foot-note">Площадка, где творческий Тбилиси находит и сдаёт пространства по часам — для съёмок, занятий, встреч и праздников.</p>
       </div>
       <div class="foot-cols">
-        <div class="foot-col"><h5>Аренда</h5><a href="#grid-wrap">Все пространства</a><a href="#cats">По типам</a><a href="#districts">По районам</a><a href="#faq">Частые вопросы</a></div>
-        <div class="foot-col"><h5>Хозяевам</h5><a href="#host">Сдать пространство</a><a href="#how">Как это работает</a><a href="#faq">Оплата и залог</a></div>
-        <div class="foot-col"><h5>Lumi</h5><a href="#">О проекте</a><a href="#">Telegram-канал</a><a href="#">Написать нам</a></div>
+        <div class="foot-col"><h5>Аренда</h5><a href="#" data-go="spaces">Все пространства</a><a href="#" data-go="how">Как это работает</a><a href="#" data-go="faq">Вопросы</a></div>
+        <div class="foot-col"><h5>Хозяевам</h5><a href="#" data-go="host">Сдать пространство</a><a href="#" data-go="how">Как это работает</a><a href="#" data-go="faq">Оплата и залог</a></div>
+        <div class="foot-col"><h5>Lumi</h5><a href="#" data-go="about">О нас</a><a href="#">Telegram</a><a href="#">Контакты</a></div>
       </div>
     </div>
-    <div class="foot-bottom">
+    <div class="foot-bot">
       <span>© 2026 Lumi · Тбилиси</span>
-      <span style="display:flex;gap:18px;flex-wrap:wrap;"><a href="#">Условия</a><a href="#">Конфиденциальность</a><a href="#">Контакты</a></span>
+      <span style="display:flex;gap:18px;flex-wrap:wrap;"><a href="#">Условия</a><a href="#">Конфиденциальность</a></span>
     </div>
   </div>
 </footer>
 
-<div id="page" class="page-overlay"></div>
-<div id="dash" class="dash-page"></div>
+<div id="dash" class="dash"></div>
 <div class="scrim" id="authScrim"><div class="authcard" id="authCard"></div></div>
 <div class="toast" id="toast"></div>
 
@@ -496,9 +389,9 @@ const $=s=>document.querySelector(s);
 const API="https://lumi-spase-production.up.railway.app";
 function plural(n,a,b,c){n=Math.abs(n)%100;const n1=n%10;if(n>10&&n<20)return c;if(n1>1&&n1<5)return b;if(n1===1)return a;return c;}
 function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2600);}
-const _io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");_io.unobserve(e.target);}}),{threshold:.08,rootMargin:"0px 0px -40px 0px"});
+const _io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");_io.unobserve(e.target);}}),{threshold:.06,rootMargin:"0px 0px -30px 0px"});
 function reveal(scope){(scope||document).querySelectorAll(".reveal:not(.in)").forEach(el=>_io.observe(el));}
-const HCV=["#C7432E","#1F6B52","#3A6EA5","#9B5DE5","#E1543B","#2A9D8F"];
+const HCV=["#1E5DFF","#1F6B52","#C7432E","#9B5DE5","#0EA5E9","#2A9D8F"];
 
 /* ---------- api ---------- */
 let token=localStorage.getItem("lumi_token")||null, user=null;
@@ -518,113 +411,279 @@ async function reloadSpaces(){try{SPACES=await api("/api/spaces");}catch(e){}}
 /* ---------- visuals ---------- */
 function room(hue,seed){
   const r=n=>{const x=Math.sin((seed+1)*9301+n*49297)*233280;return x-Math.floor(x);};
-  return `<svg class="room" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g${seed}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="hsl(${hue},32%,92%)"/><stop offset="1" stop-color="hsl(${hue},30%,80%)"/></linearGradient></defs><rect width="400" height="300" fill="url(#g${seed})"/><rect x="0" y="205" width="400" height="95" fill="hsl(${hue},25%,${72+r(1)*8}%)"/><rect x="${40+r(2)*40}" y="${70+r(3)*30}" width="${70+r(4)*40}" height="${90+r(5)*30}" rx="6" fill="hsl(${hue},22%,66%)" opacity=".8"/><circle cx="${300+r(6)*50}" cy="${90+r(7)*30}" r="${24+r(8)*14}" fill="hsl(${(hue+30)%360},40%,78%)" opacity=".7"/><rect x="${250+r(9)*40}" y="150" width="${60+r(10)*30}" height="55" rx="6" fill="hsl(${hue},20%,60%)" opacity=".75"/></svg>`;
+  return `<svg class="room" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g${seed}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="hsl(${hue},20%,93%)"/><stop offset="1" stop-color="hsl(${hue},18%,84%)"/></linearGradient></defs><rect width="400" height="300" fill="url(#g${seed})"/><rect x="0" y="205" width="400" height="95" fill="hsl(${hue},14%,${76+r(1)*8}%)"/><rect x="${40+r(2)*40}" y="${70+r(3)*30}" width="${70+r(4)*40}" height="${90+r(5)*30}" rx="6" fill="hsl(${hue},14%,72%)" opacity=".8"/><circle cx="${300+r(6)*50}" cy="${90+r(7)*30}" r="${24+r(8)*14}" fill="hsl(${(hue+20)%360},22%,80%)" opacity=".7"/><rect x="${250+r(9)*40}" y="150" width="${60+r(10)*30}" height="55" rx="6" fill="hsl(${hue},12%,66%)" opacity=".75"/></svg>`;
 }
 const PX=id=>`https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop`;
 const PXMAP={photo:[30599531,17181935],clay:[17807715,11419079],work:[11419079,5570222],move:[5691493,8978626],event:[30243614,5570222],food:[2089698,30243614],art:[17807715,30599531],loft:[30599531,11419079]};
 function photo(s){if(s.isNew)return null;const arr=PXMAP[s.cat]||[17181935];return PX(arr[s.id%arr.length]);}
-const WALL={photo:32,clay:18,work:152,move:198,event:344,food:30,art:272,loft:22};
+const WALL={photo:212,clay:24,work:158,move:200,event:268,food:30,art:280,loft:210};
 const CATS=[{id:"all",n:"Все"},{id:"photo",n:"Съёмка"},{id:"clay",n:"Керамика"},{id:"work",n:"Коворк"},{id:"move",n:"Танец и йога"},{id:"event",n:"Мероприятия"},{id:"food",n:"Кухня"},{id:"art",n:"Арт"},{id:"loft",n:"Лофт"}];
 const DISTRICTS=["Все районы","Ваке","Вера","Сололаки","Чугурети","Сабуртало","Мтацминда","Марджанишвили","Плеханова","Дигоми"];
 const AMEN=["Wi-Fi","Проектор","Звук","Кухня","Парковка","Туалет","Кондиционер","Дневной свет","Мебель","Гримёрка"];
 
-function getDetail(s){return{desc:s.desc||`${s.name} — ${s.use}.`,amen:s.amen||[],booked:[],rev:s.rev||[]};}
+function getDetail(s){return{desc:s.desc||`${s.name} — ${s.use}.`,amen:s.amen||[],rev:s.rev||[]};}
 function vals(s){const sub=s.rate*bk.hours,dep=Math.max(50,Math.round(s.rate*0.8/10)*10);return{sub,dep,total:sub+dep};}
 function todayStr(){return new Date().toISOString().slice(0,10);}
 function tomorrowStr(){return new Date(Date.now()+864e5).toISOString().slice(0,10);}
 function sameMonth(ds){const d=new Date(ds),n=new Date();return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth();}
 function myBookings(){return myBookingsCache.slice().sort((a,b)=>a.date.localeCompare(b.date));}
-function curUser(){return user;}
 function syncNav(){$("#loginBtn").style.display=user?"none":"";$("#dashBtn").style.display=user?"":"none";if(user)$("#dashBtn").textContent="👤 "+user.name.split(" ")[0];}
 
-/* ---------- filters / home ---------- */
+/* ---------- filters + grid ---------- */
 let cat="all",fLoc="Все районы",fQ="",fCap=0,favs=new Set();
-function render(){
-  const grid=$("#grid");grid.innerHTML="";
+function filtered(){
   const q=(fQ||"").toLowerCase();
-  const r=SPACES.filter(s=>(cat==="all"||s.cat===cat)&&(fLoc==="Все районы"||s.loc===fLoc)&&(!fCap||(fCap>=100?s.cap>40:s.cap<=fCap))&&(!q||(s.name+" "+s.catName+" "+s.use+" "+s.loc).toLowerCase().includes(q)));
-  $("#count").textContent=`${r.length} ${plural(r.length,"место","места","мест")}`;
-  if(!r.length){grid.innerHTML=`<div class="nores">Ничего не нашлось под эти фильтры. <button onclick="resetFilters()">Сбросить</button></div>`;return;}
-  r.forEach((s,i)=>{
-    const u=photo(s),el=document.createElement("article");el.className="card reveal";el.style.transitionDelay=(i%4*70)+"ms";
-    el.innerHTML=`<div class="pic"><div class="ph-bg">${room(WALL[s.cat]??30,s.id)}</div>${u?`<img class="ph-img" src="${u}" loading="lazy" onerror="this.remove()">`:""}<button class="heart ${favs.has(s.id)?'on':''}" aria-label="Сохранить">♥</button><span class="tag">${s.use}</span></div><div class="cbody"><div class="crow"><span class="cname">${s.name}</span>${s.isNew?'<span class="rate" style="color:var(--coral-deep)">новое</span>':`<span class="rate">★ ${s.rating}</span>`}</div><div class="cmeta">${s.catName} · ${s.loc} · у ${s.host}</div><div class="cprice"><b>₾${s.rate}</b><span> / час · до ${s.cap}</span></div></div>`;
-    el.querySelector(".heart").onclick=e=>{e.stopPropagation();const b=e.currentTarget;favs.has(s.id)?favs.delete(s.id):favs.add(s.id);b.classList.toggle("on",favs.has(s.id));const c=$("#cnt");c.textContent=favs.size;c.classList.toggle("show",favs.size>0);};
-    el.onclick=()=>goSpace(s.id);
-    grid.appendChild(el);
-  });
-  reveal($("#grid"));
+  return SPACES.filter(s=>(cat==="all"||s.cat===cat)&&(fLoc==="Все районы"||s.loc===fLoc)&&(!fCap||(fCap>=100?s.cap>40:s.cap<=fCap))&&(!q||(s.name+" "+s.catName+" "+s.use+" "+s.loc).toLowerCase().includes(q)));
 }
-function resetFilters(){cat="all";fLoc="Все районы";fQ="";fCap=0;$("#q").value="";$("#loc").value="Все районы";$("#cap").value="0";[...$("#chips").children].forEach((x,i)=>x.setAttribute("aria-pressed",i===0));render();}
-window.resetFilters=resetFilters;
-function pickCat(id){cat=id;[...$("#chips").children].forEach((x,i)=>x.setAttribute("aria-pressed",CATS[i].id===id));render();$("#grid-wrap").scrollIntoView({behavior:"smooth"});}
-function setLoc(d){fLoc=d;$("#loc").value=d;render();$("#grid-wrap").scrollIntoView({behavior:"smooth"});}
+function cardHTML(s,i){
+  const u=photo(s);
+  return `<article class="card reveal" data-id="${s.id}" style="transition-delay:${i%4*60}ms"><div class="pic"><div class="ph-bg">${room(WALL[s.cat]??210,s.id)}</div>${u?`<img class="ph-img" src="${u}" loading="lazy" onerror="this.remove()">`:""}<button class="heart ${favs.has(s.id)?'on':''}" data-fav="${s.id}" aria-label="Сохранить">♥</button><span class="tag">${s.use}</span></div><div class="cbody"><div class="crow"><span class="cname">${s.name}</span>${s.isNew?'<span class="rate new">новое</span>':`<span class="rate">★ ${s.rating}</span>`}</div><div class="cmeta">${s.catName} · ${s.loc} · у ${s.host}</div><div class="cprice"><b>₾${s.rate}</b><span> / час · до ${s.cap}</span></div></div></article>`;
+}
+function wireCards(scope){
+  scope.querySelectorAll(".card").forEach(el=>{
+    el.onclick=e=>{if(e.target.closest("[data-fav]"))return;goSpace(+el.dataset.id);};
+  });
+  scope.querySelectorAll("[data-fav]").forEach(b=>b.onclick=e=>{e.stopPropagation();const id=+b.dataset.fav;favs.has(id)?favs.delete(id):favs.add(id);b.classList.toggle("on",favs.has(id));});
+  reveal(scope);
+}
 
-/* ---------- routing + detail ---------- */
-let current=null,bk={date:"",slot:null,hours:2,guests:2},pageView="detail";
-function goSpace(id){history.pushState({},"","?space="+id);route();}
-function goHome(){history.pushState({},"",location.pathname);route();}
+/* ---------- router ---------- */
+let current=null,bk={date:"",slot:null,hours:2,guests:2},detailView="detail";
+function go(page){history.pushState({},"",page==="home"?location.pathname:("?page="+page));route();window.scrollTo(0,0);}
+function goSpace(id){history.pushState({},"","?space="+id);route();window.scrollTo(0,0);}
+function setActive(page){document.querySelectorAll(".nlink").forEach(a=>a.classList.toggle("active",a.dataset.go===page));}
 async function route(){
-  const id=+new URLSearchParams(location.search).get("space");
-  let s=id&&SPACES.find(x=>x.id===id);
-  if(id&&!s){try{s=await api("/api/spaces/"+id);}catch(e){s=null;}}
-  if(s){current=s;bk={date:tomorrowStr(),slot:null,hours:2,guests:2};pageView="detail";renderPage();$("#page").classList.add("open");document.body.style.overflow="hidden";window.scrollTo(0,0);}
-  else{$("#page").classList.remove("open");if(!$("#dash").classList.contains("open")&&!$("#authScrim").classList.contains("open"))document.body.style.overflow="";}
+  const p=new URLSearchParams(location.search);
+  const sp=+p.get("space");
+  if(sp){
+    let s=SPACES.find(x=>x.id===sp);
+    if(!s){try{s=await api("/api/spaces/"+sp);}catch(e){s=null;}}
+    if(s){current=s;bk={date:tomorrowStr(),slot:null,hours:2,guests:2};detailView="detail";setActive(null);renderDetail();return;}
+  }
+  const page=p.get("page")||"home";
+  renderView(page);setActive(page==="home"?null:page);
 }
 window.addEventListener("popstate",route);
 
+function renderView(page){
+  const v=$("#view");
+  if(page==="spaces"){v.innerHTML=viewSpaces();wireSpaces();}
+  else if(page==="how"){v.innerHTML=viewHow();}
+  else if(page==="about"){v.innerHTML=viewAbout();}
+  else if(page==="faq"){v.innerHTML=viewFaq();wireFaq();}
+  else if(page==="host"){v.innerHTML=viewHost();}
+  else {v.innerHTML=viewHome();wireHome();}
+  reveal(v);
+}
+
+/* ---------- views ---------- */
+function chipsHTML(active){return CATS.map(c=>`<button class="chip" data-cat="${c.id}" aria-pressed="${c.id===active}">${c.n}</button>`).join("");}
+function catTilesHTML(){return CATS.filter(c=>c.id!=="all").map(c=>`<button class="cat-tile" data-cat="${c.id}"><div class="ph-bg">${room(WALL[c.id]??210,3)}</div><img class="ph-img" src="${PX((PXMAP[c.id]||[17181935])[0])}" onerror="this.remove()"><div class="ov"></div><span>${c.n}</span></button>`).join("");}
+
+function viewHome(){
+  const featured=SPACES.slice(0,8);
+  return `
+  <section class="hero wrap">
+    <span class="eyebrow">Более 140 пространств в Тбилиси</span>
+    <h1 class="hero-h">Место под любое дело.</h1>
+    <p class="hero-sub">Находи и бронируй студии, мастерские и залы для съёмок, занятий и встреч — по часам, без долгой аренды.</p>
+    <div class="search">
+      <div class="sf"><label>Что</label><input id="hq" placeholder="студия, зал, кухня…"></div>
+      <div class="sf"><label>Район</label><select id="hloc">${DISTRICTS.map(d=>`<option>${d}</option>`).join("")}</select></div>
+      <button class="btn btn-primary" id="hgo" style="padding:0 22px;border-radius:11px;">Найти</button>
+    </div>
+    <div class="chips" id="hchips">${chipsHTML("all")}</div>
+  </section>
+  <section class="section wrap">
+    <div class="sec-head"><div><h2>Популярные пространства</h2></div><a class="link" href="#" data-go="spaces">Все пространства →</a></div>
+    <div class="grid" id="homeGrid">${featured.length?featured.map((s,i)=>cardHTML(s,i)).join(""):'<div class="nores">Загружаем…</div>'}</div>
+  </section>
+  <section class="section wrap">
+    <div class="sec-head"><div><h2>Загляни по типам</h2><p>Выбери, что нужно — покажем подходящие места.</p></div></div>
+    <div class="cat-grid" id="homeCats">${catTilesHTML()}</div>
+  </section>
+  <section class="section wrap">
+    <div class="sec-head"><div><h2>Как это работает</h2></div><a class="link" href="#" data-go="how">Подробнее →</a></div>
+    <div class="steps">
+      <div class="step reveal"><div class="num">1</div><h4>Найди место</h4><p>Фильтруй по типу, району и вместимости. Цена и фото — сразу.</p></div>
+      <div class="step reveal"><div class="num">2</div><h4>Забронируй по часам</h4><p>Выбери дату и время, оплати онлайн. Без звонков и переписок.</p></div>
+      <div class="step reveal"><div class="num">3</div><h4>Приходи и твори</h4><p>Адрес и контакты хозяина — после оплаты. Залог вернётся.</p></div>
+    </div>
+  </section>
+  <section class="section wrap">
+    <div class="band reveal">
+      <div><h2>Заработай на своём пространстве.</h2><p>Сдавай студию, зал или мастерскую по часам. Ты задаёшь цену и правила — Lumi приводит гостей.</p><button class="btn btn-blue" data-go="host">Разместить пространство</button></div>
+      <div class="band-stats"><div><b>бесплатно</b><span>разместить</span></div><div><b>ты</b><span>ставишь цену</span></div><div><b>~сутки</b><span>до первой брони</span></div></div>
+    </div>
+  </section>`;
+}
+function wireHome(){
+  const v=$("#view");
+  wireCards(v);
+  v.querySelectorAll("#hchips .chip").forEach(b=>b.onclick=()=>{cat=b.dataset.cat;go("spaces");});
+  v.querySelectorAll("#homeCats .cat-tile").forEach(b=>b.onclick=()=>{cat=b.dataset.cat;go("spaces");});
+  $("#hgo").onclick=()=>{fQ=$("#hq").value.trim();fLoc=$("#hloc").value;go("spaces");};
+  $("#hq").addEventListener("keydown",e=>{if(e.key==="Enter")$("#hgo").click();});
+}
+
+function viewSpaces(){
+  const list=filtered();
+  return `
+  <section class="page-head wrap"><h1>Пространства Тбилиси</h1><p>Студии, залы и мастерские по часам. Найди своё.</p></section>
+  <section class="wrap" style="padding-bottom:46px;">
+    <div class="filters">
+      <div class="fctl" style="flex:1;min-width:200px;"><label>Что ищешь</label><input id="fq" value="${fQ}" placeholder="студия, зал, кухня…"></div>
+      <div class="fctl"><label>Район</label><select id="floc">${DISTRICTS.map(d=>`<option ${d===fLoc?'selected':''}>${d}</option>`).join("")}</select></div>
+      <div class="fctl"><label>Вместимость</label><select id="fcap"><option value="0">Любая</option><option value="10" ${fCap===10?'selected':''}>до 10</option><option value="20" ${fCap===20?'selected':''}>до 20</option><option value="40" ${fCap===40?'selected':''}>до 40</option><option value="100" ${fCap===100?'selected':''}>больше 40</option></select></div>
+    </div>
+    <div class="chips" id="schips" style="margin-bottom:22px;">${chipsHTML(cat)}</div>
+    <div id="count" style="margin-bottom:18px;">${list.length} ${plural(list.length,"место","места","мест")}</div>
+    <div class="grid" id="catalog">${list.length?list.map((s,i)=>cardHTML(s,i)).join(""):`<div class="nores">Ничего не нашлось. <button id="resetF">Сбросить фильтры</button></div>`}</div>
+  </section>`;
+}
+function wireSpaces(){
+  const v=$("#view");
+  const apply=()=>{renderView("spaces");};
+  $("#fq").addEventListener("input",e=>{fQ=e.target.value;clearTimeout(window._ft);window._ft=setTimeout(apply,250);});
+  $("#floc").onchange=e=>{fLoc=e.target.value;apply();};
+  $("#fcap").onchange=e=>{fCap=+e.target.value;apply();};
+  v.querySelectorAll("#schips .chip").forEach(b=>b.onclick=()=>{cat=b.dataset.cat;apply();});
+  const rf=$("#resetF");if(rf)rf.onclick=()=>{cat="all";fLoc="Все районы";fQ="";fCap=0;apply();};
+  wireCards(v);
+}
+
+function viewHow(){
+  return `
+  <section class="page-head wrap"><h1>Как это работает</h1><p>Просто для гостей и выгодно для хозяев.</p></section>
+  <section class="section wrap">
+    <h2 style="font-size:24px;margin-bottom:22px;">Для гостей</h2>
+    <div class="steps">
+      <div class="step reveal"><div class="num">1</div><h4>Найди место</h4><p>Фильтруй по типу, району и числу гостей. Видишь фото, цену и что внутри сразу.</p></div>
+      <div class="step reveal"><div class="num">2</div><h4>Забронируй и оплати</h4><p>Выбери дату, время и часы. Оплата и залог проходят через Lumi — безопасно.</p></div>
+      <div class="step reveal"><div class="num">3</div><h4>Приходи</h4><p>Точный адрес и контакты хозяина открываются после оплаты. Залог вернётся в течение суток.</p></div>
+    </div>
+  </section>
+  <section class="section wrap" style="padding-top:0;">
+    <h2 style="font-size:24px;margin-bottom:22px;">Для хозяев</h2>
+    <div class="steps">
+      <div class="step reveal"><div class="num">1</div><h4>Размести пространство</h4><p>Короткий мастер: тип, адрес на карте, что внутри, описание и цена. Бесплатно.</p></div>
+      <div class="step reveal"><div class="num">2</div><h4>Принимай брони</h4><p>Гости бронируют по часам онлайн. Видишь занятость в календаре кабинета.</p></div>
+      <div class="step reveal"><div class="num">3</div><h4>Получай оплату</h4><p>Деньги уходят тебе после встречи. Ты задаёшь цену, часы и правила.</p></div>
+    </div>
+    <div style="margin-top:26px;"><button class="btn btn-primary" data-go="host">Разместить пространство</button></div>
+  </section>`;
+}
+
+function viewAbout(){
+  return `
+  <section class="page-head wrap"><h1>О Lumi</h1><p>Мы помогаем творческому Тбилиси находить и сдавать пространства по часам.</p></section>
+  <section class="section wrap"><div class="prose">
+    <p>Lumi родился из простой проблемы: в Тбилиси много прекрасных студий, мастерских и залов, но найти и забронировать их — это десятки переписок в чатах, неясные цены и потерянное время.</p>
+    <p>Мы собрали всё в одном месте. Гость видит фото, цену и что внутри — и бронирует по часам в пару кликов. Хозяин размещает пространство бесплатно, сам задаёт цену и правила, а Lumi приводит гостей и берёт на себя оплату.</p>
+    <h3>Наши принципы</h3>
+    <div class="principles">
+      <div class="principle reveal"><b>Прозрачность</b><p>Цена, залог и что входит — видно до брони. Без сюрпризов на месте.</p></div>
+      <div class="principle reveal"><b>По часам</b><p>Никакой долгой аренды. Бери ровно столько времени, сколько нужно.</p></div>
+      <div class="principle reveal"><b>Локально</b><p>Сделано для Тбилиси и его творческого сообщества — на русском и понятно.</p></div>
+    </div>
+    <h3>Куда мы идём</h3>
+    <p>Сейчас Lumi — это площадка аренды по часам. Дальше — отзывы, чат с хозяином, оплата картой и Telegram, и Mini App прямо в мессенджере. Если у тебя есть пространство или идеи — напиши нам.</p>
+    <div style="margin-top:20px;"><button class="btn btn-primary" data-go="spaces">Смотреть пространства</button></div>
+  </div></section>`;
+}
+
+const FAQS=[
+  ["Как забронировать пространство?","Открой место, выбери дату, время и число часов — цену увидишь сразу. Нажми «Забронировать» и оплати. Адрес и контакты хозяина откроются после оплаты."],
+  ["Что с оплатой и залогом?","Оплата и залог проходят через Lumi. Деньги уходят хозяину после встречи, а возвратный залог возвращается в течение суток, если всё в порядке."],
+  ["Можно ли отменить бронь?","Да. При отмене за 24 часа до начала оплата и залог возвращаются полностью. Точные условия указаны на странице каждого места."],
+  ["Нужно ли регистрироваться?","Смотреть пространства можно без регистрации. Чтобы забронировать или разместить место — нужен короткий профиль (имя, почта, пароль)."],
+  ["Как сдать своё пространство?","Нажми «Сдать пространство» и пройди короткий мастер: тип, адрес на карте, что внутри, описание и цена. Размещение бесплатное, ты сам задаёшь цену."],
+  ["Сколько стоит разместить место?","Разместить пространство бесплатно. Ты задаёшь цену за час и правила."],
+  ["Где именно находится место?","Точный адрес показывается после подтверждения брони — так безопаснее для хозяев. На странице видно район и место на карте."],
+  ["Как со мной свяжется хозяин?","После брони хозяин получает уведомление и ваши контакты. Чат с хозяином внутри Lumi появится в ближайших обновлениях."]
+];
+function viewFaq(){
+  return `
+  <section class="page-head wrap"><h1>Частые вопросы</h1><p>Не нашёл ответ — напиши нам, поможем.</p></section>
+  <section class="section wrap"><div class="faq">${FAQS.map(f=>`<div class="faq-item"><button class="faq-q">${f[0]}<span class="pl"></span></button><div class="faq-a"><div>${f[1]}</div></div></div>`).join("")}</div></section>`;
+}
+function wireFaq(){document.querySelectorAll(".faq-item").forEach(it=>{it.querySelector(".faq-q").onclick=()=>{const open=it.classList.toggle("open");const a=it.querySelector(".faq-a");a.style.maxHeight=open?a.scrollHeight+"px":"0";};});}
+
+function viewHost(){
+  return `
+  <section class="page-head wrap"><h1>Сдавай пространство по часам</h1><p>Зарабатывай на студии, зале или мастерской, когда они свободны. Размещение бесплатное.</p>
+    <div style="margin-top:22px;"><button class="btn btn-primary" id="hostStart">Разместить пространство</button></div>
+  </section>
+  <section class="section wrap">
+    <div class="steps">
+      <div class="step reveal"><div class="num">1</div><h4>Размести за 5 минут</h4><p>Мастер проведёт по шагам: тип, адрес на карте, удобства, описание и цена.</p></div>
+      <div class="step reveal"><div class="num">2</div><h4>Принимай брони онлайн</h4><p>Гости бронируют по часам. Занятость и доход видны в кабинете и календаре.</p></div>
+      <div class="step reveal"><div class="num">3</div><h4>Получай оплату</h4><p>Деньги уходят тебе после встречи. Ты задаёшь цену, часы работы и правила.</p></div>
+    </div>
+  </section>
+  <section class="section wrap" style="padding-top:0;">
+    <div class="band reveal">
+      <div><h2>Готов начать?</h2><p>Размести первое пространство сегодня — это бесплатно и занимает пару минут.</p><button class="btn btn-blue" id="hostStart2">Разместить пространство</button></div>
+      <div class="band-stats"><div><b>0%</b><span>за размещение</span></div><div><b>по часам</b><span>гибкий формат</span></div></div>
+    </div>
+  </section>`;
+}
+
+/* ---------- detail ---------- */
 function galleryHTML(s){
   const arr=s.isNew?[]:(PXMAP[s.cat]||[]);
-  const cell=(idx,seed,main)=>{const u=arr[idx]?PX(arr[idx]):null;return `<div class="g-cell ${main?'main':''}"><div class="ph-bg">${room(WALL[s.cat]??30,seed)}</div>${u?`<img class="ph-img" src="${u}" onerror="this.remove()">`:""}</div>`;};
+  const cell=(idx,seed,main)=>{const u=arr[idx]?PX(arr[idx]):null;return `<div class="g-cell ${main?'main':''}"><div class="ph-bg">${room(WALL[s.cat]??210,seed)}</div>${u?`<img class="ph-img" src="${u}" onerror="this.remove()">`:""}</div>`;};
   return `<div class="gallery">${cell(0,s.id,true)}<div class="g-side">${cell(1,s.id+1)}${cell(0,s.id+2)}</div></div>`;
 }
-function pageTop(){return `<div class="page-top"><a class="brand" href="#" id="pLogo"><span class="spark"></span>Lumi</a><button class="btn btn-ghost" id="pBack">← Все места</button><div style="flex:1"></div>${user?`<button class="btn btn-ghost" id="pDash">👤 ${user.name.split(" ")[0]}</button>`:`<button class="btn btn-ghost" id="pLogin">Войти</button>`}</div>`;}
 const FACETS=[["Парковка","Бесплатная на улице рядом"],["Доступ","Удобный вход, лифт"],["Звук","Можно с музыкой до 22:00"],["Электрика","Розетки по периметру, 220В"],["Интернет","Быстрый Wi-Fi, бесплатно"],["Правила","Без уличной обуви, уборка после себя"]];
 const ADDONS=[["Ассистент хозяина","₾40 / час"],["Доп. световой комплект","₾30"],["Гримёр","₾60"],["Аренда мебели","₾25"]];
 function detailHTML(s){
   const d=getDetail(s),slots=[];for(let h=9;h<=21;h++)slots.push(h);
   const rc=s.id*13+24, late=s.cat==="loft"||s.cat==="event";
-  return `<div class="subnav"><button data-sec="sec-photos">Фото</button><button data-sec="sec-about">О месте</button><button data-sec="sec-amen">Удобства</button><button data-sec="sec-addons">Услуги</button><button data-sec="sec-loc">Расположение</button><button data-sec="sec-know">Важно знать</button></div>
-   <div id="sec-photos"></div>
-   ${galleryHTML(s)}
-   <div class="detail-grid">
-     <div class="detail-main">
-       <h1 class="detail-h1">${s.name}</h1>
-       <div class="detail-loc"><a href="#" onclick="goHome();setTimeout(()=>setLoc('${s.loc}'),60);return false;">${s.loc}</a>, Тбилиси · ${s.catName}</div>
-       <div class="facts">${s.isNew?'<span class="fact"><b style="color:var(--coral-deep)">новое место</b></span>':`<span class="fact">★ <b>${s.rating}</b> · ${rc} отз.</span>`}<span class="fact">до <b>${s.cap}</b> чел.</span><span class="fact">от <b>2 ч</b></span><span class="fact">~<b>${s.cap*4}</b> м²</span></div>
-       <div class="host-row"><span class="ra" style="background:${HCV[s.host.length%HCV.length]}">${(s.host||'?')[0]}</span><div style="flex:1"><b>Хозяин — ${s.host}</b>${s.rating>=4.8?' <span class="badge">Опытный хозяин</span>':''}<div class="muted2">Обычно отвечает в течение часа</div></div><button class="btn btn-ghost" id="msgHost">Написать</button></div>
-       <section id="sec-about" class="detail-sec reveal"><h3 class="detail-h3">О месте</h3><p class="detail-desc">${d.desc}</p><div class="facet-grid">${FACETS.map(f=>`<div class="facet"><div class="facet-k">${f[0]}</div><div class="facet-v">${f[1]}</div></div>`).join("")}</div></section>
-       <section id="sec-amen" class="detail-sec reveal"><h3 class="detail-h3">Что включено</h3>${d.amen.length?`<div class="feat-grid">${d.amen.map(a=>`<div class="feat">✓ ${a}</div>`).join("")}</div>`:`<p class="muted2">Хозяин добавит удобства чуть позже.</p>`}</section>
-       <section id="sec-addons" class="detail-sec reveal"><h3 class="detail-h3">Услуги хозяина</h3><p class="muted2" style="margin-bottom:12px;">Добавишь при бронировании — по желанию.</p><div class="addon-grid">${ADDONS.map((a,i)=>`<div class="addon"><div class="addon-pic"><div class="ph-bg">${room((WALL[s.cat]??30)+i*22,s.id+i+5)}</div></div><div><b>${a[0]}</b><div class="muted2">${a[1]}</div></div></div>`).join("")}</div></section>
-       <section id="sec-loc" class="detail-sec reveal"><h3 class="detail-h3">Расположение</h3>${s.lat?`<div id="detmap" class="mapcard live"></div>${s.addr?`<p style="margin-top:10px;font-weight:600;">${s.addr}</p>`:""}`:`<div class="mapcard"><div class="map-grid"></div><div class="map-pin">📍</div><div class="map-lbl">${s.loc}, Тбилиси</div></div><p class="muted2" style="margin-top:10px;">Точный адрес появится после подтверждения брони.</p>`}<div class="hours"><b>Часы работы</b><span>${late?"Пн–Вс · до 02:00":"Пн–Вс · 09:00–22:00"}</span></div></section>
-       <section id="sec-know" class="detail-sec reveal"><h3 class="detail-h3">Важно знать</h3><div class="know"><div><b>Отмена</b><p class="muted2">Бесплатно за 24 часа до начала — вернём оплату и залог полностью.</p></div><div><b>Залог</b><p class="muted2">Возвратный, вернётся в течение суток после встречи.</p></div><div><b>Чистота</b><p class="muted2">Хозяин убирает между бронями. Оставь место таким же.</p></div></div></section>
-       <section class="detail-sec reveal"><h3 class="detail-h3">${s.isNew?"Отзывы":`★ ${s.rating} · ${rc} отзывов`}</h3>${d.rev.length?d.rev.map(r=>`<div class="review"><div class="rh"><span class="ra" style="background:${HCV[r[0].length%HCV.length]}">${r[0][0]}</span><span class="rn">${r[0]}</span><span class="rd">${r[1]}</span></div><p>${r[2]}</p></div>`).join(""):`<p class="muted2">Пока без отзывов — будь первым, кто здесь побывает.</p>`}</section>
-     </div>
-     <aside class="book-card">
-       <div class="bc-price"><b>₾${s.rate}</b> / час <span class="muted2">· от 2 часов</span></div>
-       <div class="bkf"><label>Дата</label><input type="date" id="bkd" value="${bk.date}" min="${todayStr()}"></div>
-       <label class="bkf-label">Время начала</label>
-       <div class="slots" id="slots">${slots.map(h=>`<button class="slot ${bk.slot===h?'on':''}" data-h="${h}">${h}:00</button>`).join("")}</div>
-       <div class="bkf"><label>Часов</label><select id="bkh">${[1,2,3,4,5,6,8].map(h=>`<option value="${h}" ${h===bk.hours?'selected':''}>${h} ${plural(h,"час","часа","часов")}</option>`).join("")}</select></div>
-       <div class="bkf"><label>Сколько человек</label><input id="bkg" inputmode="numeric" value="${bk.guests||''}" placeholder="до ${s.cap}"></div>
-       <div class="calc" id="calc"></div>
-       <button class="btn btn-coral bkcta" id="bkB">Забронировать</button>
-       <p class="muted2" style="text-align:center;margin-top:8px;">Пока ничего не спишем · бесплатная отмена за 24 ч</p>
-     </aside>
-   </div>`;
+  return `
+  <div class="wrap">
+    <div class="back-row"><button id="dBack">← Все пространства</button></div>
+    <div class="subnav"><button data-sec="sec-photos">Фото</button><button data-sec="sec-about">О месте</button><button data-sec="sec-amen">Удобства</button><button data-sec="sec-addons">Услуги</button><button data-sec="sec-loc">Расположение</button><button data-sec="sec-know">Важно знать</button></div>
+    <div id="sec-photos"></div>
+    ${galleryHTML(s)}
+    <div class="detail-grid">
+      <div class="detail-main">
+        <h1 class="detail-h1">${s.name}</h1>
+        <div class="detail-loc"><a href="#" data-loc="${s.loc}">${s.loc}</a>, Тбилиси · ${s.catName}</div>
+        <div class="facts">${s.isNew?'<span><b style="color:var(--accent)">новое место</b></span>':`<span>★ <b>${s.rating}</b> · ${rc} отз.</span>`}<span>до <b>${s.cap}</b> чел.</span><span>от <b>2 ч</b></span><span>~<b>${s.cap*4}</b> м²</span></div>
+        <div class="host-row"><span class="ra" style="background:${HCV[(s.host||'?').length%HCV.length]}">${(s.host||'?')[0]}</span><div style="flex:1"><b>Хозяин — ${s.host}</b>${s.rating>=4.8?' <span class="badge">Опытный хозяин</span>':''}<div class="faint">Обычно отвечает в течение часа</div></div><button class="btn btn-ghost" id="msgHost">Написать</button></div>
+        <section id="sec-about" class="detail-sec reveal"><h3 class="detail-h3">О месте</h3><p class="detail-desc">${d.desc}</p><div class="facet-grid">${FACETS.map(f=>`<div class="facet"><div class="facet-k">${f[0]}</div><div class="facet-v">${f[1]}</div></div>`).join("")}</div></section>
+        <section id="sec-amen" class="detail-sec reveal"><h3 class="detail-h3">Что включено</h3>${d.amen.length?`<div class="feat-grid">${d.amen.map(a=>`<div class="feat">✓ ${a}</div>`).join("")}</div>`:`<p class="faint">Хозяин добавит удобства чуть позже.</p>`}</section>
+        <section id="sec-addons" class="detail-sec reveal"><h3 class="detail-h3">Услуги хозяина</h3><p class="faint" style="margin-bottom:12px;">Добавишь при бронировании — по желанию.</p><div class="addon-grid">${ADDONS.map((a,i)=>`<div class="addon"><div class="addon-pic"><div class="ph-bg">${room((WALL[s.cat]??210)+i*14,s.id+i+5)}</div></div><div><b>${a[0]}</b><div class="faint">${a[1]}</div></div></div>`).join("")}</div></section>
+        <section id="sec-loc" class="detail-sec reveal"><h3 class="detail-h3">Расположение</h3>${s.lat?`<div id="detmap" class="mapcard live"></div>${s.addr?`<p style="margin-top:10px;font-weight:600;">${s.addr}</p>`:""}`:`<div class="mapcard"><div class="map-grid"></div><div class="map-pin">📍</div><div class="map-lbl">${s.loc}, Тбилиси</div></div><p class="faint" style="margin-top:10px;">Точный адрес появится после подтверждения брони.</p>`}<div class="hours"><b>Часы работы</b><span>${late?"Пн–Вс · до 02:00":"Пн–Вс · 09:00–22:00"}</span></div></section>
+        <section id="sec-know" class="detail-sec reveal"><h3 class="detail-h3">Важно знать</h3><div class="know"><div><b>Отмена</b><p class="faint">Бесплатно за 24 часа до начала — вернём оплату и залог полностью.</p></div><div><b>Залог</b><p class="faint">Возвратный, вернётся в течение суток после встречи.</p></div><div><b>Чистота</b><p class="faint">Хозяин убирает между бронями. Оставь место таким же.</p></div></div></section>
+        <section class="detail-sec reveal"><h3 class="detail-h3">${s.isNew?"Отзывы":`★ ${s.rating} · ${rc} отзывов`}</h3>${d.rev.length?d.rev.map(r=>`<div class="review"><div class="rh"><span class="ra" style="width:32px;height:32px;font-size:13px;background:${HCV[r[0].length%HCV.length]}">${r[0][0]}</span><span class="rn">${r[0]}</span><span class="rd">${r[1]}</span></div><p>${r[2]}</p></div>`).join(""):`<p class="faint">Пока без отзывов — будь первым, кто здесь побывает.</p>`}</section>
+      </div>
+      <aside class="book-card">
+        <div class="bc-price"><b>₾${s.rate}</b> / час · от 2 часов</div>
+        <div class="bkf"><label>Дата</label><input type="date" id="bkd" value="${bk.date}" min="${todayStr()}"></div>
+        <label class="bkf-label">Время начала</label>
+        <div class="slots" id="slots">${slots.map(h=>`<button class="slot ${bk.slot===h?'on':''}" data-h="${h}">${h}:00</button>`).join("")}</div>
+        <div class="bkf"><label>Часов</label><select id="bkh">${[1,2,3,4,5,6,8].map(h=>`<option value="${h}" ${h===bk.hours?'selected':''}>${h} ${plural(h,"час","часа","часов")}</option>`).join("")}</select></div>
+        <div class="bkf"><label>Сколько человек</label><input id="bkg" inputmode="numeric" value="${bk.guests||''}" placeholder="до ${s.cap}"></div>
+        <div class="calc" id="calc"></div>
+        <button class="btn btn-primary bkcta" id="bkB">Забронировать</button>
+        <p class="faint" style="text-align:center;margin-top:8px;">Пока ничего не спишем · бесплатная отмена за 24 ч</p>
+      </aside>
+    </div>
+  </div>`;
 }
-function payHTML(s){const v=vals(s);return `<div class="pay-wrap"><h1 class="detail-h1">Оплата брони</h1><div class="pay-sum"><div class="ps-row"><span>${s.name}</span><span>${s.loc}</span></div><div class="ps-row"><span>${bk.date.split("-").reverse().join(".")} · ${bk.slot}:00–${bk.slot+bk.hours}:00</span><span>${bk.guests||1} чел.</span></div><div class="crow2"><span>Аренда</span><b>₾${v.sub}</b></div><div class="crow2"><span>Залог (вернётся)</span><b>₾${v.dep}</b></div><div class="crow2 tot"><span>Итого</span><b>₾${v.total}</b></div></div><div class="pay-methods"><button class="pm sel" data-m="card">Карта</button><button class="pm" data-m="apple">Apple Pay</button><button class="pm" data-m="tg">Telegram Pay</button></div><div id="cardForm"><div class="bkf"><label>Номер карты</label><input id="cNum" inputmode="numeric" placeholder="0000 0000 0000 0000"></div><div class="cardgrid"><div class="bkf"><label>Срок</label><input id="cExp" placeholder="ММ/ГГ"></div><div class="bkf"><label>CVC</label><input id="cCvc" inputmode="numeric" placeholder="123"></div></div></div><button class="btn btn-coral bkcta" id="payB">Оплатить ₾${v.total}</button></div>`;}
-function confirmPageHTML(s){const v=vals(s);return `<div class="confirm"><div class="ico2">✓</div><h1 class="detail-h1">«${s.name}» забронировано</h1><p class="muted2" style="margin-top:8px;">${bk.date.split("-").reverse().join(".")} · ${bk.slot}:00–${bk.slot+bk.hours}:00 · ${bk.guests||1} чел.</p><div class="pay-sum" style="text-align:left;"><div class="crow2"><span>Хозяин</span><b>${s.host}</b></div><div class="crow2 tot"><span>Оплачено</span><b>₾${v.total}</b></div></div><p class="muted2">${s.host} получит уведомление. Бронь уже в твоём кабинете → «Мои брони». Напомним за день до встречи.</p><div style="display:flex;gap:10px;margin-top:18px;justify-content:center;"><button class="btn btn-ghost" id="cHome">На главную</button><button class="btn btn-coral" id="cDash">Открыть кабинет</button></div></div>`;}
-function renderPage(){
+function payHTML(s){const v=vals(s);return `<div class="wrap"><div class="back-row"><button id="dBack">← Назад</button></div><div class="pay-wrap"><h1 class="detail-h1">Оплата брони</h1><div class="pay-sum"><div class="ps-row"><span>${s.name}</span><span>${s.loc}</span></div><div class="ps-row"><span>${bk.date.split("-").reverse().join(".")} · ${bk.slot}:00–${bk.slot+bk.hours}:00</span><span>${bk.guests||1} чел.</span></div><div class="crow2"><span>Аренда</span><b>₾${v.sub}</b></div><div class="crow2"><span>Залог (вернётся)</span><b>₾${v.dep}</b></div><div class="crow2 tot"><span>Итого</span><b>₾${v.total}</b></div></div><div class="pay-methods"><button class="pm sel" data-m="card">Карта</button><button class="pm" data-m="apple">Apple Pay</button><button class="pm" data-m="tg">Telegram Pay</button></div><div id="cardForm"><div class="bkf"><label>Номер карты</label><input id="cNum" inputmode="numeric" placeholder="0000 0000 0000 0000"></div><div class="cardgrid"><div class="bkf"><label>Срок</label><input id="cExp" placeholder="ММ/ГГ"></div><div class="bkf"><label>CVC</label><input id="cCvc" inputmode="numeric" placeholder="123"></div></div></div><button class="btn btn-primary bkcta" id="payB">Оплатить ₾${v.total}</button></div></div>`;}
+function confirmPageHTML(s){const v=vals(s);return `<div class="wrap"><div class="confirm"><div class="ico2">✓</div><h1 class="detail-h1">«${s.name}» забронировано</h1><p class="faint" style="margin-top:8px;">${bk.date.split("-").reverse().join(".")} · ${bk.slot}:00–${bk.slot+bk.hours}:00 · ${bk.guests||1} чел.</p><div class="pay-sum" style="text-align:left;"><div class="crow2"><span>Хозяин</span><b>${s.host}</b></div><div class="crow2 tot"><span>Оплачено</span><b>₾${v.total}</b></div></div><p class="faint">${s.host} получит уведомление. Бронь уже в твоём кабинете → «Мои брони».</p><div style="display:flex;gap:10px;margin-top:18px;justify-content:center;"><button class="btn btn-ghost" id="cHome">На главную</button><button class="btn btn-primary" id="cDash">Открыть кабинет</button></div></div></div>`;}
+function renderDetail(){
   const s=current;if(!s)return;
-  let inner=pageView==="pay"?payHTML(s):pageView==="confirm"?confirmPageHTML(s):detailHTML(s);
-  $("#page").innerHTML=pageTop()+`<div class="page-wrap">${inner}</div>`;
-  const lg=$("#pLogo");if(lg)lg.onclick=e=>{e.preventDefault();goHome();};
-  $("#pBack").onclick=()=>{if(pageView!=="detail"){pageView="detail";renderPage();window.scrollTo(0,0);}else goHome();};
-  const pd=$("#pDash");if(pd)pd.onclick=()=>openDash();
-  const pl=$("#pLogin");if(pl)pl.onclick=()=>openAuth("login");
-  if(pageView==="detail")wireDetail();
-  else if(pageView==="pay")wirePay();
-  else{const ch=$("#cHome");if(ch)ch.onclick=goHome;const cd=$("#cDash");if(cd)cd.onclick=()=>{goHome();openDash("bookings");};}
+  const v=$("#view");
+  v.innerHTML=detailView==="pay"?payHTML(s):detailView==="confirm"?confirmPageHTML(s):detailHTML(s);
+  const back=$("#dBack");if(back)back.onclick=()=>{if(detailView!=="detail"){detailView="detail";renderDetail();window.scrollTo(0,0);}else go("spaces");};
+  if(detailView==="detail")wireDetail();
+  else if(detailView==="pay")wirePay();
+  else{const ch=$("#cHome");if(ch)ch.onclick=()=>go("home");const cd=$("#cDash");if(cd)cd.onclick=()=>{go("home");openDash("bookings");};}
+  reveal(v);
 }
 function calc(){const s=current,v=vals(s),c=$("#calc");if(!c)return;c.innerHTML=`<div class="crow2"><span>₾${s.rate} × ${bk.hours} ${plural(bk.hours,"час","часа","часов")}</span><b>₾${v.sub}</b></div><div class="crow2"><span>Залог (вернётся)</span><b>₾${v.dep}</b></div><div class="crow2 tot"><span>Итого</span><b>₾${v.total}</b></div>`;}
 function wireDetail(){
@@ -632,21 +691,21 @@ function wireDetail(){
   $("#slots").querySelectorAll(".slot").forEach(b=>b.onclick=()=>{bk.slot=+b.dataset.h;$("#slots").querySelectorAll(".slot").forEach(x=>x.classList.remove("on"));b.classList.add("on");});
   $("#bkh").onchange=e=>{bk.hours=+e.target.value;calc();};
   $("#bkg").addEventListener("input",e=>{e.target.value=e.target.value.replace(/\D/g,"").slice(0,4);bk.guests=parseInt(e.target.value)||0;});
-  $("#bkB").onclick=()=>{if(!bk.slot)return toast("Выбери время начала");pageView="pay";renderPage();window.scrollTo(0,0);};
-  $("#page").querySelectorAll(".subnav button").forEach(b=>b.onclick=()=>{const t=document.getElementById(b.dataset.sec);if(t)t.scrollIntoView({behavior:"smooth",block:"start"});});
+  $("#bkB").onclick=()=>{if(!bk.slot)return toast("Выбери время начала");detailView="pay";renderDetail();window.scrollTo(0,0);};
+  $("#view").querySelectorAll(".subnav button").forEach(b=>b.onclick=()=>{const t=document.getElementById(b.dataset.sec);if(t)t.scrollIntoView({behavior:"smooth",block:"start"});});
+  const ml=$("#view").querySelector("[data-loc]");if(ml)ml.onclick=e=>{e.preventDefault();fLoc=ml.dataset.loc;go("spaces");};
   const mh=$("#msgHost");if(mh)mh.onclick=()=>toast("Чат с хозяином — в следующем обновлении");
   if(current.lat)showMap("detmap",current.lat,current.lon);
-  reveal($("#page"));
   calc();
 }
 function wirePay(){
-  $("#page").querySelectorAll(".pm").forEach(b=>b.onclick=()=>{$("#page").querySelectorAll(".pm").forEach(x=>x.classList.remove("sel"));b.classList.add("sel");$("#cardForm").style.display=b.dataset.m==="card"?"":"none";});
+  $("#view").querySelectorAll(".pm").forEach(b=>b.onclick=()=>{$("#view").querySelectorAll(".pm").forEach(x=>x.classList.remove("sel"));b.classList.add("sel");$("#cardForm").style.display=b.dataset.m==="card"?"":"none";});
   const cn=$("#cNum");if(cn)cn.addEventListener("input",e=>{e.target.value=e.target.value.replace(/\D/g,"").slice(0,16).replace(/(.{4})/g,"$1 ").trim();});
   const ce=$("#cExp");if(ce)ce.addEventListener("input",e=>{let v=e.target.value.replace(/\D/g,"").slice(0,4);if(v.length>2)v=v.slice(0,2)+"/"+v.slice(2);e.target.value=v;});
   $("#payB").onclick=async()=>{
     if(!user){openAuth("login");toast("Войди, чтобы завершить бронь");return;}
     const b=$("#payB");b.disabled=true;b.textContent="Обработка…";
-    try{await recordBooking();pageView="confirm";renderPage();window.scrollTo(0,0);}
+    try{await recordBooking();detailView="confirm";renderDetail();window.scrollTo(0,0);}
     catch(e){b.disabled=false;b.textContent="Оплатить ₾"+vals(current).total;toast(e.message||"Не удалось забронировать");}
   };
 }
@@ -658,24 +717,23 @@ async function recordBooking(){
 /* ---------- auth ---------- */
 let authMode="login";
 function openAuth(m){authMode=m||"login";renderAuth();$("#authScrim").classList.add("open");document.body.style.overflow="hidden";}
-function closeAuth(){$("#authScrim").classList.remove("open");if(!$("#page").classList.contains("open")&&!$("#dash").classList.contains("open"))document.body.style.overflow="";}
+function closeAuth(){$("#authScrim").classList.remove("open");if(!$("#dash").classList.contains("open"))document.body.style.overflow="";}
 function renderAuth(){
-  $("#authCard").innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;"><h2>${authMode==="login"?"С возвращением":"Создать профиль"}</h2><button class="sheet-close" id="aClose">✕</button></div><div class="auth-tabs"><button class="auth-tab ${authMode==="login"?"active":""}" id="tabL">Вход</button><button class="auth-tab ${authMode==="reg"?"active":""}" id="tabR">Регистрация</button></div>${authMode==="reg"?`<div class="bkf"><label>Имя</label><input id="aName" placeholder="Как тебя зовут"></div>`:""}<div class="bkf"><label>Почта</label><input id="aEmail" type="email" placeholder="you@mail.com"></div><div class="bkf"><label>Пароль</label><input id="aPass" type="password" placeholder="••••••••"></div><button class="btn btn-coral bkcta" id="aGo">${authMode==="login"?"Войти":"Зарегистрироваться"}</button><div id="aErr" style="color:var(--coral-deep);font-size:13.5px;margin-top:9px;display:none;font-weight:600;"></div>`;
+  $("#authCard").innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;"><h2>${authMode==="login"?"С возвращением":"Создать профиль"}</h2><button class="x" id="aClose">✕</button></div><div class="auth-tabs"><button class="auth-tab ${authMode==="login"?"active":""}" id="tabL">Вход</button><button class="auth-tab ${authMode==="reg"?"active":""}" id="tabR">Регистрация</button></div>${authMode==="reg"?`<div class="bkf"><label>Имя</label><input id="aName" placeholder="Как тебя зовут"></div>`:""}<div class="bkf"><label>Почта</label><input id="aEmail" type="email" placeholder="you@mail.com"></div><div class="bkf"><label>Пароль</label><input id="aPass" type="password" placeholder="••••••••"></div><button class="btn btn-primary bkcta" id="aGo">${authMode==="login"?"Войти":"Зарегистрироваться"}</button><div id="aErr" style="color:#C7432E;font-size:13.5px;margin-top:9px;display:none;font-weight:600;"></div>`;
   $("#aClose").onclick=closeAuth;$("#tabL").onclick=()=>{authMode="login";renderAuth();};$("#tabR").onclick=()=>{authMode="reg";renderAuth();};$("#aGo").onclick=submitAuth;
 }
 async function submitAuth(){
   const email=($("#aEmail").value||"").trim().toLowerCase(),pass=$("#aPass").value||"",err=m=>{const e=$("#aErr");e.style.display="block";e.textContent=m;};
   if(!email||!pass)return err("Заполни почту и пароль.");
-  const go=$("#aGo");go.disabled=true;
+  const go2=$("#aGo");go2.disabled=true;
   try{
     let res;
-    if(authMode==="reg"){const name=($("#aName").value||"").trim();if(!name){go.disabled=false;return err("Как тебя зовут?");}res=await api("/api/auth/register",{method:"POST",body:{email,name,password:pass}});}
+    if(authMode==="reg"){const name=($("#aName").value||"").trim();if(!name){go2.disabled=false;return err("Как тебя зовут?");}res=await api("/api/auth/register",{method:"POST",body:{email,name,password:pass}});}
     else res=await api("/api/auth/login",{method:"POST",body:{email,password:pass}});
     token=res.token;localStorage.setItem("lumi_token",token);user=res.user;
     closeAuth();syncNav();toast(`Привет, ${user.name.split(" ")[0]}!`);
     await refreshMine();await refreshOwner();remindTomorrow();
-    if($("#page").classList.contains("open"))renderPage();
-  }catch(e){go.disabled=false;err(e.message||"Не удалось войти");}
+  }catch(e){go2.disabled=false;err(e.message||"Не удалось войти");}
 }
 function logout(){token=null;localStorage.removeItem("lumi_token");user=null;myBookingsCache=[];ownerBookingsCache=[];syncNav();closeDash();toast("Ты вышел из профиля.");}
 function remindTomorrow(){const t=tomorrowStr(),b=myBookings().find(x=>x.date===t);if(b)setTimeout(()=>toast(`🔔 Напоминание: завтра мероприятие в «${b.spaceName}»`),1400);}
@@ -694,15 +752,15 @@ function calInner(spaceId){
   for(let d=1;d<=days;d++){const arr=byDay[d],g=arr?arr.reduce((a,b)=>a+b.guests,0):0,tdy=y===today.getFullYear()&&m===today.getMonth()&&d===today.getDate();cells+=`<button class="cd ${g?'booked':''} ${tdy?'today':''}" data-day="${d}">${d}${g?`<small>${g} чел</small>`:""}</button>`;}
   return `<div class="cal-top"><div class="cal-title">${mn} ${y}</div><div style="display:flex;gap:6px;"><button class="cal-nav" data-nav="-1">‹</button><button class="cal-nav" data-nav="1">›</button></div></div><div class="cal-head">${["Пн","Вт","Ср","Чт","Пт","Сб","Вс"].map(x=>`<span>${x}</span>`).join("")}</div><div class="cal">${cells}</div><div class="cal-day" id="calday-${spaceId}"></div>`;
 }
-function calendarHTML(spaceId){return `<div class="cal-wrap" id="cal-${spaceId}" data-sp="${spaceId}">${calInner(spaceId)}</div>`;}
+function calendarHTML(spaceId){return `<div class="cal-wrap" id="cal-${spaceId}" data-sp="${spaceId}" style="margin-top:14px;">${calInner(spaceId)}</div>`;}
 function wireCals(){document.querySelectorAll(".cal-wrap").forEach(w=>{const sp=+w.dataset.sp;w.onclick=e=>{const nav=e.target.closest(".cal-nav");if(nav){const st=calState[sp];st.m+=+nav.dataset.nav;if(st.m<0){st.m=11;st.y--;}if(st.m>11){st.m=0;st.y++;}w.innerHTML=calInner(sp);return;}const cd=e.target.closest(".cd[data-day]");if(cd){const day=+cd.dataset.day,st=calState[sp],ds=new Date(st.y,st.m,day).toISOString().slice(0,10),list=ownerBookingsCache.filter(b=>b.spaceId===sp&&b.date===ds);w.querySelectorAll(".cd").forEach(x=>x.classList.remove("sel"));cd.classList.add("sel");const det=document.getElementById("calday-"+sp),mn=["янв","фев","мар","апр","мая","июн","июл","авг","сен","окт","ноя","дек"][st.m];det.innerHTML=list.length?`<div class="cal-day-h">${day} ${mn} — ${list.length} ${plural(list.length,"бронь","брони","броней")}</div>${list.map(b=>`<div class="cal-bk">${b.slot}:00–${b.slot+b.hours}:00 · ${b.renterName} · ${b.guests} чел.</div>`).join("")}`:`<div class="cal-day-h">${day} ${mn} — свободно</div>`;}};});}
-function bookingItem(b,isTom){const sp=SPACES.find(s=>s.id===b.spaceId),u=sp?photo(sp):null;return `<div class="bk-item"><div class="bk-thumb">${sp?`<div class="ph-bg">${room(WALL[sp.cat]??30,b.spaceId)}</div>${u?`<img class="ph-img" src="${u}" onerror="this.remove()">`:""}`:""}</div><div style="flex:1;"><div style="font-weight:700;">${b.spaceName}${isTom?`<span class="tom">завтра</span>`:""}</div><div style="color:var(--muted);font-size:14px;">${b.date.split("-").reverse().join(".")} · ${b.slot}:00–${b.slot+b.hours}:00 · ${b.guests} чел.</div></div><div style="font-weight:700;">₾${b.total||b.sub}</div></div>`;}
+function bookingItem(b,isTom){const sp=SPACES.find(s=>s.id===b.spaceId),u=sp?photo(sp):null;return `<div class="bk-item"><div class="bk-thumb">${sp?`<div class="ph-bg">${room(WALL[sp.cat]??210,b.spaceId)}</div>${u?`<img class="ph-img" src="${u}" onerror="this.remove()">`:""}`:""}</div><div style="flex:1;"><div style="font-weight:600;">${b.spaceName}${isTom?`<span class="tom">завтра</span>`:""}</div><div class="muted" style="font-size:14px;">${b.date.split("-").reverse().join(".")} · ${b.slot}:00–${b.slot+b.hours}:00 · ${b.guests} чел.</div></div><div style="font-weight:700;">₾${b.total||b.sub}</div></div>`;}
 
 /* ---------- dashboard ---------- */
 let dashTab="overview",wiz=null;
 async function openDash(tab){if(!user)return openAuth("login");dashTab=tab||"overview";if(dashTab==="add"&&!wiz)startWiz();$("#dash").classList.add("open");document.body.style.overflow="hidden";renderDash();await refreshMine();await refreshOwner();renderDash();}
-function closeDash(){$("#dash").classList.remove("open");if(!$("#page").classList.contains("open"))document.body.style.overflow="";}
-async function delSpace(id){try{await api("/api/spaces/"+id,{method:"DELETE",auth:true});}catch(e){return toast(e.message||"Не удалось удалить");}await reloadSpaces();await refreshOwner();render();renderDash();toast("Пространство удалено.");}
+function closeDash(){$("#dash").classList.remove("open");document.body.style.overflow="";}
+async function delSpace(id){try{await api("/api/spaces/"+id,{method:"DELETE",auth:true});}catch(e){return toast(e.message||"Не удалось удалить");}await reloadSpaces();await refreshOwner();renderDash();toast("Пространство удалено.");}
 function renderDash(){
   if(!user){closeDash();return;}
   const mySpaces=SPACES.filter(s=>s.ownerId===user.id),mine=myBookings().filter(b=>b.date>=todayStr()),t=tomorrowStr();
@@ -710,22 +768,22 @@ function renderDash(){
   let main="";
   if(dashTab==="overview"){
     const earn=ownerBookingsCache.filter(b=>sameMonth(b.date)).reduce((a,b)=>a+b.sub,0);
-    main=`<h1 class="dash-h1">Привет, ${user.name.split(" ")[0]} 👋</h1><div class="stat-grid"><div class="stat"><b>${mine.length}</b><span>предстоящих броней</span></div><div class="stat"><b>${mySpaces.length}</b><span>твоих пространств</span></div><div class="stat"><b>₾${earn}</b><span>заработано в этом месяце</span></div></div>${mine.some(b=>b.date===t)?`<div class="reminder">🔔 Завтра у тебя мероприятие — не забудь подготовиться!</div>`:""}<div class="quick"><button class="btn btn-coral" data-go="add">Разместить пространство</button><button class="btn btn-ghost" id="qFind">Найти место</button></div>`;
+    main=`<h1 class="dash-h1">Привет, ${user.name.split(" ")[0]} 👋</h1><div class="stat-grid"><div class="stat"><b>${mine.length}</b><span>предстоящих броней</span></div><div class="stat"><b>${mySpaces.length}</b><span>твоих пространств</span></div><div class="stat"><b>₾${earn}</b><span>заработано в этом месяце</span></div></div>${mine.some(b=>b.date===t)?`<div class="reminder">🔔 Завтра у тебя мероприятие — не забудь подготовиться!</div>`:""}<div class="quick"><button class="btn btn-primary" data-go="add">Разместить пространство</button><button class="btn btn-ghost" id="qFind">Найти место</button></div>`;
   }else if(dashTab==="bookings"){
     main=`<h1 class="dash-h1">Мои брони</h1>${mine.some(b=>b.date===t)?`<div class="reminder">🔔 Завтра у тебя мероприятие!</div>`:""}${mine.length?mine.map(b=>bookingItem(b,b.date===t)).join(""):`<p class="empty2">Пока нет броней. Найди место и забронируй — оно появится здесь.</p>`}`;
   }else if(dashTab==="spaces"){
-    main=`<div class="dash-h1row"><h1 class="dash-h1">Мои пространства</h1><button class="btn btn-coral" data-go="add">+ Добавить</button></div>${mySpaces.length?mySpaces.map(s=>{const mo=ownerBookingsCache.filter(b=>b.spaceId===s.id&&sameMonth(b.date));return `<div class="space-card"><div class="sc-head"><b>${s.name}</b><span>${s.catName} · ${s.loc} · ₾${s.rate}/час</span><button class="del" data-id="${s.id}">Удалить</button></div><div class="stat-grid"><div class="stat"><b>${mo.length}</b><span>броней в этом месяце</span></div><div class="stat"><b>₾${mo.reduce((a,b)=>a+b.sub,0)}</b><span>заработано</span></div><div class="stat"><b>${mo.reduce((a,b)=>a+b.guests,0)}</b><span>гостей всего</span></div></div>${calendarHTML(s.id)}</div>`;}).join(""):`<p class="empty2">У тебя пока нет пространств. Нажми «Добавить» и опубликуй первое.</p>`}`;
+    main=`<div class="dash-h1row"><h1 class="dash-h1">Мои пространства</h1><button class="btn btn-primary" data-go="add">+ Добавить</button></div>${mySpaces.length?mySpaces.map(s=>{const mo=ownerBookingsCache.filter(b=>b.spaceId===s.id&&sameMonth(b.date));return `<div class="space-card"><div class="sc-head"><b>${s.name}</b><span>${s.catName} · ${s.loc} · ₾${s.rate}/час</span><button class="del" data-id="${s.id}">Удалить</button></div><div class="stat-grid"><div class="stat"><b>${mo.length}</b><span>броней в этом месяце</span></div><div class="stat"><b>₾${mo.reduce((a,b)=>a+b.sub,0)}</b><span>заработано</span></div><div class="stat"><b>${mo.reduce((a,b)=>a+b.guests,0)}</b><span>гостей всего</span></div></div>${calendarHTML(s.id)}</div>`;}).join(""):`<p class="empty2">У тебя пока нет пространств. Нажми «Добавить» и опубликуй первое.</p>`}`;
   }else if(dashTab==="add"){
     main=`<button class="backlink" data-go="spaces">← Назад</button><div class="form-wrap">${wizHTML()}</div>`;
   }else{
     main=`<h1 class="dash-h1">Профиль</h1><div class="form-wrap"><div class="bkf"><label>Имя</label><input value="${user.name}" disabled></div><div class="bkf"><label>Почта</label><input value="${user.email}" disabled></div><button class="btn btn-ghost" id="logoutBtn" style="margin-top:16px;">Выйти из профиля</button></div>`;
   }
-  $("#dash").innerHTML=`<div class="dash-top"><a class="brand" href="#" id="dashLogo"><span class="spark"></span>Lumi</a><div style="flex:1"></div><div class="dash-user"><div class="dash-av sm">${user.name[0]}</div><span class="nav-hide">${user.name.split(" ")[0]}</span></div><button class="btn btn-ghost" id="dashExit">На сайт</button></div><div class="dash-shell"><nav class="dash-side">${nav.map(([k,l,ic])=>`<button class="dnav ${dashTab===k?"active":""}" data-tab="${k}"><span>${ic}</span>${l}</button>`).join("")}</nav><main class="dash-main">${main}</main></div>`;
+  $("#dash").innerHTML=`<div class="dash-top"><a class="brand" href="#" id="dashLogo"><span class="mark"></span>Lumi</a><div style="flex:1"></div><div class="dash-user"><div class="dash-av">${user.name[0]}</div></div><button class="btn btn-ghost" id="dashExit">На сайт</button></div><div class="dash-shell"><nav class="dash-side">${nav.map(([k,l,ic])=>`<button class="dnav ${dashTab===k?"active":""}" data-tab="${k}"><span>${ic}</span>${l}</button>`).join("")}</nav><main class="dash-main">${main}</main></div>`;
   $("#dashExit").onclick=closeDash;$("#dashLogo").onclick=e=>{e.preventDefault();closeDash();};
   $("#dash").querySelectorAll(".dnav").forEach(b=>b.onclick=()=>{dashTab=b.dataset.tab;if(dashTab==="add"&&!wiz)startWiz();renderDash();});
   $("#dash").querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{dashTab=b.dataset.go;if(dashTab==="add"&&!wiz)startWiz();renderDash();});
   $("#dash").querySelectorAll(".del").forEach(b=>b.onclick=()=>delSpace(+b.dataset.id));
-  const qf=$("#qFind");if(qf)qf.onclick=()=>{closeDash();$("#grid-wrap").scrollIntoView({behavior:"smooth"});};
+  const qf=$("#qFind");if(qf)qf.onclick=()=>{closeDash();go("spaces");};
   const lb=$("#logoutBtn");if(lb)lb.onclick=logout;
   wireCals();
   if(dashTab==="add")wireWiz();
@@ -733,14 +791,14 @@ function renderDash(){
 
 /* ---------- wizard ---------- */
 const WSTEPS=["Тип","Адрес","Что внутри","Описание","Цена"];
-const TA="width:100%;border:1.5px solid var(--line-2);background:var(--bg);border-radius:11px;padding:11px 13px;font-family:inherit;font-size:15px;color:var(--ink);outline:none;resize:vertical;";
+const TA="width:100%;border:1px solid var(--line-2);background:#fff;border-radius:10px;padding:11px 13px;font-family:inherit;font-size:15px;color:var(--ink);outline:none;resize:vertical;";
 function startWiz(){wiz={step:0,type:"",name:"",loc:DISTRICTS[1],addr:"",lat:null,lon:null,cap:"",rate:"",use:"",amen:[],desc:""};}
 function wizHTML(){
   const s=wiz.step;
   const prog=`<div class="wiz-prog">${WSTEPS.map((l,i)=>`<div class="wstep ${i===s?'on':''} ${i<s?'done':''}"><span>${i<s?'✓':i+1}</span>${l}</div>`).join("")}</div>`;
   let body="";
   if(s===0){
-    body=`<h2 class="wiz-h">Что за пространство?</h2><p class="wiz-sub">Выбери тип — это поможет гостям найти тебя.</p><div class="type-grid">${CATS.filter(c=>c.id!=="all").map(c=>`<button class="type-tile ${wiz.type===c.id?'sel':''}" data-type="${c.id}"><div class="ph-bg">${room(WALL[c.id]??30,3)}</div><img class="ph-img" src="${PX((PXMAP[c.id]||[17181935])[0])}" onerror="this.remove()"><span>${c.n}</span></button>`).join("")}</div><div class="bkf" style="margin-top:18px;"><label>Название места</label><input id="wName" value="${wiz.name}" placeholder="Например, Светлая студия «Окна»"></div>`;
+    body=`<h2 class="wiz-h">Что за пространство?</h2><p class="wiz-sub">Выбери тип — это поможет гостям найти тебя.</p><div class="type-grid">${CATS.filter(c=>c.id!=="all").map(c=>`<button class="type-tile ${wiz.type===c.id?'sel':''}" data-type="${c.id}"><div class="ph-bg">${room(WALL[c.id]??210,3)}</div><img class="ph-img" src="${PX((PXMAP[c.id]||[17181935])[0])}" onerror="this.remove()"><span>${c.n}</span></button>`).join("")}</div><div class="bkf" style="margin-top:18px;"><label>Название места</label><input id="wName" value="${wiz.name}" placeholder="Например, Светлая студия «Окна»"></div>`;
   }else if(s===1){
     body=`<h2 class="wiz-h">Где находится?</h2><p class="wiz-sub">Начни вводить адрес — подскажем варианты и покажем на карте.</p><div class="bkf"><label>Район</label><select id="wLoc">${DISTRICTS.filter(d=>d!=="Все районы").map(d=>`<option ${d===wiz.loc?'selected':''}>${d}</option>`).join("")}</select></div><div class="bkf addr-wrap"><label>Адрес</label><input id="wAddr" value="${wiz.addr||''}" placeholder="улица, дом…" autocomplete="off"><div class="ac-box" id="acBox"></div></div><div id="wizMap" class="wiz-map">${wiz.lat?"":`<div class="map-empty">Карта появится, когда выберешь адрес</div>`}</div><div class="bkf"><label>Вместимость, чел.</label><input id="wCap" inputmode="numeric" value="${wiz.cap}" placeholder="например, 15"></div>`;
   }else if(s===2){
@@ -751,7 +809,7 @@ function wizHTML(){
     body=`<h2 class="wiz-h">Цена</h2><p class="wiz-sub">Ставка за час. Поменять можно в любой момент.</p><div class="bkf"><label>₾ за час</label><input id="wRate" inputmode="numeric" value="${wiz.rate}" placeholder="например, 50"></div><div class="wiz-pre">Гость заплатит <b>₾${(parseInt(wiz.rate)||0)*2}</b> за 2 часа плюс возвратный залог.</div>`;
   }
   const back=s>0?`<button class="btn btn-ghost" id="wBack">Назад</button>`:`<button class="btn btn-ghost" data-go="spaces">Отмена</button>`;
-  const next=s<4?`<button class="btn btn-coral" id="wNext">Далее</button>`:`<button class="btn btn-coral" id="wPub">Опубликовать</button>`;
+  const next=s<4?`<button class="btn btn-primary" id="wNext">Далее</button>`:`<button class="btn btn-primary" id="wPub">Опубликовать</button>`;
   return `${prog}<div class="wiz-body">${body}</div><div class="wiz-nav">${back}<div style="flex:1"></div>${next}</div><div id="wErr" class="wiz-err"></div>`;
 }
 function wireWiz(){
@@ -771,41 +829,25 @@ async function publishWiz(){
     await api("/api/spaces",{method:"POST",auth:true,body:{name:wiz.name.trim(),cat:wiz.type,catName,use:wiz.use.trim(),loc:wiz.loc,addr:wiz.addr||"",lat:wiz.lat,lon:wiz.lon,cap:parseInt(wiz.cap)||0,rate:parseInt(wiz.rate)||0,desc:wiz.desc.trim(),amen:wiz.amen}});
   }catch(e){const el=$("#wErr");if(el){el.textContent=e.message||"Не удалось опубликовать";el.style.display="block";}return;}
   await reloadSpaces();await refreshOwner();
-  cat="all";fLoc="Все районы";fQ="";fCap=0;render();
   wiz=null;dashTab="spaces";renderDash();toast("Готово! Место опубликовано.");
 }
 function openHost(){if(!user){openAuth("login");toast("Войди, чтобы разместить место");return;}startWiz();openDash("add");}
 
 /* ---------- init ---------- */
-const loc=$("#loc");DISTRICTS.forEach(d=>{const o=document.createElement("option");o.textContent=d;loc.appendChild(o);});
-const chips=$("#chips");CATS.forEach((c,i)=>{const b=document.createElement("button");b.className="chip";b.setAttribute("aria-pressed",c.id==="all");b.textContent=c.n;b.onclick=()=>{cat=c.id;[...chips.children].forEach(x=>x.setAttribute("aria-pressed","false"));b.setAttribute("aria-pressed","true");render();};chips.appendChild(b);});
-const collageHues=[32,198,272],collageShots=[11419079,30599531,30243614];
-[...document.querySelectorAll("#collage .ph")].forEach((el,i)=>el.innerHTML=`<div class="ph-bg">${room(collageHues[i],i+1)}</div><img class="ph-img" src="${PX(collageShots[i])}" alt="" onerror="this.remove()">`);
-$("#hostPic").innerHTML=`<div class="ph-bg">${room(30,2)}</div><img class="ph-img" src="${PX(5570222)}" alt="" onerror="this.remove()">`;
-const catG=$("#catGrid");
-CATS.filter(c=>c.id!=="all").forEach(c=>{const ph=(PXMAP[c.id]||[17181935])[0];const t=document.createElement("button");t.className="cat-tile";t.innerHTML=`<div class="ph-bg">${room(WALL[c.id]??30,3)}</div><img class="ph-img" src="${PX(ph)}" alt="" onerror="this.remove()"><div class="ov"></div><span>${c.n}</span>`;t.onclick=()=>pickCat(c.id);catG.appendChild(t);});
-const distW=$("#distWrap");
-DISTRICTS.filter(d=>d!=="Все районы").forEach(d=>{const b=document.createElement("button");b.className="dist";b.textContent=d;b.onclick=()=>setLoc(d);distW.appendChild(b);});
-document.querySelectorAll(".faq-item").forEach(it=>{it.querySelector(".faq-q").onclick=()=>{const open=it.classList.toggle("open");const a=it.querySelector(".faq-a");a.style.maxHeight=open?a.scrollHeight+"px":"0";};});
-$("#goBtn").onclick=()=>{fQ=$("#q").value.trim();fLoc=$("#loc").value;fCap=+$("#cap").value;render();$("#grid-wrap").scrollIntoView({behavior:"smooth"});};
-$("#q").addEventListener("keydown",e=>{if(e.key==="Enter")$("#goBtn").click();});
-$("#homeLogo").onclick=e=>{e.preventDefault();goHome();window.scrollTo({top:0,behavior:"smooth"});};
-$("#navHost").onclick=openHost;$("#hostCta").onclick=openHost;
-$("#loginBtn").onclick=()=>openAuth("login");$("#dashBtn").onclick=()=>openDash();
-$("#favBtn").onclick=()=>toast(favs.size?`Сохранено мест: ${favs.size}`:"Жми ♥ на карточке, чтобы сохранить место");
+document.addEventListener("click",e=>{const g=e.target.closest("[data-go]");if(g&&!g.closest("#dash")){e.preventDefault();const p=g.dataset.go;if(p==="host"){openHost();}else go(p);}});
+$("#navHost").onclick=openHost;
+$("#loginBtn").onclick=()=>openAuth("login");
+$("#dashBtn").onclick=()=>openDash();
 $("#authScrim").addEventListener("click",e=>{if(e.target===$("#authScrim"))closeAuth();});
-document.addEventListener("keydown",e=>{if(e.key==="Escape"){if($("#authScrim").classList.contains("open"))closeAuth();else if($("#dash").classList.contains("open"))closeDash();else if($("#page").classList.contains("open"))goHome();}});
-document.querySelectorAll('.cat-tile,.quote,.hcard,.faq-item,.host,#cats .sec-head,#districts .sec-head,#how .sec-head,#faq .sec-head').forEach(el=>el.classList.add('reveal'));
-reveal();
-$("#grid").innerHTML='<div class="nores">Загружаем пространства…</div>';
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){if($("#authScrim").classList.contains("open"))closeAuth();else if($("#dash").classList.contains("open"))closeDash();}});
+document.addEventListener("click",e=>{const hs=e.target.closest("#hostStart,#hostStart2");if(hs){openHost();}});
 
 async function boot(){
   await reloadSpaces();
   if(token){try{user=await api("/api/me",{auth:true});await refreshMine();await refreshOwner();}catch(e){token=null;localStorage.removeItem("lumi_token");user=null;}}
-  syncNav();render();route();if(user)remindTomorrow();
+  syncNav();route();if(user)remindTomorrow();
 }
 boot();
-
 </script>
 </body>
 </html>
