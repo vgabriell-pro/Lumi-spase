@@ -536,6 +536,7 @@ function vals(s){const sub=s.rate*bk.hours,dep=Math.max(50,Math.round(s.rate*0.8
 let mem={};
 const DB={get(k,d){try{const v=localStorage.getItem("lumi_"+k);return v==null?d:JSON.parse(v);}catch(e){return (k in mem)?mem[k]:d;}},set(k,v){try{localStorage.setItem("lumi_"+k,JSON.stringify(v));}catch(e){mem[k]=v;}}};
 let users=DB.get("users",[]),session=DB.get("session",null),bookings=DB.get("bookings",[]);
+bookings=bookings.filter(b=>!String(b.renterEmail||"").endsWith("@demo.ge"));DB.set("bookings",bookings);
 DB.get("userSpaces",[]).forEach(s=>{if(!SPACES.find(x=>x.id===s.id))SPACES.unshift(s);});
 function curUser(){return users.find(u=>u.email===session)||null;}
 function saveSpaces(){DB.set("userSpaces",SPACES.filter(s=>s.ownerEmail));}
@@ -762,7 +763,7 @@ function wireWiz(){
 function publishWiz(){
   const id=Math.max(0,...SPACES.map(s=>s.id))+1,catName=(CATS.find(c=>c.id===wiz.type)||{}).n||"Пространство";
   const ns={id,name:wiz.name.trim(),cat:wiz.type,catName,use:wiz.use.trim()||"разные форматы",loc:wiz.loc,addr:wiz.addr||"",lat:wiz.lat,lon:wiz.lon,cap:parseInt(wiz.cap)||0,rate:parseInt(wiz.rate)||0,rating:0,host:curUser().name.split(" ")[0],ownerEmail:session,isNew:true,desc:wiz.desc.trim(),amen:wiz.amen.slice()};
-  SPACES.unshift(ns);saveSpaces();seedDemoBookings(ns);
+  SPACES.unshift(ns);saveSpaces();
   cat="all";fLoc="Все районы";fQ="";fCap=0;render();
   wiz=null;dashTab="spaces";renderDash();toast("Готово! Место опубликовано.");
 }
