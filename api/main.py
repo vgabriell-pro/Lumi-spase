@@ -1,4 +1,6 @@
-import os, json, datetime
+import os, json, datetime, smtplib, threading
+from email.mime.text import MIMEText
+from email.utils import formataddr
 from typing import Optional
 from fastapi import FastAPI, Depends, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,6 +14,50 @@ DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///./lumi.db")
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 SECRET = os.environ.get("SECRET_KEY", "dev-secret-change-me")
+
+# ---------- email ----------
+SMTP_HOST  = os.environ.get("SMTP_HOST", "smtp.gmail.com")
+SMTP_PORT  = int(os.environ.get("SMTP_PORT", "587"))
+SMTP_USER  = os.environ.get("SMTP_USER", "")
+SMTP_PASS  = os.environ.get("SMTP_PASS", "")
+FROM_EMAIL = os.environ.get("FROM_EMAIL", SMTP_USER)
+FROM_NAME  = os.environ.get("FROM_NAME", "Lumi")
+APP_URL    = os.environ.get("APP_URL", "https://vgabriell-pro.github.io/Lumi-spase/")
+
+def _send(to: str, subject: str, html: str):
+    if not (SMTP_USER and SMTP_PASS and to):
+        return  # email not configured — skip quietly
+    try:
+        msg = MIMEText(html, "html", "utf-8")
+        msg["Subject"] = subject
+        msg["From"] = formataddr((FROM_NAME, FROM_EMAIL))
+        msg["To"] = to
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=15) as srv:
+            srv.starttls()
+            srv.login(SMTP_USER, SMTP_PASS)
+            srv.sendmail(FROM_EMAIL, [to], msg.as_string())
+    except Exception as e:
+        print("email error:", e)
+
+def send_email(to: str, subject: str, html: str):
+    threading.Thread(target=_send, args=(to, subject, html), daemon=True).start()
+
+def email_html(title: str, body: str, cta_text: str = "", cta_url: str = "") -> str:
+    btn = (f'<a href="{cta_url}" style="display:inline-block;background:#15171A;color:#fff;'
+           f'text-decoration:none;font-weight:600;font-size:15px;padding:12px 22px;border-radius:10px;'
+           f'margin-top:10px;">{cta_text}</a>') if (cta_text and cta_url) else ""
+    return (f'<div style="font-family:Inter,Arial,Helvetica,sans-serif;max-width:520px;margin:0 auto;color:#15171A;">'
+            f'<div style="font-weight:800;font-size:20px;letter-spacing:-1px;margin-bottom:18px;">'
+            f'<span style="display:inline-block;width:14px;height:14px;border-radius:4px;background:#1E5DFF;'
+            f'vertical-align:-1px;margin-right:6px;"></span>Lumi</div>'
+            f'<h1 style="font-size:22px;margin:0 0 12px;">{title}</h1>'
+            f'<div style="font-size:15px;color:#5B6168;line-height:1.65;">{body}</div>{btn}'
+            f'<hr style="border:none;border-top:1px solid #ECEEF1;margin:26px 0 14px;">'
+            f'<div style="font-size:12px;color:#8A9099;">Lumi · аренда пространств в Тбилиси по часам</div></div>')
+
+def fmt_date(d: str) -> str:
+    p = d.split("-")
+    return f"{p[2]}.{p[1]}.{p[0]}" if len(p) == 3 else d
 
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 engine = create_engine(DATABASE_URL, connect_args=connect_args, pool_pre_ping=True)
@@ -175,6 +221,11 @@ def register(body: RegIn, db: Session = Depends(get_db)):
         raise HTTPException(400, "Такая почта уже занята")
     u = User(email=email, name=body.name.strip(), password_hash=hash_pw(body.password))
     db.add(u); db.commit(); db.refresh(u)
+    send_email(u.email, "Добро пожаловать в Lumi",
+        email_html(f"Привет, {u.name.split(' ')[0]}!",
+                   "Профиль создан. Теперь можно бронировать пространства Тбилиси по часам — "
+                   "и размещать свои, если захочешь сдавать.",
+                   "Открыть Lumi", APP_URL))
     return {"token": make_token(u.id), "user": {"id": u.id, "email": u.email, "name": u.name}}
 
 @app.post("/api/auth/login")
@@ -245,6 +296,24 @@ def create_booking(body: BookingIn, u: User = Depends(require_user), db: Session
         sub=sub, dep=dep, total=sub + dep,
     )
     db.add(b); db.commit(); db.refresh(b)
+    when = f"{fmt_date(body.date)} · {body.slot}:00–{body.slot + body.hours}:00"
+    guests = max(1, body.guests)
+    # confirmation to the guest
+    send_email(u.email, f"Бронь подтверждена — {s.name}",
+        email_html("Бронь подтверждена ✓",
+                   f"<b>{s.name}</b> · {s.loc}, Тбилиси<br>{when} · {guests} чел.<br><br>"
+                   f"Аренда ₾{sub} + возвратный залог ₾{dep} = <b>₾{sub + dep}</b>.<br>"
+                   f"Хозяин — {s.host}. Напомним за день до встречи.",
+                   "Мои брони", APP_URL))
+    # notification to the host
+    if s.owner_id:
+        owner = db.get(User, s.owner_id)
+        if owner and owner.email:
+            send_email(owner.email, f"Новая бронь — {s.name}",
+                email_html("У тебя новая бронь 🎉",
+                           f"<b>{s.name}</b><br>{when} · {guests} чел.<br><br>"
+                           f"Гость — {u.name}.<br>Аренда ₾{sub}.",
+                           "Открыть кабинет", APP_URL))
     return booking_dict(b, s.name)
 
 @app.get("/api/my/bookings")
