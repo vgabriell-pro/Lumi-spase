@@ -23,6 +23,8 @@ SMTP_PASS  = os.environ.get("SMTP_PASS", "")
 FROM_EMAIL = os.environ.get("FROM_EMAIL", SMTP_USER)
 FROM_NAME  = os.environ.get("FROM_NAME", "Lumi")
 APP_URL    = os.environ.get("APP_URL", "https://vgabriell-pro.github.io/Lumi-spase/")
+OWNER_EMAIL = os.environ.get("OWNER_EMAIL", "")
+MAIN_NAME   = os.environ.get("VENUE_NAME", "Lumi Space")
 
 def _send(to: str, subject: str, html: str):
     if not (SMTP_USER and SMTP_PASS and to):
@@ -108,6 +110,16 @@ class Booking(Base):
     sub = Column(Integer)
     dep = Column(Integer)
     total = Column(Integer)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+class Inquiry(Base):
+    __tablename__ = "inquiries"
+    id = Column(Integer, primary_key=True)
+    name = Column(String, default="")
+    contact = Column(String, default="")
+    date = Column(String, default="")
+    kind = Column(String, default="")
+    message = Column(Text, default="")
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
 Base.metadata.create_all(engine)
@@ -253,34 +265,35 @@ def get_space(sid: int, db: Session = Depends(get_db)):
         raise HTTPException(404, "Пространство не найдено")
     return space_dict(s)
 
-@app.post("/api/spaces")
-def create_space(body: SpaceIn, u: User = Depends(require_user), db: Session = Depends(get_db)):
-    s = Space(
-        owner_id=u.id, name=body.name.strip(), cat=body.cat,
-        cat_name=body.catName or "Пространство", use=body.use or "разные форматы",
-        loc=body.loc, addr=body.addr, lat=body.lat, lon=body.lon,
-        cap=body.cap, rate=body.rate, rating=0, host=u.name.split(" ")[0],
-        descr=body.desc, amen=json.dumps(body.amen, ensure_ascii=False),
-        reviews="[]", is_new=1,
-    )
-    db.add(s); db.commit(); db.refresh(s)
+@app.get("/api/space")
+def main_space(db: Session = Depends(get_db)):
+    s = db.query(Space).filter(Space.name == MAIN_NAME).first()
+    if not s:
+        raise HTTPException(404, "Пространство не найдено")
     return space_dict(s)
 
-@app.delete("/api/spaces/{sid}")
-def delete_space(sid: int, u: User = Depends(require_user), db: Session = Depends(get_db)):
-    s = db.get(Space, sid)
-    if not s:
-        raise HTTPException(404, "Не найдено")
-    if s.owner_id != u.id:
-        raise HTTPException(403, "Это не твоё пространство")
-    db.query(Booking).filter(Booking.space_id == sid).delete()
-    db.delete(s); db.commit()
-    return {"ok": True}
+class ContactIn(BaseModel):
+    name: str
+    contact: str
+    date: str = ""
+    kind: str = ""
+    message: str = ""
 
-@app.get("/api/my/spaces")
-def my_spaces(u: User = Depends(require_user), db: Session = Depends(get_db)):
-    rows = db.query(Space).filter(Space.owner_id == u.id).order_by(Space.id.desc()).all()
-    return [space_dict(s) for s in rows]
+@app.post("/api/contact")
+def contact(body: ContactIn, db: Session = Depends(get_db)):
+    if not body.name.strip() or not body.contact.strip():
+        raise HTTPException(400, "Укажи имя и контакт")
+    q = Inquiry(name=body.name.strip(), contact=body.contact.strip(),
+                date=body.date, kind=body.kind, message=body.message)
+    db.add(q); db.commit()
+    if OWNER_EMAIL:
+        send_email(OWNER_EMAIL, "Новая заявка на мероприятие — Lumi Space",
+            email_html("Новая заявка на мероприятие",
+                       f"<b>{body.name}</b><br>Контакт: {body.contact}<br>"
+                       f"Дата: {body.date or '—'}<br>Формат: {body.kind or '—'}<br><br>"
+                       f"{body.message or '(без комментария)'}",
+                       "Открыть Lumi", APP_URL))
+    return {"ok": True}
 
 # ----- bookings -----
 @app.post("/api/bookings")
@@ -306,14 +319,12 @@ def create_booking(body: BookingIn, u: User = Depends(require_user), db: Session
                    f"Хозяин — {s.host}. Напомним за день до встречи.",
                    "Мои брони", APP_URL))
     # notification to the host
-    if s.owner_id:
-        owner = db.get(User, s.owner_id)
-        if owner and owner.email:
-            send_email(owner.email, f"Новая бронь — {s.name}",
-                email_html("У тебя новая бронь 🎉",
-                           f"<b>{s.name}</b><br>{when} · {guests} чел.<br><br>"
-                           f"Гость — {u.name}.<br>Аренда ₾{sub}.",
-                           "Открыть кабинет", APP_URL))
+    if OWNER_EMAIL:
+        send_email(OWNER_EMAIL, f"Новая бронь — {s.name}",
+            email_html("Новая бронь 🎉",
+                       f"<b>{s.name}</b><br>{when} · {guests} чел.<br><br>"
+                       f"Гость — {u.name} ({u.email}).<br>Аренда ₾{sub}.",
+                       "Открыть Lumi", APP_URL))
     return booking_dict(b, s.name)
 
 @app.get("/api/my/bookings")
@@ -324,14 +335,6 @@ def my_bookings(u: User = Depends(require_user), db: Session = Depends(get_db)):
         s = db.get(Space, b.space_id)
         out.append(booking_dict(b, s.name if s else ""))
     return out
-
-@app.get("/api/owner/bookings")
-def owner_bookings(u: User = Depends(require_user), db: Session = Depends(get_db)):
-    my = [s.id for s in db.query(Space).filter(Space.owner_id == u.id).all()]
-    if not my:
-        return []
-    rows = db.query(Booking).filter(Booking.space_id.in_(my)).all()
-    return [booking_dict(b) for b in rows]
 
 # ---------- seed demo catalogue ----------
 SEED = [
@@ -388,4 +391,22 @@ def seed():
     finally:
         db.close()
 
+def ensure_main():
+    db = SessionLocal()
+    try:
+        if not db.query(Space).filter(Space.name == MAIN_NAME).first():
+            db.add(Space(
+                owner_id=None, name=MAIN_NAME, cat="event", cat_name="Творческое пространство",
+                use="съёмок, занятий, встреч и праздников", loc="Ваке", addr="Тбилиси, Ваке",
+                lat=41.7095, lon=44.7860, cap=30, rate=80, rating=5.0, host="Lumi",
+                descr="Светлое творческое пространство в районе Ваке. Большие окна, дневной свет и "
+                      "гибкая рассадка — подходит для съёмок, классов, встреч и небольших праздников.",
+                amen=json.dumps(["Дневной свет","Wi-Fi","Звук","Кухня","Мебель","Кондиционер","Проектор","Туалет"], ensure_ascii=False),
+                reviews="[]", is_new=0,
+            ))
+            db.commit()
+    finally:
+        db.close()
+
 seed()
+ensure_main()
