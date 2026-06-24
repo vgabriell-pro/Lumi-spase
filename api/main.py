@@ -73,6 +73,9 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     name = Column(String, nullable=False)
     password_hash = Column(String, nullable=False)
+    is_master = Column(Integer, default=0)
+    phone = Column(String, default="")
+    telegram = Column(String, default="")
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
 class Space(Base):
@@ -123,6 +126,23 @@ class Inquiry(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
 Base.metadata.create_all(engine)
+
+def migrate():
+    cols = {"is_master": "INTEGER DEFAULT 0", "phone": "VARCHAR DEFAULT ''", "telegram": "VARCHAR DEFAULT ''"}
+    try:
+        with engine.begin() as conn:
+            if DATABASE_URL.startswith("postgresql"):
+                for c, t in cols.items():
+                    conn.exec_driver_sql(f"ALTER TABLE users ADD COLUMN IF NOT EXISTS {c} {t}")
+            else:
+                existing = [r[1] for r in conn.exec_driver_sql("PRAGMA table_info(users)")]
+                for c, t in cols.items():
+                    if c not in existing:
+                        conn.exec_driver_sql(f"ALTER TABLE users ADD COLUMN {c} {t}")
+    except Exception as e:
+        print("migrate error:", e)
+
+migrate()
 
 # ---------- helpers ----------
 def get_db():
@@ -179,6 +199,11 @@ def booking_dict(b: Booking, space_name: str = "") -> dict:
         "renterName": b.renter_name, "date": b.date, "slot": b.slot,
         "hours": b.hours, "guests": b.guests, "sub": b.sub, "dep": b.dep, "total": b.total,
     }
+
+def user_dict(u: User) -> dict:
+    return {"id": u.id, "email": u.email, "name": u.name,
+            "phone": getattr(u, "phone", "") or "", "telegram": getattr(u, "telegram", "") or "",
+            "isMaster": bool(getattr(u, "is_master", 0))}
 
 # ---------- schemas ----------
 class RegIn(BaseModel):
@@ -238,7 +263,7 @@ def register(body: RegIn, db: Session = Depends(get_db)):
                    "Профиль создан. Теперь можно бронировать пространства Тбилиси по часам — "
                    "и размещать свои, если захочешь сдавать.",
                    "Открыть Lumi", APP_URL))
-    return {"token": make_token(u.id), "user": {"id": u.id, "email": u.email, "name": u.name}}
+    return {"token": make_token(u.id), "user": user_dict(u)}
 
 @app.post("/api/auth/login")
 def login(body: LoginIn, db: Session = Depends(get_db)):
@@ -246,11 +271,34 @@ def login(body: LoginIn, db: Session = Depends(get_db)):
     u = db.query(User).filter(User.email == email).first()
     if not u or not check_pw(body.password, u.password_hash):
         raise HTTPException(400, "Неверная почта или пароль")
-    return {"token": make_token(u.id), "user": {"id": u.id, "email": u.email, "name": u.name}}
+    return {"token": make_token(u.id), "user": user_dict(u)}
 
 @app.get("/api/me")
 def me(u: User = Depends(require_user)):
-    return {"id": u.id, "email": u.email, "name": u.name}
+    return user_dict(u)
+
+class MasterIn(BaseModel):
+    isMaster: bool = False
+
+@app.post("/api/me/master")
+def set_master(body: MasterIn, u: User = Depends(require_user), db: Session = Depends(get_db)):
+    u.is_master = 1 if body.isMaster else 0
+    db.commit()
+    return user_dict(u)
+
+class ProfileIn(BaseModel):
+    name: str = ""
+    phone: str = ""
+    telegram: str = ""
+
+@app.post("/api/me/update")
+def update_me(body: ProfileIn, u: User = Depends(require_user), db: Session = Depends(get_db)):
+    if body.name.strip():
+        u.name = body.name.strip()
+    u.phone = (body.phone or "").strip()
+    u.telegram = (body.telegram or "").strip()
+    db.commit()
+    return user_dict(u)
 
 # ----- spaces -----
 @app.get("/api/spaces")
@@ -320,10 +368,13 @@ def create_booking(body: BookingIn, u: User = Depends(require_user), db: Session
                    "Мои брони", APP_URL))
     # notification to the host
     if OWNER_EMAIL:
+        contact_line = ""
+        if getattr(u, "phone", ""): contact_line += f"<br>Телефон: {u.phone}"
+        if getattr(u, "telegram", ""): contact_line += f"<br>Telegram: {u.telegram}"
         send_email(OWNER_EMAIL, f"Новая бронь — {s.name}",
-            email_html("Новая бронь 🎉",
+            email_html("Новая бронь",
                        f"<b>{s.name}</b><br>{when} · {guests} чел.<br><br>"
-                       f"Гость — {u.name} ({u.email}).<br>Аренда ₾{sub}.",
+                       f"Гость — {u.name} ({u.email}){contact_line}.<br>Аренда ₾{sub}.",
                        "Открыть Lumi", APP_URL))
     return booking_dict(b, s.name)
 
