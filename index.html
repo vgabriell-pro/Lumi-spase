@@ -493,13 +493,29 @@
 
 <script>
 const $=s=>document.querySelector(s);
+const API="https://lumi-spase-production.up.railway.app";
 function plural(n,a,b,c){n=Math.abs(n)%100;const n1=n%10;if(n>10&&n<20)return c;if(n1>1&&n1<5)return b;if(n1===1)return a;return c;}
 function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2600);}
 const _io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");_io.unobserve(e.target);}}),{threshold:.08,rootMargin:"0px 0px -40px 0px"});
 function reveal(scope){(scope||document).querySelectorAll(".reveal:not(.in)").forEach(el=>_io.observe(el));}
 const HCV=["#C7432E","#1F6B52","#3A6EA5","#9B5DE5","#E1543B","#2A9D8F"];
-const star="★";
 
+/* ---------- api ---------- */
+let token=localStorage.getItem("lumi_token")||null, user=null;
+let SPACES=[], myBookingsCache=[], ownerBookingsCache=[];
+async function api(path,{method="GET",body,auth=false}={}){
+  const h={"Content-Type":"application/json"};
+  if(auth&&token)h["Authorization"]="Bearer "+token;
+  const r=await fetch(API+path,{method,headers:h,body:body?JSON.stringify(body):undefined});
+  let data={};try{data=await r.json();}catch(e){}
+  if(!r.ok)throw new Error(data.detail||"Ошибка сервера");
+  return data;
+}
+async function refreshMine(){if(!token)return;try{myBookingsCache=await api("/api/my/bookings",{auth:true});}catch(e){}}
+async function refreshOwner(){if(!token)return;try{ownerBookingsCache=await api("/api/owner/bookings",{auth:true});}catch(e){}}
+async function reloadSpaces(){try{SPACES=await api("/api/spaces");}catch(e){}}
+
+/* ---------- visuals ---------- */
 function room(hue,seed){
   const r=n=>{const x=Math.sin((seed+1)*9301+n*49297)*233280;return x-Math.floor(x);};
   return `<svg class="room" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g${seed}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="hsl(${hue},32%,92%)"/><stop offset="1" stop-color="hsl(${hue},30%,80%)"/></linearGradient></defs><rect width="400" height="300" fill="url(#g${seed})"/><rect x="0" y="205" width="400" height="95" fill="hsl(${hue},25%,${72+r(1)*8}%)"/><rect x="${40+r(2)*40}" y="${70+r(3)*30}" width="${70+r(4)*40}" height="${90+r(5)*30}" rx="6" fill="hsl(${hue},22%,66%)" opacity=".8"/><circle cx="${300+r(6)*50}" cy="${90+r(7)*30}" r="${24+r(8)*14}" fill="hsl(${(hue+30)%360},40%,78%)" opacity=".7"/><rect x="${250+r(9)*40}" y="150" width="${60+r(10)*30}" height="55" rx="6" fill="hsl(${hue},20%,60%)" opacity=".75"/></svg>`;
@@ -507,57 +523,19 @@ function room(hue,seed){
 const PX=id=>`https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop`;
 const PXMAP={photo:[30599531,17181935],clay:[17807715,11419079],work:[11419079,5570222],move:[5691493,8978626],event:[30243614,5570222],food:[2089698,30243614],art:[17807715,30599531],loft:[30599531,11419079]};
 function photo(s){if(s.isNew)return null;const arr=PXMAP[s.cat]||[17181935];return PX(arr[s.id%arr.length]);}
-
 const WALL={photo:32,clay:18,work:152,move:198,event:344,food:30,art:272,loft:22};
 const CATS=[{id:"all",n:"Все"},{id:"photo",n:"Съёмка"},{id:"clay",n:"Керамика"},{id:"work",n:"Коворк"},{id:"move",n:"Танец и йога"},{id:"event",n:"Мероприятия"},{id:"food",n:"Кухня"},{id:"art",n:"Арт"},{id:"loft",n:"Лофт"}];
 const DISTRICTS=["Все районы","Ваке","Вера","Сололаки","Чугурети","Сабуртало","Мтацминда","Марджанишвили","Плеханова","Дигоми"];
 const AMEN=["Wi-Fi","Проектор","Звук","Кухня","Парковка","Туалет","Кондиционер","Дневной свет","Мебель","Гримёрка"];
 
-const SPACES=[
-  {id:1,name:"Студия «Окна»",cat:"photo",catName:"Съёмка",use:"съёмки и контент",loc:"Вера",cap:12,rate:60,rating:4.9,host:"Нино"},
-  {id:2,name:"Лофт «Кирпич»",cat:"loft",catName:"Лофт",use:"вечеринки и съёмки",loc:"Чугурети",cap:40,rate:90,rating:4.8,host:"Гио"},
-  {id:3,name:"Мастерская «Глина»",cat:"clay",catName:"Керамика",use:"гончарные классы",loc:"Сололаки",cap:8,rate:45,rating:5.0,host:"Кетеван"},
-  {id:4,name:"Зал «Поток»",cat:"move",catName:"Танец и йога",use:"йога, танцы, репетиции",loc:"Сабуртало",cap:20,rate:50,rating:4.7,host:"Лела"},
-  {id:5,name:"Веранда «Сад»",cat:"event",catName:"Мероприятия",use:"дни рождения, лекции",loc:"Ваке",cap:35,rate:80,rating:4.8,host:"Дато"},
-  {id:6,name:"Коворкинг «Тихо»",cat:"work",catName:"Коворк",use:"встречи и работа",loc:"Ваке",cap:14,rate:40,rating:4.6,host:"Анна"},
-  {id:7,name:"Кухня-студия «Тесто»",cat:"food",catName:"Кухня",use:"кулинарные классы",loc:"Марджанишвили",cap:10,rate:55,rating:4.9,host:"Софо"},
-  {id:8,name:"Арт-пространство «Палитра»",cat:"art",catName:"Арт",use:"выставки, мастер-классы",loc:"Сололаки",cap:25,rate:70,rating:4.8,host:"Тамар"},
-  {id:9,name:"Фотостудия «Циклорама»",cat:"photo",catName:"Съёмка",use:"fashion и предметка",loc:"Дигоми",cap:15,rate:75,rating:4.9,host:"Леван"},
-  {id:10,name:"Зал «Сцена»",cat:"event",catName:"Мероприятия",use:"концерты, спектакли",loc:"Мтацминда",cap:50,rate:110,rating:4.7,host:"Ника"},
-  {id:11,name:"Студия «Барре»",cat:"move",catName:"Танец и йога",use:"балет, стретчинг",loc:"Вера",cap:16,rate:48,rating:4.8,host:"Мариам"},
-  {id:12,name:"Лофт «Панорама»",cat:"loft",catName:"Лофт",use:"съёмки с видом",loc:"Мтацминда",cap:30,rate:100,rating:5.0,host:"Заза"}
-];
-const DETAIL={
-  1:{desc:"Светлая студия с большими окнами и мягким дневным светом. Подходит для съёмок, интервью и небольших классов.",amen:["Дневной свет","Циклорама","Свет","Гримёрка","Wi-Fi"],booked:[11,15],rev:[["Марика","Май","Свет шикарный, окна — мечта. Вернусь."]]},
-  2:{desc:"Просторный лофт с кирпичными стенами и высокими потолками. Звук, свет, бар-зона — для вечеринок и съёмок.",amen:["Звук","Свет","Бар","Парковка","Кондиционер"],booked:[18,19],rev:[["Гио","Апрель","Идеально для дня рождения, все были в восторге."]]},
-  3:{desc:"Уютная гончарная мастерская с кругами и печью. Для классов и личной практики.",amen:["Гончарные круги","Печь","Глина","Туалет"],booked:[10],rev:[["Софи","Май","Кетеван — золото, всё показала и помогла."]]},
-  4:{desc:"Зеркальный зал с мягким покрытием. Для йоги, танцев и репетиций.",amen:["Зеркала","Коврики","Звук","Раздевалка"],booked:[9,18],rev:[]},
-  5:{desc:"Зелёная веранда с садом. Для дней рождения, лекций и тёплых встреч.",amen:["Сад","Мебель","Проектор","Кухня"],booked:[],rev:[["Нина","Июнь","Гости не хотели уходить — так красиво."]]},
-  6:{desc:"Спокойный коворкинг для встреч и сосредоточенной работы.",amen:["Wi-Fi","Проектор","Кофе","Кондиционер"],booked:[14],rev:[]},
-  7:{desc:"Кухня-студия с островом и красивым светом. Для кулинарных классов и съёмок еды.",amen:["Кухня","Посуда","Дневной свет","Мебель"],booked:[12,17],rev:[["Лаша","Май","Снимали рецепты — картинка вкусная."]]},
-  8:{desc:"Светлое арт-пространство под выставки и мастер-классы.",amen:["Свет","Мебель","Wi-Fi","Туалет"],booked:[],rev:[]},
-  9:{desc:"Профессиональная фотостудия с циклорамой и студийным светом.",amen:["Циклорама","Студийный свет","Гримёрка","Парковка"],booked:[13],rev:[["Эка","Апрель","Циклорама большая, света хватает."]]},
-  10:{desc:"Большой зал со сценой и звуком для концертов и спектаклей.",amen:["Сцена","Звук","Свет","Гримёрка"],booked:[20],rev:[]},
-  11:{desc:"Балетная студия со станком и зеркалами.",amen:["Станок","Зеркала","Покрытие","Раздевалка"],booked:[10,11],rev:[]},
-  12:{desc:"Лофт с панорамным окном и видом на город. Для съёмок и встреч.",amen:["Панорама","Дневной свет","Мебель","Wi-Fi"],booked:[],rev:[["Тео","Июнь","Вид на закате — отдельный вид искусства."]]}
-};
-function getDetail(s){const d=DETAIL[s.id]||{};return{desc:s.desc||d.desc||`${s.name} — ${s.use}.`,amen:s.amen||d.amen||[],booked:d.booked||[],rev:d.rev||[]};}
+function getDetail(s){return{desc:s.desc||`${s.name} — ${s.use}.`,amen:s.amen||[],booked:[],rev:s.rev||[]};}
 function vals(s){const sub=s.rate*bk.hours,dep=Math.max(50,Math.round(s.rate*0.8/10)*10);return{sub,dep,total:sub+dep};}
-
-/* ---------- storage / auth ---------- */
-let mem={};
-const DB={get(k,d){try{const v=localStorage.getItem("lumi_"+k);return v==null?d:JSON.parse(v);}catch(e){return (k in mem)?mem[k]:d;}},set(k,v){try{localStorage.setItem("lumi_"+k,JSON.stringify(v));}catch(e){mem[k]=v;}}};
-let users=DB.get("users",[]),session=DB.get("session",null),bookings=DB.get("bookings",[]);
-bookings=bookings.filter(b=>!String(b.renterEmail||"").endsWith("@demo.ge"));DB.set("bookings",bookings);
-DB.get("userSpaces",[]).forEach(s=>{if(!SPACES.find(x=>x.id===s.id))SPACES.unshift(s);});
-function curUser(){return users.find(u=>u.email===session)||null;}
-function saveSpaces(){DB.set("userSpaces",SPACES.filter(s=>s.ownerEmail));}
-function saveBookings(){DB.set("bookings",bookings);}
 function todayStr(){return new Date().toISOString().slice(0,10);}
 function tomorrowStr(){return new Date(Date.now()+864e5).toISOString().slice(0,10);}
 function sameMonth(ds){const d=new Date(ds),n=new Date();return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth();}
-function myBookings(){return bookings.filter(b=>b.renterEmail===session).sort((a,b)=>a.date.localeCompare(b.date));}
-function syncNav(){const u=curUser();$("#loginBtn").style.display=u?"none":"";$("#dashBtn").style.display=u?"":"none";if(u)$("#dashBtn").textContent="👤 "+u.name.split(" ")[0];}
+function myBookings(){return myBookingsCache.slice().sort((a,b)=>a.date.localeCompare(b.date));}
+function curUser(){return user;}
+function syncNav(){$("#loginBtn").style.display=user?"none":"";$("#dashBtn").style.display=user?"":"none";if(user)$("#dashBtn").textContent="👤 "+user.name.split(" ")[0];}
 
 /* ---------- filters / home ---------- */
 let cat="all",fLoc="Все районы",fQ="",fCap=0,favs=new Set();
@@ -581,13 +559,14 @@ window.resetFilters=resetFilters;
 function pickCat(id){cat=id;[...$("#chips").children].forEach((x,i)=>x.setAttribute("aria-pressed",CATS[i].id===id));render();$("#grid-wrap").scrollIntoView({behavior:"smooth"});}
 function setLoc(d){fLoc=d;$("#loc").value=d;render();$("#grid-wrap").scrollIntoView({behavior:"smooth"});}
 
-/* ---------- routing + detail page ---------- */
+/* ---------- routing + detail ---------- */
 let current=null,bk={date:"",slot:null,hours:2,guests:2},pageView="detail";
 function goSpace(id){history.pushState({},"","?space="+id);route();}
 function goHome(){history.pushState({},"",location.pathname);route();}
-function route(){
+async function route(){
   const id=+new URLSearchParams(location.search).get("space");
-  const s=id&&SPACES.find(x=>x.id===id);
+  let s=id&&SPACES.find(x=>x.id===id);
+  if(id&&!s){try{s=await api("/api/spaces/"+id);}catch(e){s=null;}}
   if(s){current=s;bk={date:tomorrowStr(),slot:null,hours:2,guests:2};pageView="detail";renderPage();$("#page").classList.add("open");document.body.style.overflow="hidden";window.scrollTo(0,0);}
   else{$("#page").classList.remove("open");if(!$("#dash").classList.contains("open")&&!$("#authScrim").classList.contains("open"))document.body.style.overflow="";}
 }
@@ -598,7 +577,7 @@ function galleryHTML(s){
   const cell=(idx,seed,main)=>{const u=arr[idx]?PX(arr[idx]):null;return `<div class="g-cell ${main?'main':''}"><div class="ph-bg">${room(WALL[s.cat]??30,seed)}</div>${u?`<img class="ph-img" src="${u}" onerror="this.remove()">`:""}</div>`;};
   return `<div class="gallery">${cell(0,s.id,true)}<div class="g-side">${cell(1,s.id+1)}${cell(0,s.id+2)}</div></div>`;
 }
-function pageTop(){const u=curUser();return `<div class="page-top"><a class="brand" href="#" id="pLogo"><span class="spark"></span>Lumi</a><button class="btn btn-ghost" id="pBack">← Все места</button><div style="flex:1"></div>${u?`<button class="btn btn-ghost" id="pDash">👤 ${u.name.split(" ")[0]}</button>`:`<button class="btn btn-ghost" id="pLogin">Войти</button>`}</div>`;}
+function pageTop(){return `<div class="page-top"><a class="brand" href="#" id="pLogo"><span class="spark"></span>Lumi</a><button class="btn btn-ghost" id="pBack">← Все места</button><div style="flex:1"></div>${user?`<button class="btn btn-ghost" id="pDash">👤 ${user.name.split(" ")[0]}</button>`:`<button class="btn btn-ghost" id="pLogin">Войти</button>`}</div>`;}
 const FACETS=[["Парковка","Бесплатная на улице рядом"],["Доступ","Удобный вход, лифт"],["Звук","Можно с музыкой до 22:00"],["Электрика","Розетки по периметру, 220В"],["Интернет","Быстрый Wi-Fi, бесплатно"],["Правила","Без уличной обуви, уборка после себя"]];
 const ADDONS=[["Ассистент хозяина","₾40 / час"],["Доп. световой комплект","₾30"],["Гримёр","₾60"],["Аренда мебели","₾25"]];
 function detailHTML(s){
@@ -612,7 +591,7 @@ function detailHTML(s){
        <h1 class="detail-h1">${s.name}</h1>
        <div class="detail-loc"><a href="#" onclick="goHome();setTimeout(()=>setLoc('${s.loc}'),60);return false;">${s.loc}</a>, Тбилиси · ${s.catName}</div>
        <div class="facts">${s.isNew?'<span class="fact"><b style="color:var(--coral-deep)">новое место</b></span>':`<span class="fact">★ <b>${s.rating}</b> · ${rc} отз.</span>`}<span class="fact">до <b>${s.cap}</b> чел.</span><span class="fact">от <b>2 ч</b></span><span class="fact">~<b>${s.cap*4}</b> м²</span></div>
-       <div class="host-row"><span class="ra" style="background:${HCV[s.host.length%HCV.length]}">${s.host[0]}</span><div style="flex:1"><b>Хозяин — ${s.host}</b>${s.rating>=4.8?' <span class="badge">Опытный хозяин</span>':''}<div class="muted2">Обычно отвечает в течение часа</div></div><button class="btn btn-ghost" id="msgHost">Написать</button></div>
+       <div class="host-row"><span class="ra" style="background:${HCV[s.host.length%HCV.length]}">${(s.host||'?')[0]}</span><div style="flex:1"><b>Хозяин — ${s.host}</b>${s.rating>=4.8?' <span class="badge">Опытный хозяин</span>':''}<div class="muted2">Обычно отвечает в течение часа</div></div><button class="btn btn-ghost" id="msgHost">Написать</button></div>
        <section id="sec-about" class="detail-sec reveal"><h3 class="detail-h3">О месте</h3><p class="detail-desc">${d.desc}</p><div class="facet-grid">${FACETS.map(f=>`<div class="facet"><div class="facet-k">${f[0]}</div><div class="facet-v">${f[1]}</div></div>`).join("")}</div></section>
        <section id="sec-amen" class="detail-sec reveal"><h3 class="detail-h3">Что включено</h3>${d.amen.length?`<div class="feat-grid">${d.amen.map(a=>`<div class="feat">✓ ${a}</div>`).join("")}</div>`:`<p class="muted2">Хозяин добавит удобства чуть позже.</p>`}</section>
        <section id="sec-addons" class="detail-sec reveal"><h3 class="detail-h3">Услуги хозяина</h3><p class="muted2" style="margin-bottom:12px;">Добавишь при бронировании — по желанию.</p><div class="addon-grid">${ADDONS.map((a,i)=>`<div class="addon"><div class="addon-pic"><div class="ph-bg">${room((WALL[s.cat]??30)+i*22,s.id+i+5)}</div></div><div><b>${a[0]}</b><div class="muted2">${a[1]}</div></div></div>`).join("")}</div></section>
@@ -624,7 +603,7 @@ function detailHTML(s){
        <div class="bc-price"><b>₾${s.rate}</b> / час <span class="muted2">· от 2 часов</span></div>
        <div class="bkf"><label>Дата</label><input type="date" id="bkd" value="${bk.date}" min="${todayStr()}"></div>
        <label class="bkf-label">Время начала</label>
-       <div class="slots" id="slots">${slots.map(h=>`<button class="slot ${d.booked.includes(h)?'off':''} ${bk.slot===h?'on':''}" data-h="${h}" ${d.booked.includes(h)?'disabled':''}>${h}:00</button>`).join("")}</div>
+       <div class="slots" id="slots">${slots.map(h=>`<button class="slot ${bk.slot===h?'on':''}" data-h="${h}">${h}:00</button>`).join("")}</div>
        <div class="bkf"><label>Часов</label><select id="bkh">${[1,2,3,4,5,6,8].map(h=>`<option value="${h}" ${h===bk.hours?'selected':''}>${h} ${plural(h,"час","часа","часов")}</option>`).join("")}</select></div>
        <div class="bkf"><label>Сколько человек</label><input id="bkg" inputmode="numeric" value="${bk.guests||''}" placeholder="до ${s.cap}"></div>
        <div class="calc" id="calc"></div>
@@ -650,12 +629,12 @@ function renderPage(){
 function calc(){const s=current,v=vals(s),c=$("#calc");if(!c)return;c.innerHTML=`<div class="crow2"><span>₾${s.rate} × ${bk.hours} ${plural(bk.hours,"час","часа","часов")}</span><b>₾${v.sub}</b></div><div class="crow2"><span>Залог (вернётся)</span><b>₾${v.dep}</b></div><div class="crow2 tot"><span>Итого</span><b>₾${v.total}</b></div>`;}
 function wireDetail(){
   $("#bkd").onchange=e=>{bk.date=e.target.value;};
-  $("#slots").querySelectorAll(".slot:not(.off)").forEach(b=>b.onclick=()=>{bk.slot=+b.dataset.h;$("#slots").querySelectorAll(".slot").forEach(x=>x.classList.remove("on"));b.classList.add("on");});
+  $("#slots").querySelectorAll(".slot").forEach(b=>b.onclick=()=>{bk.slot=+b.dataset.h;$("#slots").querySelectorAll(".slot").forEach(x=>x.classList.remove("on"));b.classList.add("on");});
   $("#bkh").onchange=e=>{bk.hours=+e.target.value;calc();};
   $("#bkg").addEventListener("input",e=>{e.target.value=e.target.value.replace(/\D/g,"").slice(0,4);bk.guests=parseInt(e.target.value)||0;});
   $("#bkB").onclick=()=>{if(!bk.slot)return toast("Выбери время начала");pageView="pay";renderPage();window.scrollTo(0,0);};
   $("#page").querySelectorAll(".subnav button").forEach(b=>b.onclick=()=>{const t=document.getElementById(b.dataset.sec);if(t)t.scrollIntoView({behavior:"smooth",block:"start"});});
-  const mh=$("#msgHost");if(mh)mh.onclick=()=>toast("Чат с хозяином появится с подключением бэкенда");
+  const mh=$("#msgHost");if(mh)mh.onclick=()=>toast("Чат с хозяином — в следующем обновлении");
   if(current.lat)showMap("detmap",current.lat,current.lon);
   reveal($("#page"));
   calc();
@@ -664,9 +643,17 @@ function wirePay(){
   $("#page").querySelectorAll(".pm").forEach(b=>b.onclick=()=>{$("#page").querySelectorAll(".pm").forEach(x=>x.classList.remove("sel"));b.classList.add("sel");$("#cardForm").style.display=b.dataset.m==="card"?"":"none";});
   const cn=$("#cNum");if(cn)cn.addEventListener("input",e=>{e.target.value=e.target.value.replace(/\D/g,"").slice(0,16).replace(/(.{4})/g,"$1 ").trim();});
   const ce=$("#cExp");if(ce)ce.addEventListener("input",e=>{let v=e.target.value.replace(/\D/g,"").slice(0,4);if(v.length>2)v=v.slice(0,2)+"/"+v.slice(2);e.target.value=v;});
-  $("#payB").onclick=()=>{if(!curUser()){openAuth("login");toast("Войди, чтобы завершить бронь");return;}const b=$("#payB");b.disabled=true;b.textContent="Обработка…";setTimeout(()=>{recordBooking();pageView="confirm";renderPage();window.scrollTo(0,0);},850);};
+  $("#payB").onclick=async()=>{
+    if(!user){openAuth("login");toast("Войди, чтобы завершить бронь");return;}
+    const b=$("#payB");b.disabled=true;b.textContent="Обработка…";
+    try{await recordBooking();pageView="confirm";renderPage();window.scrollTo(0,0);}
+    catch(e){b.disabled=false;b.textContent="Оплатить ₾"+vals(current).total;toast(e.message||"Не удалось забронировать");}
+  };
 }
-function recordBooking(){const s=current,v=vals(s),u=curUser();bookings.push({id:Date.now(),spaceId:s.id,spaceName:s.name,hostEmail:s.ownerEmail||null,renterEmail:session,renterName:u.name,date:bk.date,slot:bk.slot,hours:bk.hours,guests:bk.guests||1,sub:v.sub,dep:v.dep,total:v.total});saveBookings();}
+async function recordBooking(){
+  await api("/api/bookings",{method:"POST",auth:true,body:{spaceId:current.id,date:bk.date,slot:bk.slot,hours:bk.hours,guests:bk.guests||1}});
+  await refreshMine();
+}
 
 /* ---------- auth ---------- */
 let authMode="login";
@@ -676,57 +663,64 @@ function renderAuth(){
   $("#authCard").innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;"><h2>${authMode==="login"?"С возвращением":"Создать профиль"}</h2><button class="sheet-close" id="aClose">✕</button></div><div class="auth-tabs"><button class="auth-tab ${authMode==="login"?"active":""}" id="tabL">Вход</button><button class="auth-tab ${authMode==="reg"?"active":""}" id="tabR">Регистрация</button></div>${authMode==="reg"?`<div class="bkf"><label>Имя</label><input id="aName" placeholder="Как тебя зовут"></div>`:""}<div class="bkf"><label>Почта</label><input id="aEmail" type="email" placeholder="you@mail.com"></div><div class="bkf"><label>Пароль</label><input id="aPass" type="password" placeholder="••••••••"></div><button class="btn btn-coral bkcta" id="aGo">${authMode==="login"?"Войти":"Зарегистрироваться"}</button><div id="aErr" style="color:var(--coral-deep);font-size:13.5px;margin-top:9px;display:none;font-weight:600;"></div>`;
   $("#aClose").onclick=closeAuth;$("#tabL").onclick=()=>{authMode="login";renderAuth();};$("#tabR").onclick=()=>{authMode="reg";renderAuth();};$("#aGo").onclick=submitAuth;
 }
-function submitAuth(){
+async function submitAuth(){
   const email=($("#aEmail").value||"").trim().toLowerCase(),pass=$("#aPass").value||"",err=m=>{const e=$("#aErr");e.style.display="block";e.textContent=m;};
   if(!email||!pass)return err("Заполни почту и пароль.");
-  if(authMode==="reg"){const name=($("#aName").value||"").trim();if(!name)return err("Как тебя зовут?");if(users.find(u=>u.email===email))return err("Такая почта уже занята.");users.push({email,pass,name});DB.set("users",users);session=email;DB.set("session",email);}
-  else{const u=users.find(u=>u.email===email);if(!u||u.pass!==pass)return err("Неверная почта или пароль.");session=email;DB.set("session",email);}
-  closeAuth();syncNav();toast(`Привет, ${curUser().name.split(" ")[0]}!`);remindTomorrow();if($("#page").classList.contains("open"))renderPage();
+  const go=$("#aGo");go.disabled=true;
+  try{
+    let res;
+    if(authMode==="reg"){const name=($("#aName").value||"").trim();if(!name){go.disabled=false;return err("Как тебя зовут?");}res=await api("/api/auth/register",{method:"POST",body:{email,name,password:pass}});}
+    else res=await api("/api/auth/login",{method:"POST",body:{email,password:pass}});
+    token=res.token;localStorage.setItem("lumi_token",token);user=res.user;
+    closeAuth();syncNav();toast(`Привет, ${user.name.split(" ")[0]}!`);
+    await refreshMine();await refreshOwner();remindTomorrow();
+    if($("#page").classList.contains("open"))renderPage();
+  }catch(e){go.disabled=false;err(e.message||"Не удалось войти");}
 }
-function logout(){session=null;DB.set("session",null);syncNav();closeDash();toast("Ты вышел из профиля.");}
+function logout(){token=null;localStorage.removeItem("lumi_token");user=null;myBookingsCache=[];ownerBookingsCache=[];syncNav();closeDash();toast("Ты вышел из профиля.");}
 function remindTomorrow(){const t=tomorrowStr(),b=myBookings().find(x=>x.date===t);if(b)setTimeout(()=>toast(`🔔 Напоминание: завтра мероприятие в «${b.spaceName}»`),1400);}
 
-/* ---------- dashboard ---------- */
-function delSpace(id){const i=SPACES.findIndex(s=>s.id===id);if(i>-1)SPACES.splice(i,1);bookings=bookings.filter(b=>b.spaceId!==id);saveSpaces();saveBookings();render();renderDash();toast("Пространство удалено.");}
+/* ---------- maps + calendar ---------- */
 let calState={},leafletReady=null,acTimer=null,acItems=[];
 function loadLeaflet(){if(leafletReady)return leafletReady;leafletReady=new Promise((res,rej)=>{if(window.L)return res(window.L);const css=document.createElement("link");css.rel="stylesheet";css.href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";document.head.appendChild(css);const sc=document.createElement("script");sc.src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";sc.onload=()=>res(window.L);sc.onerror=rej;document.head.appendChild(sc);});return leafletReady;}
 async function showMap(elId,lat,lon){try{const L=await loadLeaflet();const el=document.getElementById(elId);if(!el)return;el.innerHTML="";const map=L.map(el,{zoomControl:true,scrollWheelZoom:false,attributionControl:false}).setView([lat,lon],15);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(map);L.marker([lat,lon]).addTo(map);setTimeout(()=>map.invalidateSize(),120);}catch(e){}}
 function addrSearch(q,box,onPick){clearTimeout(acTimer);if(!q||q.trim().length<3){box.innerHTML="";return;}acTimer=setTimeout(async()=>{try{const r=await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=5&accept-language=ru&q=${encodeURIComponent(q+", Тбилиси, Грузия")}`);acItems=await r.json();box.innerHTML=acItems.map((d,i)=>`<button type="button" class="ac-item" data-i="${i}">${d.display_name}</button>`).join("");box.querySelectorAll(".ac-item").forEach(b=>b.onclick=()=>onPick(acItems[+b.dataset.i]));}catch(e){box.innerHTML="";}},380);}
-
 function calInner(spaceId){
   const st=calState[spaceId]||(calState[spaceId]={y:new Date().getFullYear(),m:new Date().getMonth()}),{y,m}=st;
   const first=new Date(y,m,1),startDow=(first.getDay()+6)%7,days=new Date(y,m+1,0).getDate(),today=new Date(),byDay={};
-  bookings.forEach(b=>{if(b.spaceId!==spaceId)return;const d=new Date(b.date);if(d.getFullYear()===y&&d.getMonth()===m)(byDay[d.getDate()]=byDay[d.getDate()]||[]).push(b);});
+  ownerBookingsCache.forEach(b=>{if(b.spaceId!==spaceId)return;const d=new Date(b.date);if(d.getFullYear()===y&&d.getMonth()===m)(byDay[d.getDate()]=byDay[d.getDate()]||[]).push(b);});
   const mn=["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"][m];
   let cells="";for(let i=0;i<startDow;i++)cells+=`<div class="cd muted"></div>`;
   for(let d=1;d<=days;d++){const arr=byDay[d],g=arr?arr.reduce((a,b)=>a+b.guests,0):0,tdy=y===today.getFullYear()&&m===today.getMonth()&&d===today.getDate();cells+=`<button class="cd ${g?'booked':''} ${tdy?'today':''}" data-day="${d}">${d}${g?`<small>${g} чел</small>`:""}</button>`;}
   return `<div class="cal-top"><div class="cal-title">${mn} ${y}</div><div style="display:flex;gap:6px;"><button class="cal-nav" data-nav="-1">‹</button><button class="cal-nav" data-nav="1">›</button></div></div><div class="cal-head">${["Пн","Вт","Ср","Чт","Пт","Сб","Вс"].map(x=>`<span>${x}</span>`).join("")}</div><div class="cal">${cells}</div><div class="cal-day" id="calday-${spaceId}"></div>`;
 }
 function calendarHTML(spaceId){return `<div class="cal-wrap" id="cal-${spaceId}" data-sp="${spaceId}">${calInner(spaceId)}</div>`;}
-function wireCals(){document.querySelectorAll(".cal-wrap").forEach(w=>{const sp=+w.dataset.sp;w.onclick=e=>{const nav=e.target.closest(".cal-nav");if(nav){const st=calState[sp];st.m+=+nav.dataset.nav;if(st.m<0){st.m=11;st.y--;}if(st.m>11){st.m=0;st.y++;}w.innerHTML=calInner(sp);return;}const cd=e.target.closest(".cd[data-day]");if(cd){const day=+cd.dataset.day,st=calState[sp],ds=new Date(st.y,st.m,day).toISOString().slice(0,10),list=bookings.filter(b=>b.spaceId===sp&&b.date===ds);w.querySelectorAll(".cd").forEach(x=>x.classList.remove("sel"));cd.classList.add("sel");const det=document.getElementById("calday-"+sp),mn=["янв","фев","мар","апр","мая","июн","июл","авг","сен","окт","ноя","дек"][st.m];det.innerHTML=list.length?`<div class="cal-day-h">${day} ${mn} — ${list.length} ${plural(list.length,"бронь","брони","броней")}</div>${list.map(b=>`<div class="cal-bk">${b.slot}:00–${b.slot+b.hours}:00 · ${b.renterName} · ${b.guests} чел.</div>`).join("")}`:`<div class="cal-day-h">${day} ${mn} — свободно</div>`;}};});}
+function wireCals(){document.querySelectorAll(".cal-wrap").forEach(w=>{const sp=+w.dataset.sp;w.onclick=e=>{const nav=e.target.closest(".cal-nav");if(nav){const st=calState[sp];st.m+=+nav.dataset.nav;if(st.m<0){st.m=11;st.y--;}if(st.m>11){st.m=0;st.y++;}w.innerHTML=calInner(sp);return;}const cd=e.target.closest(".cd[data-day]");if(cd){const day=+cd.dataset.day,st=calState[sp],ds=new Date(st.y,st.m,day).toISOString().slice(0,10),list=ownerBookingsCache.filter(b=>b.spaceId===sp&&b.date===ds);w.querySelectorAll(".cd").forEach(x=>x.classList.remove("sel"));cd.classList.add("sel");const det=document.getElementById("calday-"+sp),mn=["янв","фев","мар","апр","мая","июн","июл","авг","сен","окт","ноя","дек"][st.m];det.innerHTML=list.length?`<div class="cal-day-h">${day} ${mn} — ${list.length} ${plural(list.length,"бронь","брони","броней")}</div>${list.map(b=>`<div class="cal-bk">${b.slot}:00–${b.slot+b.hours}:00 · ${b.renterName} · ${b.guests} чел.</div>`).join("")}`:`<div class="cal-day-h">${day} ${mn} — свободно</div>`;}};});}
 function bookingItem(b,isTom){const sp=SPACES.find(s=>s.id===b.spaceId),u=sp?photo(sp):null;return `<div class="bk-item"><div class="bk-thumb">${sp?`<div class="ph-bg">${room(WALL[sp.cat]??30,b.spaceId)}</div>${u?`<img class="ph-img" src="${u}" onerror="this.remove()">`:""}`:""}</div><div style="flex:1;"><div style="font-weight:700;">${b.spaceName}${isTom?`<span class="tom">завтра</span>`:""}</div><div style="color:var(--muted);font-size:14px;">${b.date.split("-").reverse().join(".")} · ${b.slot}:00–${b.slot+b.hours}:00 · ${b.guests} чел.</div></div><div style="font-weight:700;">₾${b.total||b.sub}</div></div>`;}
 
+/* ---------- dashboard ---------- */
 let dashTab="overview",wiz=null;
-function openDash(tab){if(!curUser())return openAuth("login");dashTab=tab||"overview";if(dashTab==="add"&&!wiz)startWiz();renderDash();$("#dash").classList.add("open");document.body.style.overflow="hidden";}
+async function openDash(tab){if(!user)return openAuth("login");dashTab=tab||"overview";if(dashTab==="add"&&!wiz)startWiz();$("#dash").classList.add("open");document.body.style.overflow="hidden";renderDash();await refreshMine();await refreshOwner();renderDash();}
 function closeDash(){$("#dash").classList.remove("open");if(!$("#page").classList.contains("open"))document.body.style.overflow="";}
+async function delSpace(id){try{await api("/api/spaces/"+id,{method:"DELETE",auth:true});}catch(e){return toast(e.message||"Не удалось удалить");}await reloadSpaces();await refreshOwner();render();renderDash();toast("Пространство удалено.");}
 function renderDash(){
-  const u=curUser();if(!u){closeDash();return;}
-  const mySpaces=SPACES.filter(s=>s.ownerEmail===session),mine=myBookings().filter(b=>b.date>=todayStr()),t=tomorrowStr();
+  if(!user){closeDash();return;}
+  const mySpaces=SPACES.filter(s=>s.ownerId===user.id),mine=myBookings().filter(b=>b.date>=todayStr()),t=tomorrowStr();
   const nav=[["overview","Обзор","◎"],["bookings","Мои брони","🎟"],["spaces","Мои пространства","🏠"],["profile","Профиль","👤"]];
   let main="";
   if(dashTab==="overview"){
-    const earn=bookings.filter(b=>mySpaces.some(s=>s.id===b.spaceId)&&sameMonth(b.date)).reduce((a,b)=>a+b.sub,0);
-    main=`<h1 class="dash-h1">Привет, ${u.name.split(" ")[0]} 👋</h1><div class="stat-grid"><div class="stat"><b>${mine.length}</b><span>предстоящих броней</span></div><div class="stat"><b>${mySpaces.length}</b><span>твоих пространств</span></div><div class="stat"><b>₾${earn}</b><span>заработано в этом месяце</span></div></div>${mine.some(b=>b.date===t)?`<div class="reminder">🔔 Завтра у тебя мероприятие — не забудь подготовиться!</div>`:""}<div class="quick"><button class="btn btn-coral" data-go="add">Разместить пространство</button><button class="btn btn-ghost" id="qFind">Найти место</button></div>`;
+    const earn=ownerBookingsCache.filter(b=>sameMonth(b.date)).reduce((a,b)=>a+b.sub,0);
+    main=`<h1 class="dash-h1">Привет, ${user.name.split(" ")[0]} 👋</h1><div class="stat-grid"><div class="stat"><b>${mine.length}</b><span>предстоящих броней</span></div><div class="stat"><b>${mySpaces.length}</b><span>твоих пространств</span></div><div class="stat"><b>₾${earn}</b><span>заработано в этом месяце</span></div></div>${mine.some(b=>b.date===t)?`<div class="reminder">🔔 Завтра у тебя мероприятие — не забудь подготовиться!</div>`:""}<div class="quick"><button class="btn btn-coral" data-go="add">Разместить пространство</button><button class="btn btn-ghost" id="qFind">Найти место</button></div>`;
   }else if(dashTab==="bookings"){
     main=`<h1 class="dash-h1">Мои брони</h1>${mine.some(b=>b.date===t)?`<div class="reminder">🔔 Завтра у тебя мероприятие!</div>`:""}${mine.length?mine.map(b=>bookingItem(b,b.date===t)).join(""):`<p class="empty2">Пока нет броней. Найди место и забронируй — оно появится здесь.</p>`}`;
   }else if(dashTab==="spaces"){
-    main=`<div class="dash-h1row"><h1 class="dash-h1">Мои пространства</h1><button class="btn btn-coral" data-go="add">+ Добавить</button></div>${mySpaces.length?mySpaces.map(s=>{const mo=bookings.filter(b=>b.spaceId===s.id&&sameMonth(b.date));return `<div class="space-card"><div class="sc-head"><b>${s.name}</b><span>${s.catName} · ${s.loc} · ₾${s.rate}/час</span><button class="del" data-id="${s.id}">Удалить</button></div><div class="stat-grid"><div class="stat"><b>${mo.length}</b><span>броней в этом месяце</span></div><div class="stat"><b>₾${mo.reduce((a,b)=>a+b.sub,0)}</b><span>заработано</span></div><div class="stat"><b>${mo.reduce((a,b)=>a+b.guests,0)}</b><span>гостей всего</span></div></div>${calendarHTML(s.id)}</div>`;}).join(""):`<p class="empty2">У тебя пока нет пространств. Нажми «Добавить» и опубликуй первое.</p>`}`;
+    main=`<div class="dash-h1row"><h1 class="dash-h1">Мои пространства</h1><button class="btn btn-coral" data-go="add">+ Добавить</button></div>${mySpaces.length?mySpaces.map(s=>{const mo=ownerBookingsCache.filter(b=>b.spaceId===s.id&&sameMonth(b.date));return `<div class="space-card"><div class="sc-head"><b>${s.name}</b><span>${s.catName} · ${s.loc} · ₾${s.rate}/час</span><button class="del" data-id="${s.id}">Удалить</button></div><div class="stat-grid"><div class="stat"><b>${mo.length}</b><span>броней в этом месяце</span></div><div class="stat"><b>₾${mo.reduce((a,b)=>a+b.sub,0)}</b><span>заработано</span></div><div class="stat"><b>${mo.reduce((a,b)=>a+b.guests,0)}</b><span>гостей всего</span></div></div>${calendarHTML(s.id)}</div>`;}).join(""):`<p class="empty2">У тебя пока нет пространств. Нажми «Добавить» и опубликуй первое.</p>`}`;
   }else if(dashTab==="add"){
     main=`<button class="backlink" data-go="spaces">← Назад</button><div class="form-wrap">${wizHTML()}</div>`;
   }else{
-    main=`<h1 class="dash-h1">Профиль</h1><div class="form-wrap"><div class="bkf"><label>Имя</label><input value="${u.name}" disabled></div><div class="bkf"><label>Почта</label><input value="${u.email}" disabled></div><button class="btn btn-ghost" id="logoutBtn" style="margin-top:16px;">Выйти из профиля</button></div>`;
+    main=`<h1 class="dash-h1">Профиль</h1><div class="form-wrap"><div class="bkf"><label>Имя</label><input value="${user.name}" disabled></div><div class="bkf"><label>Почта</label><input value="${user.email}" disabled></div><button class="btn btn-ghost" id="logoutBtn" style="margin-top:16px;">Выйти из профиля</button></div>`;
   }
-  $("#dash").innerHTML=`<div class="dash-top"><a class="brand" href="#" id="dashLogo"><span class="spark"></span>Lumi</a><div style="flex:1"></div><div class="dash-user"><div class="dash-av sm">${u.name[0]}</div><span class="nav-hide">${u.name.split(" ")[0]}</span></div><button class="btn btn-ghost" id="dashExit">На сайт</button></div><div class="dash-shell"><nav class="dash-side">${nav.map(([k,l,ic])=>`<button class="dnav ${dashTab===k?"active":""}" data-tab="${k}"><span>${ic}</span>${l}</button>`).join("")}</nav><main class="dash-main">${main}</main></div>`;
+  $("#dash").innerHTML=`<div class="dash-top"><a class="brand" href="#" id="dashLogo"><span class="spark"></span>Lumi</a><div style="flex:1"></div><div class="dash-user"><div class="dash-av sm">${user.name[0]}</div><span class="nav-hide">${user.name.split(" ")[0]}</span></div><button class="btn btn-ghost" id="dashExit">На сайт</button></div><div class="dash-shell"><nav class="dash-side">${nav.map(([k,l,ic])=>`<button class="dnav ${dashTab===k?"active":""}" data-tab="${k}"><span>${ic}</span>${l}</button>`).join("")}</nav><main class="dash-main">${main}</main></div>`;
   $("#dashExit").onclick=closeDash;$("#dashLogo").onclick=e=>{e.preventDefault();closeDash();};
   $("#dash").querySelectorAll(".dnav").forEach(b=>b.onclick=()=>{dashTab=b.dataset.tab;if(dashTab==="add"&&!wiz)startWiz();renderDash();});
   $("#dash").querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{dashTab=b.dataset.go;if(dashTab==="add"&&!wiz)startWiz();renderDash();});
@@ -737,7 +731,7 @@ function renderDash(){
   if(dashTab==="add")wireWiz();
 }
 
-/* ---------- listing wizard (Peerspace-style) ---------- */
+/* ---------- wizard ---------- */
 const WSTEPS=["Тип","Адрес","Что внутри","Описание","Цена"];
 const TA="width:100%;border:1.5px solid var(--line-2);background:var(--bg);border-radius:11px;padding:11px 13px;font-family:inherit;font-size:15px;color:var(--ink);outline:none;resize:vertical;";
 function startWiz(){wiz={step:0,type:"",name:"",loc:DISTRICTS[1],addr:"",lat:null,lon:null,cap:"",rate:"",use:"",amen:[],desc:""};}
@@ -771,43 +765,47 @@ function wireWiz(){
   const bb=$("#wBack");if(bb)bb.onclick=()=>{save();wiz.step--;renderDash();};
   const pb=$("#wPub");if(pb)pb.onclick=()=>{save();if(!(parseInt(wiz.rate)>0))return err("Укажи цену за час.");publishWiz();};
 }
-function publishWiz(){
-  const id=Math.max(0,...SPACES.map(s=>s.id))+1,catName=(CATS.find(c=>c.id===wiz.type)||{}).n||"Пространство";
-  const ns={id,name:wiz.name.trim(),cat:wiz.type,catName,use:wiz.use.trim()||"разные форматы",loc:wiz.loc,addr:wiz.addr||"",lat:wiz.lat,lon:wiz.lon,cap:parseInt(wiz.cap)||0,rate:parseInt(wiz.rate)||0,rating:0,host:curUser().name.split(" ")[0],ownerEmail:session,isNew:true,desc:wiz.desc.trim(),amen:wiz.amen.slice()};
-  SPACES.unshift(ns);saveSpaces();
+async function publishWiz(){
+  const catName=(CATS.find(c=>c.id===wiz.type)||{}).n||"Пространство";
+  try{
+    await api("/api/spaces",{method:"POST",auth:true,body:{name:wiz.name.trim(),cat:wiz.type,catName,use:wiz.use.trim(),loc:wiz.loc,addr:wiz.addr||"",lat:wiz.lat,lon:wiz.lon,cap:parseInt(wiz.cap)||0,rate:parseInt(wiz.rate)||0,desc:wiz.desc.trim(),amen:wiz.amen}});
+  }catch(e){const el=$("#wErr");if(el){el.textContent=e.message||"Не удалось опубликовать";el.style.display="block";}return;}
+  await reloadSpaces();await refreshOwner();
   cat="all";fLoc="Все районы";fQ="";fCap=0;render();
   wiz=null;dashTab="spaces";renderDash();toast("Готово! Место опубликовано.");
 }
-function openHost(){if(!curUser()){openAuth("login");toast("Войди, чтобы разместить место");return;}startWiz();openDash("add");}
+function openHost(){if(!user){openAuth("login");toast("Войди, чтобы разместить место");return;}startWiz();openDash("add");}
 
 /* ---------- init ---------- */
 const loc=$("#loc");DISTRICTS.forEach(d=>{const o=document.createElement("option");o.textContent=d;loc.appendChild(o);});
 const chips=$("#chips");CATS.forEach((c,i)=>{const b=document.createElement("button");b.className="chip";b.setAttribute("aria-pressed",c.id==="all");b.textContent=c.n;b.onclick=()=>{cat=c.id;[...chips.children].forEach(x=>x.setAttribute("aria-pressed","false"));b.setAttribute("aria-pressed","true");render();};chips.appendChild(b);});
-
 const collageHues=[32,198,272],collageShots=[11419079,30599531,30243614];
 [...document.querySelectorAll("#collage .ph")].forEach((el,i)=>el.innerHTML=`<div class="ph-bg">${room(collageHues[i],i+1)}</div><img class="ph-img" src="${PX(collageShots[i])}" alt="" onerror="this.remove()">`);
 $("#hostPic").innerHTML=`<div class="ph-bg">${room(30,2)}</div><img class="ph-img" src="${PX(5570222)}" alt="" onerror="this.remove()">`;
-
 const catG=$("#catGrid");
 CATS.filter(c=>c.id!=="all").forEach(c=>{const ph=(PXMAP[c.id]||[17181935])[0];const t=document.createElement("button");t.className="cat-tile";t.innerHTML=`<div class="ph-bg">${room(WALL[c.id]??30,3)}</div><img class="ph-img" src="${PX(ph)}" alt="" onerror="this.remove()"><div class="ov"></div><span>${c.n}</span>`;t.onclick=()=>pickCat(c.id);catG.appendChild(t);});
 const distW=$("#distWrap");
 DISTRICTS.filter(d=>d!=="Все районы").forEach(d=>{const b=document.createElement("button");b.className="dist";b.textContent=d;b.onclick=()=>setLoc(d);distW.appendChild(b);});
 document.querySelectorAll(".faq-item").forEach(it=>{it.querySelector(".faq-q").onclick=()=>{const open=it.classList.toggle("open");const a=it.querySelector(".faq-a");a.style.maxHeight=open?a.scrollHeight+"px":"0";};});
-
 $("#goBtn").onclick=()=>{fQ=$("#q").value.trim();fLoc=$("#loc").value;fCap=+$("#cap").value;render();$("#grid-wrap").scrollIntoView({behavior:"smooth"});};
 $("#q").addEventListener("keydown",e=>{if(e.key==="Enter")$("#goBtn").click();});
 $("#homeLogo").onclick=e=>{e.preventDefault();goHome();window.scrollTo({top:0,behavior:"smooth"});};
-$("#navHost").onclick=openHost;
-$("#hostCta").onclick=openHost;
-$("#loginBtn").onclick=()=>openAuth("login");
-$("#dashBtn").onclick=()=>openDash();
+$("#navHost").onclick=openHost;$("#hostCta").onclick=openHost;
+$("#loginBtn").onclick=()=>openAuth("login");$("#dashBtn").onclick=()=>openDash();
 $("#favBtn").onclick=()=>toast(favs.size?`Сохранено мест: ${favs.size}`:"Жми ♥ на карточке, чтобы сохранить место");
 $("#authScrim").addEventListener("click",e=>{if(e.target===$("#authScrim"))closeAuth();});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){if($("#authScrim").classList.contains("open"))closeAuth();else if($("#dash").classList.contains("open"))closeDash();else if($("#page").classList.contains("open"))goHome();}});
-
 document.querySelectorAll('.cat-tile,.quote,.hcard,.faq-item,.host,#cats .sec-head,#districts .sec-head,#how .sec-head,#faq .sec-head').forEach(el=>el.classList.add('reveal'));
 reveal();
-syncNav();render();route();if(curUser())remindTomorrow();
+$("#grid").innerHTML='<div class="nores">Загружаем пространства…</div>';
+
+async function boot(){
+  await reloadSpaces();
+  if(token){try{user=await api("/api/me",{auth:true});await refreshMine();await refreshOwner();}catch(e){token=null;localStorage.removeItem("lumi_token");user=null;}}
+  syncNav();render();route();if(user)remindTomorrow();
+}
+boot();
+
 </script>
 </body>
 </html>
