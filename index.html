@@ -24,7 +24,6 @@
   .muted2{color:var(--faint);font-size:13.5px;font-weight:500;}
   .dot{display:inline-block;width:3px;height:3px;border-radius:50%;background:var(--faint);margin:0 9px;vertical-align:middle;}
   .rate{font-weight:700;color:var(--ink);white-space:nowrap;}
-  .rate{color:var(--ink);} .rate{} 
   .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-weight:600;font-size:14.5px;padding:10px 17px;border-radius:999px;transition:.15s;white-space:nowrap;}
   .btn-coral{background:var(--coral);color:#fff;}
   .btn-coral:hover{background:var(--coral-deep);}
@@ -354,6 +353,19 @@
   .reveal{transform:translateY(24px) scale(.985);transition:opacity .75s cubic-bezier(.16,1,.3,1),transform .75s cubic-bezier(.16,1,.3,1);}
   .reveal.in{transform:none;}
   .page-overlay{transform:translateY(14px);transition:opacity .4s cubic-bezier(.16,1,.3,1),transform .4s cubic-bezier(.16,1,.3,1);}
+  @media(max-width:760px){
+    .nav-in{gap:8px;}
+    .nav-in .btn{padding:8px 12px;font-size:13px;}
+    .brand{font-size:18px;}
+    .hero{padding:30px 0 14px;}
+    .hero-grid{grid-template-columns:1fr;gap:24px;}
+    .collage{height:240px;order:2;}
+    .search{max-width:none;}
+    .how-grid{grid-template-columns:1fr;}
+    .facts{gap:6px 14px;}
+    .page-wrap,.page-top{padding-left:16px;padding-right:16px;}
+    .subnav{margin-left:-16px;margin-right:-16px;padding-left:16px;padding-right:16px;}
+  }
   .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:12px 20px;border-radius:999px;font-size:14px;font-weight:600;box-shadow:var(--sh-h);opacity:0;transition:.25s;z-index:200;pointer-events:none;max-width:90vw;text-align:center;}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
@@ -369,8 +381,8 @@
     <a class="nav-link nav-hide" href="#faq">Вопросы</a>
     <div class="nav-sp"></div>
     <button class="fav-btn nav-hide" id="favBtn" aria-label="Сохранённые">♥<span class="fav-cnt" id="cnt">0</span></button>
-    <button class="btn btn-ghost nav-hide" id="loginBtn">Войти</button>
-    <button class="btn btn-ghost nav-hide" id="dashBtn" style="display:none;">Кабинет</button>
+    <button class="btn btn-ghost" id="loginBtn">Войти</button>
+    <button class="btn btn-ghost" id="dashBtn" style="display:none;">Кабинет</button>
     <button class="btn btn-coral" id="navHost">Сдать пространство</button>
   </div>
 </nav>
@@ -633,7 +645,7 @@ function renderPage(){
   const pl=$("#pLogin");if(pl)pl.onclick=()=>openAuth("login");
   if(pageView==="detail")wireDetail();
   else if(pageView==="pay")wirePay();
-  else{const ch=$("#cHome");if(ch)ch.onclick=goHome;const cd=$("#cDash");if(cd)cd.onclick=()=>openDash("bookings");}
+  else{const ch=$("#cHome");if(ch)ch.onclick=goHome;const cd=$("#cDash");if(cd)cd.onclick=()=>{goHome();openDash("bookings");};}
 }
 function calc(){const s=current,v=vals(s),c=$("#calc");if(!c)return;c.innerHTML=`<div class="crow2"><span>₾${s.rate} × ${bk.hours} ${plural(bk.hours,"час","часа","часов")}</span><b>₾${v.sub}</b></div><div class="crow2"><span>Залог (вернётся)</span><b>₾${v.dep}</b></div><div class="crow2 tot"><span>Итого</span><b>₾${v.total}</b></div>`;}
 function wireDetail(){
@@ -674,8 +686,7 @@ function submitAuth(){
 function logout(){session=null;DB.set("session",null);syncNav();closeDash();toast("Ты вышел из профиля.");}
 function remindTomorrow(){const t=tomorrowStr(),b=myBookings().find(x=>x.date===t);if(b)setTimeout(()=>toast(`🔔 Напоминание: завтра мероприятие в «${b.spaceName}»`),1400);}
 
-/* ---------- host seed + dashboard ---------- */
-function seedDemoBookings(s){const n=new Date(),y=n.getFullYear(),m=n.getMonth(),dn=[["Анна","anna@demo.ge"],["Гиорги","gio@demo.ge"],["Лана","lana@demo.ge"]],used=new Set();for(let i=0;i<3;i++){let day;do{day=2+Math.floor(Math.random()*26);}while(used.has(day));used.add(day);const date=new Date(y,m,day).toISOString().slice(0,10),hours=2+Math.floor(Math.random()*3),guests=Math.min(s.cap,2+Math.floor(Math.random()*8)),sub=s.rate*hours,dep=Math.max(50,Math.round(s.rate*0.8/10)*10);bookings.push({id:Date.now()+i,spaceId:s.id,spaceName:s.name,hostEmail:s.ownerEmail,renterEmail:dn[i][1],renterName:dn[i][0],date,slot:10+i*2,hours,guests,sub,dep,total:sub+dep});}saveBookings();}
+/* ---------- dashboard ---------- */
 function delSpace(id){const i=SPACES.findIndex(s=>s.id===id);if(i>-1)SPACES.splice(i,1);bookings=bookings.filter(b=>b.spaceId!==id);saveSpaces();saveBookings();render();renderDash();toast("Пространство удалено.");}
 let calState={},leafletReady=null,acTimer=null,acItems=[];
 function loadLeaflet(){if(leafletReady)return leafletReady;leafletReady=new Promise((res,rej)=>{if(window.L)return res(window.L);const css=document.createElement("link");css.rel="stylesheet";css.href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";document.head.appendChild(css);const sc=document.createElement("script");sc.src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";sc.onload=()=>res(window.L);sc.onerror=rej;document.head.appendChild(sc);});return leafletReady;}
@@ -792,7 +803,7 @@ $("#loginBtn").onclick=()=>openAuth("login");
 $("#dashBtn").onclick=()=>openDash();
 $("#favBtn").onclick=()=>toast(favs.size?`Сохранено мест: ${favs.size}`:"Жми ♥ на карточке, чтобы сохранить место");
 $("#authScrim").addEventListener("click",e=>{if(e.target===$("#authScrim"))closeAuth();});
-document.addEventListener("keydown",e=>{if(e.key==="Escape"){if($("#authScrim").classList.contains("open"))closeAuth();else if($("#page").classList.contains("open"))goHome();}});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){if($("#authScrim").classList.contains("open"))closeAuth();else if($("#dash").classList.contains("open"))closeDash();else if($("#page").classList.contains("open"))goHome();}});
 
 document.querySelectorAll('.cat-tile,.quote,.hcard,.faq-item,.host,#cats .sec-head,#districts .sec-head,#how .sec-head,#faq .sec-head').forEach(el=>el.classList.add('reveal'));
 reveal();
