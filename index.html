@@ -281,6 +281,47 @@
   .wiz-err{color:var(--coral-deep);font-weight:600;font-size:13.5px;margin-top:10px;display:none;}
   .wiz-pre{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:14px;font-weight:500;color:var(--muted);}
 
+  /* detail enrich */
+  .subnav{position:sticky;top:64px;z-index:4;display:flex;gap:4px;background:rgba(251,250,247,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);margin:0 -24px 20px;padding:9px 24px;overflow-x:auto;scrollbar-width:none;}
+  .subnav::-webkit-scrollbar{display:none;}
+  .subnav button{font-size:14px;font-weight:600;color:var(--muted);padding:7px 13px;border-radius:999px;white-space:nowrap;transition:.15s;}
+  .subnav button:hover{background:var(--surface);color:var(--ink);}
+  .detail-loc{color:var(--muted);font-weight:600;font-size:15px;margin:7px 0 14px;}
+  .detail-loc a{color:var(--coral-deep);text-decoration:underline;text-underline-offset:2px;}
+  .facts{display:flex;flex-wrap:wrap;gap:8px 20px;padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:14.5px;color:var(--muted);}
+  .fact b{color:var(--ink);}
+  .badge{font-size:11px;font-weight:700;color:var(--coral-deep);background:var(--coral-soft);padding:2px 9px;border-radius:999px;}
+  .host-row{display:flex;align-items:center;gap:12px;padding:18px 0;}
+  .detail-sec{padding:22px 0;border-top:1px solid var(--line);scroll-margin-top:124px;}
+  .facet-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 26px;margin-top:16px;}
+  .facet-k{font-weight:700;font-size:14px;margin-bottom:2px;}
+  .facet-v{color:var(--muted);font-size:14px;font-weight:500;}
+  .feat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:11px;}
+  .feat{font-weight:600;font-size:14.5px;color:var(--ink);}
+  .addon-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .addon{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--surface);}
+  .addon-pic{width:54px;height:54px;border-radius:10px;overflow:hidden;position:relative;flex:none;}
+  .addon b{font-size:14.5px;}
+  .mapcard{position:relative;height:210px;border-radius:var(--r-lg);overflow:hidden;border:1px solid var(--line-2);background:linear-gradient(135deg,#EAF0EC,#E7ECEF);}
+  .map-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(110,106,98,.13) 1px,transparent 1px),linear-gradient(90deg,rgba(110,106,98,.13) 1px,transparent 1px);background-size:30px 30px;}
+  .map-pin{position:absolute;top:50%;left:50%;transform:translate(-50%,-65%);font-size:30px;filter:drop-shadow(0 5px 7px rgba(0,0,0,.22));}
+  .map-lbl{position:absolute;left:14px;bottom:13px;background:var(--surface);border:1px solid var(--line-2);border-radius:999px;padding:6px 13px;font-weight:600;font-size:13.5px;box-shadow:var(--sh);}
+  .hours{display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:12px;font-size:14.5px;}
+  .know{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;}
+  .know b{font-size:15px;}.know p{margin-top:4px;}
+  @media(max-width:680px){.facet-grid,.addon-grid,.know{grid-template-columns:1fr;}}
+
+  /* motion */
+  .reveal{opacity:0;transform:translateY(16px);transition:opacity .6s cubic-bezier(.2,.7,.2,1),transform .6s cubic-bezier(.2,.7,.2,1);}
+  .reveal.in{opacity:1;transform:none;}
+  .page-overlay{transform:translateY(10px);transition:opacity .3s ease,transform .3s ease;}
+  .page-overlay.open{transform:none;}
+  .g-cell .ph-img{transition:transform .5s ease;}
+  .g-cell:hover .ph-img{transform:scale(1.04);}
+  .btn{transition:.16s;}.btn:active{transform:translateY(1px);}
+  .card{transition:transform .22s ease,box-shadow .22s ease;}
+  @media (prefers-reduced-motion: reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important;}.reveal{opacity:1!important;transform:none!important;}}
+
   .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:12px 20px;border-radius:999px;font-size:14px;font-weight:600;box-shadow:var(--sh-h);opacity:0;transition:.25s;z-index:200;pointer-events:none;max-width:90vw;text-align:center;}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
@@ -410,6 +451,8 @@
 const $=s=>document.querySelector(s);
 function plural(n,a,b,c){n=Math.abs(n)%100;const n1=n%10;if(n>10&&n<20)return c;if(n1>1&&n1<5)return b;if(n1===1)return a;return c;}
 function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2600);}
+const _io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");_io.unobserve(e.target);}}),{threshold:.08,rootMargin:"0px 0px -40px 0px"});
+function reveal(scope){(scope||document).querySelectorAll(".reveal:not(.in)").forEach(el=>_io.observe(el));}
 const HCV=["#C7432E","#1F6B52","#3A6EA5","#9B5DE5","#E1543B","#2A9D8F"];
 const star="★";
 
@@ -479,13 +522,14 @@ function render(){
   const r=SPACES.filter(s=>(cat==="all"||s.cat===cat)&&(fLoc==="Все районы"||s.loc===fLoc)&&(!fCap||(fCap>=100?s.cap>40:s.cap<=fCap))&&(!q||(s.name+" "+s.catName+" "+s.use+" "+s.loc).toLowerCase().includes(q)));
   $("#count").textContent=`${r.length} ${plural(r.length,"место","места","мест")}`;
   if(!r.length){grid.innerHTML=`<div class="nores">Ничего не нашлось под эти фильтры. <button onclick="resetFilters()">Сбросить</button></div>`;return;}
-  r.forEach(s=>{
-    const u=photo(s),el=document.createElement("article");el.className="card";
+  r.forEach((s,i)=>{
+    const u=photo(s),el=document.createElement("article");el.className="card reveal";el.style.transitionDelay=(i%4*50)+"ms";
     el.innerHTML=`<div class="pic"><div class="ph-bg">${room(WALL[s.cat]??30,s.id)}</div>${u?`<img class="ph-img" src="${u}" loading="lazy" onerror="this.remove()">`:""}<button class="heart ${favs.has(s.id)?'on':''}" aria-label="Сохранить">♥</button><span class="tag">${s.use}</span></div><div class="cbody"><div class="crow"><span class="cname">${s.name}</span>${s.isNew?'<span class="rate" style="color:var(--coral-deep)">новое</span>':`<span class="rate">★ ${s.rating}</span>`}</div><div class="cmeta">${s.catName} · ${s.loc} · у ${s.host}</div><div class="cprice"><b>₾${s.rate}</b><span> / час · до ${s.cap}</span></div></div>`;
     el.querySelector(".heart").onclick=e=>{e.stopPropagation();const b=e.currentTarget;favs.has(s.id)?favs.delete(s.id):favs.add(s.id);b.classList.toggle("on",favs.has(s.id));const c=$("#cnt");c.textContent=favs.size;c.classList.toggle("show",favs.size>0);};
     el.onclick=()=>goSpace(s.id);
     grid.appendChild(el);
   });
+  reveal($("#grid"));
 }
 function resetFilters(){cat="all";fLoc="Все районы";fQ="";fCap=0;$("#q").value="";$("#loc").value="Все районы";$("#cap").value="0";[...$("#chips").children].forEach((x,i)=>x.setAttribute("aria-pressed",i===0));render();}
 window.resetFilters=resetFilters;
@@ -510,9 +554,39 @@ function galleryHTML(s){
   return `<div class="gallery">${cell(0,s.id,true)}<div class="g-side">${cell(1,s.id+1)}${cell(0,s.id+2)}</div></div>`;
 }
 function pageTop(){const u=curUser();return `<div class="page-top"><a class="brand" href="#" id="pLogo"><span class="spark"></span>Lumi</a><button class="btn btn-ghost" id="pBack">← Все места</button><div style="flex:1"></div>${u?`<button class="btn btn-ghost" id="pDash">👤 ${u.name.split(" ")[0]}</button>`:`<button class="btn btn-ghost" id="pLogin">Войти</button>`}</div>`;}
+const FACETS=[["Парковка","Бесплатная на улице рядом"],["Доступ","Удобный вход, лифт"],["Звук","Можно с музыкой до 22:00"],["Электрика","Розетки по периметру, 220В"],["Интернет","Быстрый Wi-Fi, бесплатно"],["Правила","Без уличной обуви, уборка после себя"]];
+const ADDONS=[["Ассистент хозяина","₾40 / час"],["Доп. световой комплект","₾30"],["Гримёр","₾60"],["Аренда мебели","₾25"]];
 function detailHTML(s){
   const d=getDetail(s),slots=[];for(let h=9;h<=21;h++)slots.push(h);
-  return `${galleryHTML(s)}<div class="detail-grid"><div class="detail-main"><h1 class="detail-h1">${s.name}</h1><div class="detail-meta">${s.isNew?'<span class="rate" style="color:var(--coral-deep)">новое место</span>':`<span class="rate">★ ${s.rating}</span>`}<span class="dot"></span>${s.catName}<span class="dot"></span>${s.loc}, Тбилиси<span class="dot"></span>до ${s.cap} чел.</div><p class="detail-desc">${d.desc}</p>${d.amen.length?`<h3 class="detail-h3">Что внутри</h3><div class="amen">${d.amen.map(a=>`<span>${a}</span>`).join("")}</div>`:""}<h3 class="detail-h3">Хозяин места</h3><div class="host-row"><span class="ra" style="background:${HCV[s.host.length%HCV.length]}">${s.host[0]}</span><div><b>${s.host}</b><div class="muted2">Обычно отвечает в течение часа</div></div></div><h3 class="detail-h3">Что говорят</h3>${d.rev.length?d.rev.map(r=>`<div class="review"><div class="rh"><span class="ra" style="background:${HCV[r[0].length%HCV.length]}">${r[0][0]}</span><span class="rn">${r[0]}</span><span class="rd">${r[1]}</span></div><p>${r[2]}</p></div>`).join(""):`<p class="muted2">Пока без отзывов — будь первым.</p>`}</div><aside class="book-card"><div class="bc-price"><b>₾${s.rate}</b> / час</div><div class="bkf"><label>Дата</label><input type="date" id="bkd" value="${bk.date}" min="${todayStr()}"></div><label class="bkf-label">Время начала</label><div class="slots" id="slots">${slots.map(h=>`<button class="slot ${d.booked.includes(h)?'off':''} ${bk.slot===h?'on':''}" data-h="${h}" ${d.booked.includes(h)?'disabled':''}>${h}:00</button>`).join("")}</div><div class="bkf"><label>Часов</label><select id="bkh">${[1,2,3,4,5,6,8].map(h=>`<option value="${h}" ${h===bk.hours?'selected':''}>${h} ${plural(h,"час","часа","часов")}</option>`).join("")}</select></div><div class="bkf"><label>Сколько человек</label><input id="bkg" inputmode="numeric" value="${bk.guests||''}" placeholder="до ${s.cap}"></div><div class="calc" id="calc"></div><button class="btn btn-coral bkcta" id="bkB">Забронировать</button><p class="muted2" style="text-align:center;margin-top:8px;">Пока ничего не спишем — подтверждение на след. шаге</p></aside></div>`;
+  const rc=s.id*13+24, late=s.cat==="loft"||s.cat==="event";
+  return `<div class="subnav"><button data-sec="sec-photos">Фото</button><button data-sec="sec-about">О месте</button><button data-sec="sec-amen">Удобства</button><button data-sec="sec-addons">Услуги</button><button data-sec="sec-loc">Расположение</button><button data-sec="sec-know">Важно знать</button></div>
+   <div id="sec-photos"></div>
+   ${galleryHTML(s)}
+   <div class="detail-grid">
+     <div class="detail-main">
+       <h1 class="detail-h1">${s.name}</h1>
+       <div class="detail-loc"><a href="#" onclick="goHome();setTimeout(()=>setLoc('${s.loc}'),60);return false;">${s.loc}</a>, Тбилиси · ${s.catName}</div>
+       <div class="facts">${s.isNew?'<span class="fact"><b style="color:var(--coral-deep)">новое место</b></span>':`<span class="fact">★ <b>${s.rating}</b> · ${rc} отз.</span>`}<span class="fact">до <b>${s.cap}</b> чел.</span><span class="fact">от <b>2 ч</b></span><span class="fact">~<b>${s.cap*4}</b> м²</span></div>
+       <div class="host-row"><span class="ra" style="background:${HCV[s.host.length%HCV.length]}">${s.host[0]}</span><div style="flex:1"><b>Хозяин — ${s.host}</b>${s.rating>=4.8?' <span class="badge">Опытный хозяин</span>':''}<div class="muted2">Обычно отвечает в течение часа</div></div><button class="btn btn-ghost" id="msgHost">Написать</button></div>
+       <section id="sec-about" class="detail-sec reveal"><h3 class="detail-h3">О месте</h3><p class="detail-desc">${d.desc}</p><div class="facet-grid">${FACETS.map(f=>`<div class="facet"><div class="facet-k">${f[0]}</div><div class="facet-v">${f[1]}</div></div>`).join("")}</div></section>
+       <section id="sec-amen" class="detail-sec reveal"><h3 class="detail-h3">Что включено</h3>${d.amen.length?`<div class="feat-grid">${d.amen.map(a=>`<div class="feat">✓ ${a}</div>`).join("")}</div>`:`<p class="muted2">Хозяин добавит удобства чуть позже.</p>`}</section>
+       <section id="sec-addons" class="detail-sec reveal"><h3 class="detail-h3">Услуги хозяина</h3><p class="muted2" style="margin-bottom:12px;">Добавишь при бронировании — по желанию.</p><div class="addon-grid">${ADDONS.map((a,i)=>`<div class="addon"><div class="addon-pic"><div class="ph-bg">${room((WALL[s.cat]??30)+i*22,s.id+i+5)}</div></div><div><b>${a[0]}</b><div class="muted2">${a[1]}</div></div></div>`).join("")}</div></section>
+       <section id="sec-loc" class="detail-sec reveal"><h3 class="detail-h3">Расположение</h3><div class="mapcard"><div class="map-grid"></div><div class="map-pin">📍</div><div class="map-lbl">${s.loc}, Тбилиси</div></div><p class="muted2" style="margin-top:10px;">Точный адрес появится после подтверждения брони.</p><div class="hours"><b>Часы работы</b><span>${late?"Пн–Вс · до 02:00":"Пн–Вс · 09:00–22:00"}</span></div></section>
+       <section id="sec-know" class="detail-sec reveal"><h3 class="detail-h3">Важно знать</h3><div class="know"><div><b>Отмена</b><p class="muted2">Бесплатно за 24 часа до начала — вернём оплату и залог полностью.</p></div><div><b>Залог</b><p class="muted2">Возвратный, вернётся в течение суток после встречи.</p></div><div><b>Чистота</b><p class="muted2">Хозяин убирает между бронями. Оставь место таким же.</p></div></div></section>
+       <section class="detail-sec reveal"><h3 class="detail-h3">${s.isNew?"Отзывы":`★ ${s.rating} · ${rc} отзывов`}</h3>${d.rev.length?d.rev.map(r=>`<div class="review"><div class="rh"><span class="ra" style="background:${HCV[r[0].length%HCV.length]}">${r[0][0]}</span><span class="rn">${r[0]}</span><span class="rd">${r[1]}</span></div><p>${r[2]}</p></div>`).join(""):`<p class="muted2">Пока без отзывов — будь первым, кто здесь побывает.</p>`}</section>
+     </div>
+     <aside class="book-card">
+       <div class="bc-price"><b>₾${s.rate}</b> / час <span class="muted2">· от 2 часов</span></div>
+       <div class="bkf"><label>Дата</label><input type="date" id="bkd" value="${bk.date}" min="${todayStr()}"></div>
+       <label class="bkf-label">Время начала</label>
+       <div class="slots" id="slots">${slots.map(h=>`<button class="slot ${d.booked.includes(h)?'off':''} ${bk.slot===h?'on':''}" data-h="${h}" ${d.booked.includes(h)?'disabled':''}>${h}:00</button>`).join("")}</div>
+       <div class="bkf"><label>Часов</label><select id="bkh">${[1,2,3,4,5,6,8].map(h=>`<option value="${h}" ${h===bk.hours?'selected':''}>${h} ${plural(h,"час","часа","часов")}</option>`).join("")}</select></div>
+       <div class="bkf"><label>Сколько человек</label><input id="bkg" inputmode="numeric" value="${bk.guests||''}" placeholder="до ${s.cap}"></div>
+       <div class="calc" id="calc"></div>
+       <button class="btn btn-coral bkcta" id="bkB">Забронировать</button>
+       <p class="muted2" style="text-align:center;margin-top:8px;">Пока ничего не спишем · бесплатная отмена за 24 ч</p>
+     </aside>
+   </div>`;
 }
 function payHTML(s){const v=vals(s);return `<div class="pay-wrap"><h1 class="detail-h1">Оплата брони</h1><div class="pay-sum"><div class="ps-row"><span>${s.name}</span><span>${s.loc}</span></div><div class="ps-row"><span>${bk.date.split("-").reverse().join(".")} · ${bk.slot}:00–${bk.slot+bk.hours}:00</span><span>${bk.guests||1} чел.</span></div><div class="crow2"><span>Аренда</span><b>₾${v.sub}</b></div><div class="crow2"><span>Залог (вернётся)</span><b>₾${v.dep}</b></div><div class="crow2 tot"><span>Итого</span><b>₾${v.total}</b></div></div><div class="pay-methods"><button class="pm sel" data-m="card">Карта</button><button class="pm" data-m="apple">Apple Pay</button><button class="pm" data-m="tg">Telegram Pay</button></div><div id="cardForm"><div class="bkf"><label>Номер карты</label><input id="cNum" inputmode="numeric" placeholder="0000 0000 0000 0000"></div><div class="cardgrid"><div class="bkf"><label>Срок</label><input id="cExp" placeholder="ММ/ГГ"></div><div class="bkf"><label>CVC</label><input id="cCvc" inputmode="numeric" placeholder="123"></div></div></div><button class="btn btn-coral bkcta" id="payB">Оплатить ₾${v.total}</button></div>`;}
 function confirmPageHTML(s){const v=vals(s);return `<div class="confirm"><div class="ico2">✓</div><h1 class="detail-h1">«${s.name}» забронировано</h1><p class="muted2" style="margin-top:8px;">${bk.date.split("-").reverse().join(".")} · ${bk.slot}:00–${bk.slot+bk.hours}:00 · ${bk.guests||1} чел.</p><div class="pay-sum" style="text-align:left;"><div class="crow2"><span>Хозяин</span><b>${s.host}</b></div><div class="crow2 tot"><span>Оплачено</span><b>₾${v.total}</b></div></div><p class="muted2">${s.host} получит уведомление. Бронь уже в твоём кабинете → «Мои брони». Напомним за день до встречи.</p><div style="display:flex;gap:10px;margin-top:18px;justify-content:center;"><button class="btn btn-ghost" id="cHome">На главную</button><button class="btn btn-coral" id="cDash">Открыть кабинет</button></div></div>`;}
@@ -535,6 +609,9 @@ function wireDetail(){
   $("#bkh").onchange=e=>{bk.hours=+e.target.value;calc();};
   $("#bkg").addEventListener("input",e=>{e.target.value=e.target.value.replace(/\D/g,"").slice(0,4);bk.guests=parseInt(e.target.value)||0;});
   $("#bkB").onclick=()=>{if(!bk.slot)return toast("Выбери время начала");pageView="pay";renderPage();window.scrollTo(0,0);};
+  $("#page").querySelectorAll(".subnav button").forEach(b=>b.onclick=()=>{const t=document.getElementById(b.dataset.sec);if(t)t.scrollIntoView({behavior:"smooth",block:"start"});});
+  const mh=$("#msgHost");if(mh)mh.onclick=()=>toast("Чат с хозяином появится с подключением бэкенда");
+  reveal($("#page"));
   calc();
 }
 function wirePay(){
@@ -665,6 +742,8 @@ $("#favBtn").onclick=()=>toast(favs.size?`Сохранено мест: ${favs.si
 $("#authScrim").addEventListener("click",e=>{if(e.target===$("#authScrim"))closeAuth();});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){if($("#authScrim").classList.contains("open"))closeAuth();else if($("#page").classList.contains("open"))goHome();}});
 
+document.querySelectorAll('.cat-tile,.quote,.hcard,.faq-item,.host,#cats .sec-head,#districts .sec-head,#how .sec-head,#faq .sec-head').forEach(el=>el.classList.add('reveal'));
+reveal();
 syncNav();render();route();if(curUser())remindTomorrow();
 </script>
 </body>
