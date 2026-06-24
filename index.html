@@ -464,10 +464,10 @@ function myBookings(){return myBookingsCache.slice().sort((a,b)=>a.date.localeCo
 function syncNav(){
   $("#loginBtn").style.display=user?"none":"";
   $("#dashBtn").style.display=user?"":"none";
-  if(user)$("#dashBtn").textContent="👤 "+user.name.split(" ")[0];
+  if(user)$("#dashBtn").textContent=user.name.split(" ")[0];
   const ml=$("#mLogin"),md=$("#mDash");
   if(ml)ml.style.display=user?"none":"";
-  if(md){md.style.display=user?"":"none";if(user)md.textContent="👤 "+user.name.split(" ")[0]+" · Кабинет";}
+  if(md){md.style.display=user?"":"none";if(user)md.textContent=user.name.split(" ")[0]+" · Кабинет";}
 }
 function closeMenu(){const m=$("#mmenu");if(m)m.classList.remove("open");}
 
@@ -638,8 +638,8 @@ function viewEvents(){
     <div class="detail-grid">
       <div class="detail-main">
         <div class="steps" style="grid-template-columns:1fr 1fr;">
-          <div class="step reveal"><div class="num">★</div><h4>Аренда на день или под событие</h4><p>Если нужны нестандартные часы, весь день или особые условия — договоримся индивидуально.</p></div>
-          <div class="step reveal"><div class="num">☎</div><h4>Поможем с подготовкой</h4><p>Подскажем по рассадке, технике, кейтерингу и таймингу под твой формат.</p></div>
+          <div class="step reveal"><div class="num">${ic('calendar')}</div><h4>Аренда на день или под событие</h4><p>Если нужны нестандартные часы, весь день или особые условия — договоримся индивидуально.</p></div>
+          <div class="step reveal"><div class="num">${ic('chat')}</div><h4>Поможем с подготовкой</h4><p>Подскажем по рассадке, технике, кейтерингу и таймингу под твой формат.</p></div>
         </div>
         <p class="muted" style="margin-top:18px;">Для обычной брони по часам подготовка не нужна — просто <a class="link" href="#" data-go="book">забронируй онлайн</a>.</p>
       </div>
@@ -710,7 +710,7 @@ async function submitAuth(){
   }catch(e){go2.disabled=false;err(e.message||"Не удалось войти");}
 }
 function logout(){token=null;localStorage.removeItem("lumi_token");user=null;myBookingsCache=[];syncNav();closeDash();toast("Ты вышел из профиля.");}
-function remindTomorrow(){const t=tomorrowStr(),b=myBookings().find(x=>x.date===t);if(b)setTimeout(()=>toast(`🔔 Напоминание: завтра у тебя бронь в ${b.spaceName}`),1400);}
+function remindTomorrow(){const t=tomorrowStr(),b=myBookings().find(x=>x.date===t);if(b)setTimeout(()=>toast(`Напоминание: завтра у тебя бронь в ${b.spaceName}`),1400);}
 
 /* ---------- maps ---------- */
 let leafletReady=null;
@@ -718,6 +718,19 @@ function loadLeaflet(){if(leafletReady)return leafletReady;leafletReady=new Prom
 async function showMap(elId,lat,lon){try{const L=await loadLeaflet();const el=document.getElementById(elId);if(!el)return;el.innerHTML="";const map=L.map(el,{zoomControl:true,scrollWheelZoom:false,attributionControl:false}).setView([lat,lon],15);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(map);L.marker([lat,lon]).addTo(map);setTimeout(()=>map.invalidateSize(),120);}catch(e){}}
 
 /* ---------- dashboard ---------- */
+function ic(name){
+  const p={
+    grid:'<rect x="3" y="3" width="7" height="7" rx="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.6"/><rect x="3" y="14" width="7" height="7" rx="1.6"/><rect x="14" y="14" width="7" height="7" rx="1.6"/>',
+    ticket:'<path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2 2 2 0 0 0 0 4 2 2 0 0 1-2 2H6a2 2 0 0 1-2-2 2 2 0 0 0 0-4Z"/><path d="M14 6v12"/>',
+    user:'<circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3.1-5.6 7-5.6s7 2 7 5.6"/>',
+    bell:'<path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z"/><path d="M10.2 20a2 2 0 0 0 3.6 0"/>',
+    calendar:'<rect x="3.5" y="5" width="17" height="15.5" rx="2.2"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/>',
+    chat:'<path d="M20.5 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 20.5 12Z"/>',
+    spark:'<path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2 2-6Z"/>'
+  };
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="18" height="18" style="display:block;">${p[name]||''}</svg>`;
+}
+
 let dashTab="overview";
 async function openDash(tab){if(!user)return openAuth("login");dashTab=tab||"overview";$("#dash").classList.add("open");document.body.style.overflow="hidden";renderDash();await refreshMine();renderDash();}
 function closeDash(){$("#dash").classList.remove("open");document.body.style.overflow="";}
@@ -725,21 +738,35 @@ function bookingItem(b,isTom){const u=PX(GAL[0]);return `<div class="bk-item"><d
 function renderDash(){
   if(!user){closeDash();return;}
   const mine=myBookings().filter(b=>b.date>=todayStr()),past=myBookings().filter(b=>b.date<todayStr()),t=tomorrowStr();
-  const nav=[["overview","Обзор","◎"],["bookings","Мои брони","🎟"],["profile","Профиль","👤"]];
+  const nav=[["overview","Обзор","grid"],["bookings","Мои брони","ticket"],["profile","Профиль","user"]];
   let main="";
   if(dashTab==="overview"){
-    main=`<h1 class="dash-h1">Привет, ${user.name.split(" ")[0]} 👋</h1><div class="stat-grid"><div class="stat"><b>${mine.length}</b><span>предстоящих броней</span></div><div class="stat"><b>${past.length}</b><span>уже прошло</span></div><div class="stat"><b>${myBookings().reduce((a,b)=>a+(b.total||b.sub),0)}</b><span>₾ всего</span></div></div>${mine.some(b=>b.date===t)?`<div class="reminder">🔔 Завтра у тебя бронь — не забудь!</div>`:""}<div class="quick"><button class="btn btn-primary" data-book="1">Забронировать</button><button class="btn btn-ghost" data-go="about">О пространстве</button></div>`;
+    main=`<h1 class="dash-h1">Привет, ${user.name.split(" ")[0]}</h1><div class="stat-grid"><div class="stat"><b>${mine.length}</b><span>предстоящих броней</span></div><div class="stat"><b>${past.length}</b><span>уже прошло</span></div><div class="stat"><b>${myBookings().reduce((a,b)=>a+(b.total||b.sub),0)}</b><span>₾ всего</span></div></div>${mine.some(b=>b.date===t)?`<div class="reminder"><span style="display:inline-flex;vertical-align:-4px;margin-right:7px;">${ic('bell')}</span>Завтра у тебя бронь — не забудь!</div>`:""}${user.isMaster?`<div class="reminder" style="background:var(--soft);border-color:var(--line-2);color:var(--ink);">Ты отмечен как мастер. <a class="link" href="#" data-go="events">Оставить заявку на мероприятие →</a></div>`:""}<div class="quick"><button class="btn btn-primary" data-book="1">Забронировать</button><button class="btn btn-ghost" data-go="about">О пространстве</button></div>`;
   }else if(dashTab==="bookings"){
-    main=`<h1 class="dash-h1">Мои брони</h1>${mine.some(b=>b.date===t)?`<div class="reminder">🔔 Завтра у тебя бронь!</div>`:""}${mine.length?mine.map(b=>bookingItem(b,b.date===t)).join(""):`<p class="empty2">Пока нет броней. Забронируй пространство — оно появится здесь.</p>`}${past.length?`<h3 class="detail-h3" style="margin-top:24px;">Прошедшие</h3>${past.map(b=>bookingItem(b,false)).join("")}`:""}`;
+    main=`<h1 class="dash-h1">Мои брони</h1>${mine.some(b=>b.date===t)?`<div class="reminder"><span style="display:inline-flex;vertical-align:-4px;margin-right:7px;">${ic('bell')}</span>Завтра у тебя бронь!</div>`:""}${mine.length?mine.map(b=>bookingItem(b,b.date===t)).join(""):`<p class="empty2">Пока нет броней. Забронируй пространство — оно появится здесь.</p>`}${past.length?`<h3 class="detail-h3" style="margin-top:24px;">Прошедшие</h3>${past.map(b=>bookingItem(b,false)).join("")}`:""}`;
   }else{
-    main=`<h1 class="dash-h1">Профиль</h1><div class="form-wrap"><div class="bkf"><label>Имя</label><input value="${user.name}" disabled></div><div class="bkf"><label>Почта</label><input value="${user.email}" disabled></div><button class="btn btn-ghost" id="logoutBtn" style="margin-top:16px;">Выйти из профиля</button></div>`;
+    main=`<h1 class="dash-h1">Профиль</h1><div class="form-wrap"><div class="bkf"><label>Имя</label><input id="pfName" value="${user.name||''}" placeholder="Как тебя зовут"></div><div class="bkf"><label>Телефон</label><input id="pfPhone" value="${user.phone||''}" placeholder="+995 555 12 34 56"></div><div class="bkf"><label>Telegram</label><input id="pfTg" value="${user.telegram||''}" placeholder="@username"></div><div class="bkf"><label>Почта</label><input value="${user.email}" disabled><p class="faint" style="margin-top:6px;">Почта используется для входа — её менять нельзя.</p></div><div class="bkf"><label>Статус</label><button class="amen-chip ${user.isMaster?'sel':''}" id="masterToggle">${user.isMaster?'✓ Я мастер':'Отметить, что я мастер'}</button><p class="faint" style="margin-top:8px;">Мастера проводят свои мероприятия в пространстве. Отметь — и в обзоре появится быстрая кнопка для заявки на аренду под событие.</p></div><div style="display:flex;gap:10px;margin-top:6px;flex-wrap:wrap;"><button class="btn btn-primary" id="pfSave">Сохранить</button><button class="btn btn-ghost" id="logoutBtn">Выйти из профиля</button></div></div>`;
   }
-  $("#dash").innerHTML=`<div class="dash-top"><a class="brand" href="#" id="dashLogo"><span class="mark"></span>Lumi&nbsp;Space</a><div style="flex:1"></div><div class="dash-user"><div class="dash-av">${user.name[0]}</div></div><button class="btn btn-ghost" id="dashExit">На сайт</button></div><div class="dash-shell"><nav class="dash-side">${nav.map(([k,l,ic])=>`<button class="dnav ${dashTab===k?"active":""}" data-tab="${k}"><span>${ic}</span>${l}</button>`).join("")}</nav><main class="dash-main">${main}</main></div>`;
+  $("#dash").innerHTML=`<div class="dash-top"><a class="brand" href="#" id="dashLogo"><span class="mark"></span>Lumi&nbsp;Space</a><div style="flex:1"></div><div class="dash-user"><div class="dash-av">${user.name[0]}</div></div><button class="btn btn-ghost" id="dashExit">На сайт</button></div><div class="dash-shell"><nav class="dash-side">${nav.map(([k,l,icn])=>`<button class="dnav ${dashTab===k?"active":""}" data-tab="${k}"><span style="display:inline-flex;">${ic(icn)}</span>${l}</button>`).join("")}</nav><main class="dash-main">${main}</main></div>`;
   $("#dashExit").onclick=closeDash;$("#dashLogo").onclick=e=>{e.preventDefault();closeDash();};
   $("#dash").querySelectorAll(".dnav").forEach(b=>b.onclick=()=>{dashTab=b.dataset.tab;renderDash();});
   $("#dash").querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{closeDash();go(b.dataset.go);});
   $("#dash").querySelectorAll("[data-book]").forEach(b=>b.onclick=()=>{closeDash();go("book");});
   const lb=$("#logoutBtn");if(lb)lb.onclick=logout;
+  const mt=$("#masterToggle");if(mt)mt.onclick=()=>setMaster(!user.isMaster);
+  const ps=$("#pfSave");if(ps)ps.onclick=saveProfile;
+}
+async function saveProfile(){
+  const name=($("#pfName").value||"").trim();if(!name)return toast("Впиши имя");
+  const b=$("#pfSave");b.disabled=true;b.textContent="Сохраняем…";
+  try{const res=await api("/api/me/update",{method:"POST",auth:true,body:{name,phone:($("#pfPhone").value||"").trim(),telegram:($("#pfTg").value||"").trim()}});user=Object.assign(user||{},res);syncNav();}
+  catch(e){b.disabled=false;b.textContent="Сохранить";return toast(e.message||"Не удалось сохранить");}
+  renderDash();toast("Профиль обновлён");
+}
+async function setMaster(val){
+  try{const res=await api("/api/me/master",{method:"POST",auth:true,body:{isMaster:val}});user.isMaster=res.isMaster;}
+  catch(e){return toast(e.message||"Не удалось сохранить");}
+  renderDash();toast(user.isMaster?"Отмечено: ты мастер":"Статус снят");
 }
 
 /* ---------- init ---------- */

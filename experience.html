@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>Lumi Space — пространство света и звука</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{background:#05060a;color:#EAF0FF;font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
+  body{overflow-x:hidden;}
+  a{color:inherit;text-decoration:none;}
+  #c{position:fixed;inset:0;width:100vw;height:100vh;display:block;z-index:0;}
+  .grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.04;mix-blend-mode:screen;
+    background-image:radial-gradient(circle at 50% 50%, #fff 0.5px, transparent 0.6px);background-size:3px 3px;}
+  .vign{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,.55) 100%);}
+
+  /* content over canvas */
+  main{position:relative;z-index:2;}
+  section{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:0 7vw;}
+  .hud{position:fixed;z-index:5;top:0;left:0;right:0;display:flex;align-items:center;gap:14px;padding:22px 7vw;pointer-events:none;}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:19px;letter-spacing:-.03em;pointer-events:auto;}
+  .mark{width:14px;height:14px;border-radius:5px;background:#1E5DFF;box-shadow:0 0 14px 2px rgba(30,93,255,.8);}
+  .hud .sp{flex:1;}
+  .ghost{pointer-events:auto;font-size:13.5px;font-weight:500;color:#AEB9D6;border:1px solid rgba(174,185,214,.28);
+    padding:9px 16px;border-radius:999px;transition:.2s;backdrop-filter:blur(6px);}
+  .ghost:hover{color:#fff;border-color:rgba(255,255,255,.5);}
+
+  .eyebrow{font-size:12.5px;letter-spacing:.32em;text-transform:uppercase;color:#6E83C0;margin-bottom:26px;font-weight:600;}
+  h1{font-size:clamp(44px,9vw,128px);font-weight:800;letter-spacing:-.045em;line-height:.92;
+     background:linear-gradient(180deg,#FFFFFF 0%,#BFD0FF 60%,#5E80E0 110%);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sub{margin-top:26px;max-width:24ch;font-size:clamp(15px,2.1vw,20px);color:#9FB0DA;font-weight:450;line-height:1.5;}
+  .meta{margin-top:40px;display:flex;gap:34px;flex-wrap:wrap;}
+  .meta div b{display:block;font-size:24px;font-weight:800;letter-spacing:-.02em;}
+  .meta div span{font-size:12px;color:#6E83C0;letter-spacing:.04em;}
+  .scrollhint{position:fixed;z-index:5;bottom:26px;left:50%;transform:translateX(-50%);font-size:12px;letter-spacing:.25em;
+    text-transform:uppercase;color:#6E83C0;display:flex;flex-direction:column;align-items:center;gap:9px;opacity:0;}
+  .scrollhint i{width:1px;height:34px;background:linear-gradient(#6E83C0,transparent);animation:drop 1.8s infinite;}
+  @keyframes drop{0%{transform:scaleY(0);transform-origin:top;}40%{transform:scaleY(1);transform-origin:top;}100%{transform:scaleY(1);transform-origin:bottom;opacity:0;}}
+
+  .s2-line{font-size:clamp(22px,4vw,52px);font-weight:600;letter-spacing:-.03em;line-height:1.18;max-width:18ch;}
+  .s2-line span{color:#5E80E0;}
+  .cta{margin-top:38px;display:inline-flex;align-items:center;gap:10px;align-self:flex-start;
+       background:#fff;color:#0a0c12;font-weight:600;font-size:15px;padding:15px 26px;border-radius:12px;transition:.2s;}
+  .cta:hover{transform:translateY(-2px);box-shadow:0 16px 40px -12px rgba(120,160,255,.5);}
+
+  /* sound toggle */
+  .snd{display:none;}
+
+  /* enter overlay (removed) */
+  .enter,.enterbtn{display:none;}
+
+  .fallback{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;flex-direction:column;
+    text-align:center;padding:24px;background:linear-gradient(140deg,#070912,#0d1430,#070912);}
+  @media(max-width:560px){.hud,.snd{ } .meta{gap:22px;}}
+</style>
+</head>
+<body>
+
+<canvas id="c"></canvas>
+<div class="grain"></div>
+<div class="vign"></div>
+
+<div class="hud">
+  <a class="brand" href="https://vgabriell-pro.github.io/Lumi-spase/"><span class="mark"></span>Lumi&nbsp;Space</a>
+  <div class="sp"></div>
+  <a class="ghost" href="https://vgabriell-pro.github.io/Lumi-spase/">Забронировать →</a>
+</div>
+
+<main>
+  <section id="hero">
+    <div class="eyebrow" data-rise>Тбилиси · пространство по часам</div>
+    <h1 data-rise>Свет,<br>который<br>звучит.</h1>
+    <p class="sub" data-rise>Каждая частица движется по живому потоку, а кольца дышат в такт звуку. Так выглядит Lumi Space.</p>
+    <div class="meta" data-rise>
+      <div><b>65k</b><span>частиц в потоке</span></div>
+      <div><b>60</b><span>кадров в секунду</span></div>
+      <div><b>∞</b><span>траекторий</span></div>
+    </div>
+  </section>
+  <section id="s2">
+    <div class="s2-line" data-rise2>Пространство, в котором <span>хочется</span> провести съёмку, класс или вечер.</div>
+    <a class="cta" href="https://vgabriell-pro.github.io/Lumi-spase/" data-rise2>Открыть Lumi Space →</a>
+  </section>
+</main>
+
+<div class="scrollhint" id="hint"><span>листай</span><i></i></div>
+
+<div class="fallback" id="fallback">
+  <div class="ttl" style="font-size:48px;font-weight:800;background:linear-gradient(180deg,#fff,#7FA0FF);-webkit-background-clip:text;background-clip:text;color:transparent;">Lumi Space</div>
+  <p style="margin-top:14px;color:#8294C2;">Твой браузер не тянет 3D-сцену, но пространство ждёт.</p>
+  <a class="cta" style="margin-top:26px;" href="https://vgabriell-pro.github.io/Lumi-spase/">Открыть Lumi Space →</a>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GPUComputationRenderer } from 'three/addons/misc/GPUComputationRenderer.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const MOBILE = matchMedia('(max-width:760px)').matches;
+const SIM = MOBILE ? 128 : 256;            // SIM*SIM particles
+const COUNT = SIM * SIM;
+
+let renderer, scene, camera, composer, bloom, gpu, posVar, points, rings, group, clock;
+let started = false;
+
+/* ---------- shaders ---------- */
+const SIMPLEX = `
+vec3 mod289(vec3 x){return x-floor(x*(1.0/289.0))*289.0;}
+vec4 mod289(vec4 x){return x-floor(x*(1.0/289.0))*289.0;}
+vec4 permute(vec4 x){return mod289(((x*34.0)+1.0)*x);}
+vec4 taylorInvSqrt(vec4 r){return 1.79284291400159-0.85373472095314*r;}
+float snoise(vec3 v){
+  const vec2 C=vec2(1.0/6.0,1.0/3.0); const vec4 D=vec4(0.0,0.5,1.0,2.0);
+  vec3 i=floor(v+dot(v,C.yyy)); vec3 x0=v-i+dot(i,C.xxx);
+  vec3 g=step(x0.yzx,x0.xyz); vec3 l=1.0-g; vec3 i1=min(g.xyz,l.zxy); vec3 i2=max(g.xyz,l.zxy);
+  vec3 x1=x0-i1+C.xxx; vec3 x2=x0-i2+C.yyy; vec3 x3=x0-D.yyy;
+  i=mod289(i);
+  vec4 p=permute(permute(permute(i.z+vec4(0.0,i1.z,i2.z,1.0))+i.y+vec4(0.0,i1.y,i2.y,1.0))+i.x+vec4(0.0,i1.x,i2.x,1.0));
+  float n_=0.142857142857; vec3 ns=n_*D.wyz-D.xzx;
+  vec4 j=p-49.0*floor(p*ns.z*ns.z);
+  vec4 x_=floor(j*ns.z); vec4 y_=floor(j-7.0*x_);
+  vec4 x=x_*ns.x+ns.yyyy; vec4 y=y_*ns.x+ns.yyyy; vec4 h=1.0-abs(x)-abs(y);
+  vec4 b0=vec4(x.xy,y.xy); vec4 b1=vec4(x.zw,y.zw);
+  vec4 s0=floor(b0)*2.0+1.0; vec4 s1=floor(b1)*2.0+1.0; vec4 sh=-step(h,vec4(0.0));
+  vec4 a0=b0.xzyw+s0.xzyw*sh.xxyy; vec4 a1=b1.xzyw+s1.xzyw*sh.zzww;
+  vec3 p0=vec3(a0.xy,h.x); vec3 p1=vec3(a0.zw,h.y); vec3 p2=vec3(a1.xy,h.z); vec3 p3=vec3(a1.zw,h.w);
+  vec4 norm=taylorInvSqrt(vec4(dot(p0,p0),dot(p1,p1),dot(p2,p2),dot(p3,p3)));
+  p0*=norm.x;p1*=norm.y;p2*=norm.z;p3*=norm.w;
+  vec4 m=max(0.6-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.0); m=m*m;
+  return 42.0*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));
+}
+vec3 snoiseVec3(vec3 x){return vec3(snoise(x),snoise(x+vec3(123.4,98.2,33.1)),snoise(x+vec3(-54.3,12.8,77.5)));}
+vec3 curl(vec3 p){
+  const float e=0.12; vec3 dx=vec3(e,0.,0.),dy=vec3(0.,e,0.),dz=vec3(0.,0.,e);
+  vec3 p_x0=snoiseVec3(p-dx),p_x1=snoiseVec3(p+dx);
+  vec3 p_y0=snoiseVec3(p-dy),p_y1=snoiseVec3(p+dy);
+  vec3 p_z0=snoiseVec3(p-dz),p_z1=snoiseVec3(p+dz);
+  float x=p_y1.z-p_y0.z-p_z1.y+p_z0.y;
+  float y=p_z1.x-p_z0.x-p_x1.z+p_x0.z;
+  float z=p_x1.y-p_x0.y-p_y1.x+p_y0.x;
+  return normalize(vec3(x,y,z)/(2.0*e)+1e-6);
+}`;
+
+const COMPUTE = SIMPLEX + `
+uniform float uTime, uDelta, uSpeed, uScale, uAudio;
+float rand(vec2 n){return fract(sin(dot(n,vec2(12.9898,78.233)))*43758.5453);}
+void main(){
+  vec2 uv=gl_FragCoord.xy/resolution.xy;
+  vec4 t=texture2D(texturePosition,uv);
+  vec3 pos=t.xyz; float life=t.w;
+  vec3 v=curl(pos*uScale+vec3(0.0,0.0,uTime*0.04));
+  pos += v*uSpeed*uDelta*(1.0+uAudio*1.8);
+  life -= uDelta*(0.10+uAudio*0.06);
+  float r=length(pos);
+  if(life<0.0 || r>6.5){
+    float a=rand(uv+uTime); float b=rand(uv.yx+uTime*1.7); float c=rand(uv+0.37);
+    vec3 dir=normalize(vec3(a,b,c)-0.5);
+    pos=dir*(1.0+rand(uv*3.1+uTime)*2.6);
+    life=0.6+rand(uv+uTime*0.3)*1.2;
+  }
+  gl_FragColor=vec4(pos,life);
+}`;
+
+const PVERT = `
+uniform sampler2D uPos; uniform float uSize,uPix,uTime,uAudio;
+attribute vec2 ref; varying float vLife,vTw;
+void main(){
+  vec4 p=texture2D(uPos,ref); vLife=p.w;
+  vec4 mv=modelViewMatrix*vec4(p.xyz,1.0);
+  float tw=fract(sin(dot(ref,vec2(91.7,47.3)))*43758.5);
+  vTw=tw;
+  float twk=0.5+0.5*sin(uTime*1.4+tw*6.2831);
+  gl_PointSize=uSize*(0.5+twk*0.9)*(1.0+uAudio*0.9)*uPix*(7.5/max(-mv.z,0.1));
+  gl_Position=projectionMatrix*mv;
+}`;
+
+const PFRAG = `
+precision highp float; varying float vLife,vTw; uniform float uAudio;
+void main(){
+  vec2 c=gl_PointCoord-0.5; float d=length(c);
+  if(d>0.5) discard;
+  float a=smoothstep(0.5,0.0,d);
+  float life=clamp(vLife,0.0,1.0);
+  float bright=step(0.85,vTw);
+  vec3 dim=vec3(0.10,0.20,0.52);
+  vec3 hot=vec3(0.72,0.86,1.0);
+  vec3 col=mix(dim,hot,bright);
+  col += bright*vec3(0.35,0.55,1.0)*(0.6+uAudio*1.4);
+  gl_FragColor=vec4(col, a*life*(0.55+0.45*bright));
+}`;
+
+const RVERT = `varying vec2 vUv; void main(){vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`;
+const RFRAG = `
+precision highp float; varying vec2 vUv;
+uniform float uTime,uLow,uMid,uHigh,uAudio;
+void main(){
+  vec2 p=(vUv-0.5)*2.0; float r=length(p); float t=uTime;
+  float ring=0.0;
+  for(int i=0;i<4;i++){
+    float fi=float(i);
+    float band = i==0?uLow:(i==1?uMid:(i==2?uHigh:uAudio));
+    float rad=0.20+fi*0.19+0.05*sin(t*0.5+fi*1.3);
+    float w=0.010+0.022*band;
+    ring += smoothstep(w,0.0,abs(r-rad))*(0.20+band*1.7);
+  }
+  float pr=fract(t*0.13);
+  ring += smoothstep(0.018,0.0,abs(r-pr*1.15))*uAudio*1.3*(1.0-pr);
+  float fade=smoothstep(1.15,0.18,r);
+  vec3 col=mix(vec3(0.16,0.42,1.0),vec3(0.85,0.93,1.0),clamp(ring*0.6,0.0,1.0));
+  gl_FragColor=vec4(col*ring*fade, ring*fade*0.9);
+}`;
+
+/* ---------- ambient pulse (no audio) ---------- */
+let aLow=0,aMid=0,aHigh=0,aLvl=0;
+function updatePulse(dt,t){
+  const lo=0.30+0.20*Math.sin(t*0.7)+0.06*Math.sin(t*1.9);
+  const mi=0.26+0.18*Math.sin(t*0.5+1.0)+0.05*Math.sin(t*2.3+0.5);
+  const hi=0.20+0.15*Math.sin(t*1.1+2.0)+0.05*Math.sin(t*3.1);
+  const lv=0.22+0.14*Math.sin(t*0.6)+0.05*Math.sin(t*1.7+1.0);
+  const k=1-Math.pow(0.001,dt);
+  aLow+=(lo-aLow)*k; aMid+=(mi-aMid)*k; aHigh+=(hi-aHigh)*k; aLvl+=(lv-aLvl)*k;
+}
+
+/* ---------- build scene ---------- */
+function init(){
+  const canvas=document.getElementById('c');
+  renderer=new THREE.WebGLRenderer({canvas,antialias:false,alpha:false,powerPreference:'high-performance'});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,MOBILE?2:1.8));
+  renderer.setSize(innerWidth,innerHeight);
+  renderer.setClearColor(0x05060a,1);
+  renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.05;
+
+  scene=new THREE.Scene();
+  scene.fog=new THREE.FogExp2(0x05060a,0.055);
+  camera=new THREE.PerspectiveCamera(58,innerWidth/innerHeight,0.1,100);
+  camera.position.set(0,0,7.4);
+  group=new THREE.Group(); scene.add(group);
+  clock=new THREE.Clock();
+
+  // GPGPU
+  gpu=new GPUComputationRenderer(SIM,SIM,renderer);
+  const tex=gpu.createTexture();
+  const arr=tex.image.data;
+  for(let i=0;i<COUNT;i++){
+    const i4=i*4;
+    const dir=new THREE.Vector3(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5).normalize();
+    const rad=1+Math.random()*3.2;
+    arr[i4]=dir.x*rad; arr[i4+1]=dir.y*rad; arr[i4+2]=dir.z*rad; arr[i4+3]=Math.random();
+  }
+  posVar=gpu.addVariable('texturePosition',COMPUTE,tex);
+  gpu.setVariableDependencies(posVar,[posVar]);
+  Object.assign(posVar.material.uniforms,{
+    uTime:{value:0},uDelta:{value:0},uSpeed:{value:REDUCED?0.3:0.62},uScale:{value:0.33},uAudio:{value:0}
+  });
+  const err=gpu.init(); if(err){ throw new Error(err); }
+
+  // particles
+  const g=new THREE.BufferGeometry();
+  const pos=new Float32Array(COUNT*3); const ref=new Float32Array(COUNT*2);
+  for(let i=0;i<COUNT;i++){ ref[i*2]=(i%SIM)/SIM; ref[i*2+1]=Math.floor(i/SIM)/SIM; }
+  g.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  g.setAttribute('ref',new THREE.BufferAttribute(ref,2));
+  const pmat=new THREE.ShaderMaterial({
+    uniforms:{uPos:{value:null},uSize:{value:MOBILE?2.2:2.7},uPix:{value:renderer.getPixelRatio()},uTime:{value:0},uAudio:{value:0}},
+    vertexShader:PVERT,fragmentShader:PFRAG,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending
+  });
+  points=new THREE.Points(g,pmat); points.frustumCulled=false; group.add(points);
+
+  // rings
+  const rmat=new THREE.ShaderMaterial({
+    uniforms:{uTime:{value:0},uLow:{value:0},uMid:{value:0},uHigh:{value:0},uAudio:{value:0}},
+    vertexShader:RVERT,fragmentShader:RFRAG,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending
+  });
+  rings=new THREE.Mesh(new THREE.PlaneGeometry(13,13),rmat);
+  scene.add(rings);
+
+  // bloom (selective via luminance threshold)
+  composer=new EffectComposer(renderer);
+  composer.addPass(new RenderPass(scene,camera));
+  bloom=new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight), MOBILE?0.85:1.05, 0.62, 0.16);
+  composer.addPass(bloom);
+  composer.addPass(new OutputPass());
+
+  addEventListener('resize',onResize);
+  // parallax
+  addEventListener('pointermove',e=>{ tmx=(e.clientX/innerWidth-0.5); tmy=(e.clientY/innerHeight-0.5); },{passive:true});
+}
+
+let tmx=0,tmy=0,mx=0,my=0,scrollP=0;
+function onResize(){
+  camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight); composer.setSize(innerWidth,innerHeight);
+}
+
+function render(){
+  const dt=Math.min(clock.getDelta(),0.033); const t=clock.elapsedTime;
+  updatePulse(dt,t);
+  // sim
+  posVar.material.uniforms.uTime.value=t;
+  posVar.material.uniforms.uDelta.value=dt;
+  posVar.material.uniforms.uAudio.value=aLvl;
+  gpu.compute();
+  points.material.uniforms.uPos.value=gpu.getCurrentRenderTarget(posVar).texture;
+  points.material.uniforms.uTime.value=t;
+  points.material.uniforms.uAudio.value=aLvl;
+  const ru=rings.material.uniforms;
+  ru.uTime.value=t; ru.uLow.value=aLow; ru.uMid.value=aMid; ru.uHigh.value=aHigh; ru.uAudio.value=aLvl;
+  // motion
+  mx+=(tmx-mx)*0.04; my+=(tmy-my)*0.04;
+  group.rotation.y += dt*(REDUCED?0.015:0.045);
+  group.rotation.x = my*0.4;
+  group.rotation.z = mx*0.12;
+  rings.lookAt(camera.position);
+  camera.position.x += (mx*1.2 - camera.position.x)*0.05;
+  camera.position.y += (-my*1.0 - camera.position.y)*0.05;
+  camera.position.z = 7.4 - scrollP*2.2;
+  bloom.strength = (MOBILE?0.85:1.05) + aLvl*0.7 + scrollP*0.3;
+  camera.lookAt(0,0,0);
+  composer.render();
+}
+
+function loop(time){ if(lenis) lenis.raf(time); if(started) render(); requestAnimationFrame(loop); }
+
+/* ---------- scroll (Lenis + GSAP) ---------- */
+let lenis;
+function initScroll(){
+  if(typeof Lenis==='undefined'){ return; }
+  lenis=new Lenis({duration:1.15,smoothWheel:true});
+  if(window.ScrollTrigger){
+    gsap.registerPlugin(ScrollTrigger);
+    lenis.on('scroll',ScrollTrigger.update);
+    ScrollTrigger.create({trigger:'#hero',start:'top top',end:'bottom top',scrub:true,
+      onUpdate:s=>{scrollP=s.progress;}});
+    gsap.utils.toArray('[data-rise2]').forEach((el,i)=>{
+      gsap.from(el,{y:40,opacity:0,duration:1,ease:'power3.out',
+        scrollTrigger:{trigger:'#s2',start:'top 65%'},delay:i*0.12});
+    });
+  }
+}
+
+/* ---------- start ---------- */
+function reveal(){
+  if(window.gsap){
+    gsap.fromTo('[data-rise]',{y:46,opacity:0},{y:0,opacity:1,duration:1.3,stagger:0.12,ease:'power3.out',delay:0.25});
+    gsap.to('#hint',{opacity:1,duration:1,delay:1.2});
+  }
+}
+
+try{
+  init();
+  initScroll();
+  started=true;
+  requestAnimationFrame(loop);
+  reveal();
+}catch(e){
+  console.error(e);
+  document.getElementById('c').style.display='none';
+  document.getElementById('fallback').style.display='flex';
+}
+</script>
+</body>
+</html>
