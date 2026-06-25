@@ -508,39 +508,47 @@ function countUp(g,b){
 function animateView(){
   const v=$("#view"), g=window.gsap, ST=window.ScrollTrigger;
   if(!g){reveal(v);return;}
-  const reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
   if(ST){g.registerPlugin(ST);ST.getAll().forEach(t=>t.kill());}
+  const reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
   v.querySelectorAll(".reveal").forEach(e=>e.classList.add("in"));
   const ease="power3.out";
+  /* hero — plays on load, never scroll-dependent */
   const hero=v.querySelector(".hero");
   if(hero){
     const h=hero.querySelector(".hero-h");
     if(h&&!reduced){const sp=splitWords(h);g.from(sp,{yPercent:120,duration:.9,ease:"power4.out",stagger:.05,delay:.05});}
-    g.from(hero.querySelectorAll(".eyebrow,.hero-sub,.facts"),{y:reduced?0:30,autoAlpha:0,duration:.8,ease,stagger:.08,delay:.15});
-    const gal=hero.querySelector(".gallery");
-    if(gal){g.from(gal,{autoAlpha:0,y:reduced?0:30,duration:.9,ease,delay:.2});
-      const mi=gal.querySelector(".main .ph-img");if(mi&&!reduced)g.from(mi,{scale:1.28,duration:1.7,ease,delay:.2});}
-    const card=hero.querySelector(".book-card");
-    if(card)g.from(card,{y:reduced?0:42,autoAlpha:0,duration:.9,ease,delay:.25,clearProps:"transform"});
+    if(!reduced){
+      g.from(hero.querySelectorAll(".eyebrow,.hero-sub,.facts"),{y:26,autoAlpha:0,duration:.7,ease,stagger:.08,delay:.12});
+      const gal=hero.querySelector(".gallery");
+      if(gal){g.from(gal,{autoAlpha:0,y:26,duration:.8,ease,delay:.18});
+        const mi=gal.querySelector(".main .ph-img");if(mi)g.from(mi,{scale:1.25,duration:1.5,ease,delay:.18});}
+      const card=hero.querySelector(".book-card");
+      if(card)g.from(card,{autoAlpha:0,y:34,duration:.8,ease,delay:.22});
+    }
     hero.querySelectorAll(".facts b").forEach(b=>countUp(g,b));
   }
   const ph=v.querySelector(".page-head");
-  if(ph)g.from(ph,{autoAlpha:0,duration:.55,ease:"power1.out"});
-  v.querySelectorAll(".section .sec-head, section:not(.hero) .detail-grid, .band").forEach(el=>{
-    g.from(el,{y:reduced?0:36,autoAlpha:0,duration:.7,ease,clearProps:"transform",scrollTrigger:{trigger:el,start:"top 86%"}});
-  });
+  if(ph&&!reduced)g.from(ph,{autoAlpha:0,duration:.5,ease});
+  if(reduced)return;
+  /* scroll reveals via IntersectionObserver — reliable on mobile, never leaves content hidden */
+  const targets=[];
+  const io=new IntersectionObserver((es,obs)=>{es.forEach(e=>{if(e.isIntersecting){const t=e.target,k=t._kids;g.to(k||t,{opacity:1,y:0,duration:.6,ease,stagger:k?.08:0,overwrite:"auto"});obs.unobserve(t);}});},{rootMargin:"0px 0px -5% 0px",threshold:.03});
+  v.querySelectorAll(".section .sec-head, section:not(.hero) .detail-grid, .band").forEach(el=>{g.set(el,{opacity:0,y:24});targets.push(el);io.observe(el);});
   [[".feat-grid",".feat"],[".steps",".step"],[".faq",".faq-item"],[".pstrip",".g-cell"]].forEach(([wrap,child])=>{
-    const w=v.querySelector(wrap);if(!w)return;
-    g.from(w.querySelectorAll(child),{y:reduced?0:24,autoAlpha:0,duration:.55,ease,stagger:.07,clearProps:"transform",scrollTrigger:{trigger:w,start:"top 90%"}});
+    const w=v.querySelector(wrap);if(!w)return;const kids=w.querySelectorAll(child);if(!kids.length)return;
+    g.set(kids,{opacity:0,y:20});w._kids=kids;kids.forEach(k=>targets.push(k));io.observe(w);
   });
-  if(!reduced){
+  /* safety net: force-show anything still hidden */
+  setTimeout(()=>targets.forEach(el=>{if(parseFloat(getComputedStyle(el).opacity||"1")<1)g.to(el,{opacity:1,y:0,duration:.3});}),2200);
+  /* parallax — affects position only, never visibility */
+  if(ST){
     v.querySelectorAll(".pstrip .g-cell, section:not(.hero) .detail-grid .g-cell").forEach(cell=>{
       const img=cell.querySelector(".ph-img");if(!img)return;
       g.set(img,{scale:1.16});
       g.fromTo(img,{yPercent:-7},{yPercent:7,ease:"none",scrollTrigger:{trigger:cell,start:"top bottom",end:"bottom top",scrub:true}});
     });
+    requestAnimationFrame(()=>ST.refresh());
   }
-  if(ST)requestAnimationFrame(()=>ST.refresh());
 }
 
 /* visuals */
