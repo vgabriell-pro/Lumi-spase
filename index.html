@@ -424,11 +424,14 @@ function reveal(scope){(scope||document).querySelectorAll(".reveal:not(.in)").fo
 /* visuals */
 function room(hue,seed){const r=n=>{const x=Math.sin((seed+1)*9301+n*49297)*233280;return x-Math.floor(x);};
   return `<svg class="room" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g${seed}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="hsl(${hue},20%,93%)"/><stop offset="1" stop-color="hsl(${hue},18%,84%)"/></linearGradient></defs><rect width="400" height="300" fill="url(#g${seed})"/><rect x="0" y="205" width="400" height="95" fill="hsl(${hue},14%,${76+r(1)*8}%)"/><rect x="${40+r(2)*40}" y="${70+r(3)*30}" width="${70+r(4)*40}" height="${90+r(5)*30}" rx="6" fill="hsl(${hue},14%,72%)" opacity=".8"/><circle cx="${300+r(6)*50}" cy="${90+r(7)*30}" r="${24+r(8)*14}" fill="hsl(${(hue+20)%360},22%,80%)" opacity=".7"/></svg>`;}
-const PX=id=>`https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=1000&h=750&fit=crop`;
-const GAL=[30243614,5570222,11419079,30599531];
+const PX=(id,w)=>`https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&fm=webp&w=${w||700}`;
+const GAL=[30243614,5570222,11419079,30599531,1648776,2034335,1267320,3771089,6580237,1015568];
 const VHUE=268;
-function galleryHTML(){const cell=(i,seed,main)=>{const u=GAL[i]?PX(GAL[i]):null;return `<div class="g-cell ${main?'main':''}"><div class="ph-bg">${room(VHUE,seed)}</div>${u?`<img class="ph-img" src="${u}" onerror="this.remove()">`:""}</div>`;};
-  return `<div class="gallery">${cell(0,1,true)}<div class="g-side">${cell(1,2)}${cell(2,3)}</div></div>`;}
+function photoCell(i,seed,opt){opt=opt||{};const u=GAL[i]?PX(GAL[i],opt.w||700):null;
+  return `<div class="g-cell ${opt.cls||""}" style="${opt.style||""}"><div class="ph-bg">${room(VHUE,seed)}</div>${u?`<img class="ph-img" src="${u}" loading="lazy" decoding="async" onerror="this.remove()">`:""}</div>`;}
+function galleryHTML(){return `<div class="gallery">${photoCell(0,1,{cls:"main",w:900})}<div class="g-side">${photoCell(1,2)}${photoCell(2,3)}</div></div>`;}
+function stripHTML(){const items=[[3,4],[4,5],[5,6],[6,7]];
+  return `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;">${items.map(([i,s])=>photoCell(i,s,{w:600,style:"height:190px;border-radius:12px;"})).join("")}</div>`;}
 const AMEN=["Дневной свет","Wi-Fi","Звук","Кухня","Мебель","Кондиционер","Проектор","Туалет"];
 function todayStr(){return new Date().toISOString().slice(0,10);}
 
@@ -451,26 +454,49 @@ function viewHome(){return `
     <div class="detail-grid" style="align-items:start;">
       <div>
         <span class="eyebrow">Ваке, Тбилиси · по часам</span>
-        <h1 class="hero-h" style="font-size:clamp(34px,5.2vw,56px);">Пространство под твоё событие.</h1>
-        <p class="hero-sub">Съёмки, классы, встречи и праздники до 30 человек. Бронируем через менеджера — оставь заявку, и мы свяжемся с тобой в течение дня.</p>
+        <h1 class="hero-h" style="font-size:clamp(34px,5.2vw,56px);">Светлое пространство под твоё событие.</h1>
+        <p class="hero-sub">Lumi Space — творческая студия в центре Тбилиси. Съёмки, классы, встречи и праздники до 30 человек. Бронируем через менеджера — оставь заявку, и мы свяжемся в течение дня.</p>
         <div class="facts" style="margin-top:26px;">★ <b>5.0</b><span>до <b>30</b> чел.</span><span><b>Ваке</b>, центр</span><span>от <b>2 ч</b></span></div>
         <div style="margin-top:24px;">${galleryHTML()}</div>
       </div>
       ${leadFormHTML()}
     </div>
   </section>
-  <section class="section wrap" style="padding-top:14px;">
+
+  <section class="section wrap" style="padding-top:6px;">
+    <div class="sec-head"><div><h2>Пространство</h2><p>Несколько кадров с площадки.</p></div><a class="link" href="#" data-go="about">Подробнее →</a></div>
+    ${stripHTML()}
+  </section>
+
+  <section class="section wrap" style="padding-top:0;">
+    <div class="detail-grid" style="align-items:center;">
+      <div>
+        <span class="eyebrow">О пространстве</span>
+        <h2 style="font-size:clamp(26px,3.4vw,38px);font-weight:800;letter-spacing:-.03em;margin:12px 0 0;">Место, куда хочется вернуться</h2>
+        <p class="detail-desc" style="margin-top:14px;">Большие окна и дневной свет, гибкая рассадка и техника под рукой. Подходит для фотосъёмок, мастер-классов, лекций, встреч и камерных праздников. Поможем с подготовкой — от рассадки до тайминга.</p>
+        <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-primary" id="aboutLead">Оставить заявку</button>
+          <button class="btn btn-ghost" data-go="about">О пространстве</button>
+        </div>
+      </div>
+      <div>${photoCell(8,11,{w:800,style:"height:320px;border-radius:14px;"})}</div>
+    </div>
+  </section>
+
+  <section class="section wrap" style="padding-top:6px;">
     <div class="sec-head"><div><h2>Что внутри</h2><p>Всё, чтобы провести съёмку, класс или вечер.</p></div></div>
     <div class="feat-grid">${AMEN.map(a=>`<div class="feat">✓ ${a}</div>`).join("")}</div>
   </section>
+
   <section class="section wrap" style="padding-top:0;">
     <div class="sec-head"><div><h2>Как забронировать</h2></div></div>
     <div class="steps">
-      <div class="step reveal"><div class="num">1</div><h4>Оставь заявку</h4><p>Заполни форму выше — имя и удобный способ связи. Это пара минут.</p></div>
+      <div class="step reveal"><div class="num">1</div><h4>Оставь заявку</h4><p>Заполни форму — имя и удобный способ связи. Это пара минут.</p></div>
       <div class="step reveal"><div class="num">2</div><h4>Согласуем детали</h4><p>Менеджер свяжется, уточнит дату, время и формат, подскажет по условиям.</p></div>
       <div class="step reveal"><div class="num">3</div><h4>Подтверждаем бронь</h4><p>Фиксируем дату — и ждём тебя в Lumi Space.</p></div>
     </div>
   </section>
+
   <section class="section wrap" style="padding-top:0;">
     <div class="band reveal">
       <div><h2>Готов забронировать?</h2><p>Оставь заявку — ответим в течение дня и поможем с форматом любого события.</p><button class="btn btn-blue" id="bandLead">Оставить заявку</button></div>
