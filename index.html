@@ -508,9 +508,9 @@ function leadFormHTML(){return `
   <aside class="book-card" id="leadform">
     <div style="font-size:19px;font-weight:700;letter-spacing:-.02em;">Оставить заявку</div>
     <div class="faint" style="margin:3px 0 16px;">Ответим в течение дня</div>
-    <div class="bkf"><label>Имя</label><input id="lName" placeholder="Как тебя зовут"></div>
-    <div class="bkf"><label>Телефон</label><input id="lPhone" inputmode="tel" placeholder="+995 555 12 34 56"></div>
-    <label class="bkf-label">Как ещё с тобой связаться</label>
+    <div class="bkf"><label>Имя <span style="color:#B23A28">*</span></label><input id="lName" placeholder="Как тебя зовут"></div>
+    <div class="bkf"><label>Телефон <span style="color:#B23A28">*</span></label><input id="lPhone" inputmode="tel" placeholder="+995 555 12 34 56"></div>
+    <label class="bkf-label">Способ связи <span style="color:#B23A28">*</span></label>
     <div style="display:flex;gap:6px;margin-bottom:8px;" id="kindRow">
       <button class="amen-chip sel" data-kind="telegram" style="flex:1;justify-content:center;">Telegram</button>
       <button class="amen-chip" data-kind="whatsapp" style="flex:1;justify-content:center;">WhatsApp</button>
@@ -540,13 +540,22 @@ function wireForm(){
   $("#lSend").onclick=submitLead;
   reveal($("#view"));
 }
+function isPhone(v){const d=(v||"").replace(/[^\d]/g,"");return d.length>=9&&d.length<=15;}
+function isEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test((v||"").trim());}
+function isTg(v){return /^@?[A-Za-z0-9_]{4,32}$/.test((v||"").trim());}
 async function submitLead(){
-  const err=m=>{const e=$("#lErr");e.style.display="block";e.textContent=m;};
+  const eEl=$("#lErr");
+  const err=(m,el)=>{eEl.style.display="block";eEl.textContent=m;if(el){el.style.borderColor="#B23A28";el.focus();}};
+  ["#lName","#lPhone","#lContact"].forEach(s=>{const x=$(s);if(x)x.style.borderColor="";});
   const name=($("#lName").value||"").trim();
   const phone=($("#lPhone").value||"").trim();
   const contact=($("#lContact").value||"").trim();
-  if(!name)return err("Впиши имя.");
-  if(!phone&&!contact)return err("Оставь телефон или другой способ связи.");
+  if(name.length<2)return err("Впиши имя.", $("#lName"));
+  if(!isPhone(phone))return err("Впиши корректный номер телефона.", $("#lPhone"));
+  if(!contact)return err("Заполни способ связи.", $("#lContact"));
+  if(kind==="email"&&!isEmail(contact))return err("Это не похоже на email. Пример: name@mail.com", $("#lContact"));
+  if(kind==="whatsapp"&&!isPhone(contact))return err("Для WhatsApp укажи корректный номер телефона.", $("#lContact"));
+  if(kind==="telegram"&&!isTg(contact))return err("Укажи Telegram-ник вида @username.", $("#lContact"));
   if(!CRM_API)return err("Форма ещё не подключена. (Нужно вписать адрес CRM в начале файла.)");
   const b=$("#lSend");b.disabled=true;b.textContent="Отправляем…";
   try{
