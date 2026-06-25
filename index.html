@@ -58,7 +58,7 @@
   .mlink{padding:13px 4px;font-weight:500;font-size:16.5px;color:var(--ink);border-bottom:1px solid var(--line);}
   .mmenu .btn{margin-top:6px;justify-content:center;}
   @media(min-width:881px){.mmenu{display:none!important;}.burger{display:none!important;}}
-  @media(max-width:880px){.nav-links{display:none;}.nav-r{display:none;}.burger{display:inline-flex;}}
+  @media(max-width:880px){.nav-links{display:none!important;}.nav-r{display:none!important;}.burger{display:inline-flex!important;}}
   @media(max-width:560px){.brand{margin-right:6px;}}
 
   /* FOOTER */
@@ -402,6 +402,8 @@ header.scrolled{box-shadow:0 1px 0 var(--line),0 10px 28px -20px rgba(20,30,80,.
 .feat{font-weight:600;}
 .detail-grid h2::after{content:"";display:block;width:42px;height:3px;border-radius:2px;background:var(--accent);margin-top:16px;}
 @media(max-width:880px){html,body{overflow-x:hidden;}}
+.faq-q .faq-qt{flex:1;min-width:0;overflow-wrap:anywhere;}
+.faq-a div{overflow-wrap:anywhere;}
 </style>
 </head>
 <body>
@@ -711,7 +713,7 @@ const FAQS=[
 ];
 function viewFaq(){return `
   <section class="page-head wrap"><h1>Частые вопросы</h1><p>Не нашёл ответ — оставь заявку, ответим лично.</p></section>
-  <section class="section wrap"><div class="faq">${FAQS.map(f=>`<div class="faq-item"><button class="faq-q">${f[0]}<span class="pl"></span></button><div class="faq-a"><div>${f[1]}</div></div></div>`).join("")}</div>
+  <section class="section wrap"><div class="faq">${FAQS.map(f=>`<div class="faq-item"><button class="faq-q"><span class="faq-qt">${f[0]}</span><span class="pl"></span></button><div class="faq-a"><div>${f[1]}</div></div></div>`).join("")}</div>
   <div style="margin-top:24px;"><button class="btn btn-primary" id="faqLead">Оставить заявку</button></div></section>`;}
 function wireFaq(){document.querySelectorAll(".faq-item").forEach(it=>{it.querySelector(".faq-q").onclick=()=>{const open=it.classList.toggle("open");const a=it.querySelector(".faq-a");a.style.maxHeight=open?a.scrollHeight+"px":"0";};});}
 
