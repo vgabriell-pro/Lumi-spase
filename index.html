@@ -409,6 +409,8 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script>
 /* ============================================================
    ВПИШИ СЮДА АДРЕС СВОЕЙ CRM НА RAILWAY (без / в конце).
@@ -420,6 +422,28 @@ const $=s=>document.querySelector(s);
 function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2800);}
 const _io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");_io.unobserve(e.target);}}),{threshold:.06,rootMargin:"0px 0px -30px 0px"});
 function reveal(scope){(scope||document).querySelectorAll(".reveal:not(.in)").forEach(el=>_io.observe(el));}
+function animateView(){
+  const v=$("#view"), g=window.gsap, ST=window.ScrollTrigger;
+  const reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(!g||reduced){reveal(v);return;}              /* graceful fallback: just show */
+  if(ST){g.registerPlugin(ST);ST.getAll().forEach(t=>t.kill());}
+  v.querySelectorAll(".reveal").forEach(e=>e.classList.add("in"));  /* neutralize CSS hide so gsap controls it */
+  const ease="power2.out";
+  const hero=v.querySelector(".hero");
+  if(hero){
+    g.from(hero.querySelectorAll(".eyebrow,.hero-h,.hero-sub,.facts,.gallery"),{y:26,autoAlpha:0,duration:.7,ease,stagger:.08,clearProps:"transform"});
+    const card=hero.querySelector(".book-card");
+    if(card)g.from(card,{y:30,autoAlpha:0,duration:.8,ease,delay:.12,clearProps:"transform"});
+  }
+  v.querySelectorAll(".section .sec-head, .page-head, section:not(.hero) .detail-grid, .band").forEach(el=>{
+    g.from(el,{y:26,autoAlpha:0,duration:.6,ease,clearProps:"transform",scrollTrigger:{trigger:el,start:"top 86%"}});
+  });
+  [[".feat-grid",".feat"],[".steps",".step"],[".faq",".faq-item"],[".pstrip",".g-cell"]].forEach(([wrap,child])=>{
+    const w=v.querySelector(wrap);if(!w)return;
+    g.from(w.querySelectorAll(child),{y:20,autoAlpha:0,duration:.5,ease,stagger:.07,clearProps:"transform",scrollTrigger:{trigger:w,start:"top 88%"}});
+  });
+  if(ST)requestAnimationFrame(()=>ST.refresh());
+}
 
 /* visuals */
 function room(hue,seed){const r=n=>{const x=Math.sin((seed+1)*9301+n*49297)*233280;return x-Math.floor(x);};
@@ -431,7 +455,7 @@ function photoCell(i,seed,opt){opt=opt||{};const u=GAL[i]?PX(GAL[i],opt.w||700):
   return `<div class="g-cell ${opt.cls||""}" style="${opt.style||""}"><div class="ph-bg">${room(VHUE,seed)}</div>${u?`<img class="ph-img" src="${u}" loading="lazy" decoding="async" onerror="this.remove()">`:""}</div>`;}
 function galleryHTML(){return `<div class="gallery">${photoCell(0,1,{cls:"main",w:900})}<div class="g-side">${photoCell(1,2)}${photoCell(2,3)}</div></div>`;}
 function stripHTML(){const items=[[3,4],[4,5],[5,6],[6,7]];
-  return `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;">${items.map(([i,s])=>photoCell(i,s,{w:600,style:"height:190px;border-radius:12px;"})).join("")}</div>`;}
+  return `<div class="pstrip" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;">${items.map(([i,s])=>photoCell(i,s,{w:600,style:"height:190px;border-radius:12px;"})).join("")}</div>`;}
 const AMEN=["Дневной свет","Wi-Fi","Звук","Кухня","Мебель","Кондиционер","Проектор","Туалет"];
 function todayStr(){return new Date().toISOString().slice(0,10);}
 
@@ -446,7 +470,7 @@ function renderView(p){const v=$("#view");
   if(p==="about"){v.innerHTML=viewAbout();}
   else if(p==="faq"){v.innerHTML=viewFaq();wireFaq();}
   else{v.innerHTML=viewHome();wireForm();}
-  reveal(v);}
+  animateView();}
 
 /* home */
 function viewHome(){return `
