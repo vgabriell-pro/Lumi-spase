@@ -424,23 +424,24 @@ const _io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.tar
 function reveal(scope){(scope||document).querySelectorAll(".reveal:not(.in)").forEach(el=>_io.observe(el));}
 function animateView(){
   const v=$("#view"), g=window.gsap, ST=window.ScrollTrigger;
+  if(!g){reveal(v);return;}                       /* gsap failed to load -> just show via IO */
   const reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if(!g||reduced){reveal(v);return;}              /* graceful fallback: just show */
   if(ST){g.registerPlugin(ST);ST.getAll().forEach(t=>t.kill());}
-  v.querySelectorAll(".reveal").forEach(e=>e.classList.add("in"));  /* neutralize CSS hide so gsap controls it */
-  const ease="power2.out";
+  v.querySelectorAll(".reveal").forEach(e=>e.classList.add("in"));
+  const ease="power3.out";
+  const Y=reduced?0:40, DUR=reduced?0.5:0.85;     /* reduced-motion: fade only, no movement */
   const hero=v.querySelector(".hero");
   if(hero){
-    g.from(hero.querySelectorAll(".eyebrow,.hero-h,.hero-sub,.facts,.gallery"),{y:26,autoAlpha:0,duration:.7,ease,stagger:.08,clearProps:"transform"});
+    g.from(hero.querySelectorAll(".eyebrow,.hero-h,.hero-sub,.facts,.gallery"),{y:Y,autoAlpha:0,duration:DUR,ease,stagger:.1,clearProps:"transform"});
     const card=hero.querySelector(".book-card");
-    if(card)g.from(card,{y:30,autoAlpha:0,duration:.8,ease,delay:.12,clearProps:"transform"});
+    if(card)g.from(card,{y:Y+8,autoAlpha:0,duration:DUR+.1,ease,delay:.15,clearProps:"transform"});
   }
   v.querySelectorAll(".section .sec-head, .page-head, section:not(.hero) .detail-grid, .band").forEach(el=>{
-    g.from(el,{y:26,autoAlpha:0,duration:.6,ease,clearProps:"transform",scrollTrigger:{trigger:el,start:"top 86%"}});
+    g.from(el,{y:Y,autoAlpha:0,duration:DUR,ease,clearProps:"transform",scrollTrigger:{trigger:el,start:"top 88%"}});
   });
   [[".feat-grid",".feat"],[".steps",".step"],[".faq",".faq-item"],[".pstrip",".g-cell"]].forEach(([wrap,child])=>{
     const w=v.querySelector(wrap);if(!w)return;
-    g.from(w.querySelectorAll(child),{y:20,autoAlpha:0,duration:.5,ease,stagger:.07,clearProps:"transform",scrollTrigger:{trigger:w,start:"top 88%"}});
+    g.from(w.querySelectorAll(child),{y:reduced?0:24,autoAlpha:0,duration:reduced?.45:.6,ease,stagger:.08,clearProps:"transform",scrollTrigger:{trigger:w,start:"top 90%"}});
   });
   if(ST)requestAnimationFrame(()=>ST.refresh());
 }
