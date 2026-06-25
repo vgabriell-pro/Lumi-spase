@@ -390,6 +390,16 @@ header.scrolled{box-shadow:0 1px 0 var(--line),0 10px 28px -20px rgba(20,30,80,.
 .nlink{transition:color .15s ease;}
 .step .num{transition:transform .2s ease;}
 .step:hover .num{transform:scale(1.07);}
+/* ---- v2 refresh ---- */
+.hero-h{font-size:clamp(40px,6vw,66px)!important;line-height:1.04;}
+.hero-h .w{display:inline-block;overflow:hidden;vertical-align:top;}
+.hero-h .w>span{display:inline-block;will-change:transform;}
+.ph-img{will-change:transform;}
+.eyebrow{color:var(--accent-deep);}
+.sec-head h2::before{content:"";display:block;width:34px;height:3px;border-radius:2px;background:var(--accent);margin-bottom:14px;}
+.book-card{padding:24px;}
+.feat{font-weight:600;}
+.detail-grid h2::after{content:"";display:block;width:42px;height:3px;border-radius:2px;background:var(--accent);margin-top:16px;}
 </style>
 </head>
 <body>
@@ -472,27 +482,54 @@ const $=s=>document.querySelector(s);
 function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2800);}
 const _io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");_io.unobserve(e.target);}}),{threshold:.06,rootMargin:"0px 0px -30px 0px"});
 function reveal(scope){(scope||document).querySelectorAll(".reveal:not(.in)").forEach(el=>_io.observe(el));}
+function splitWords(el){
+  const words=(el.textContent||"").trim().split(/\s+/);
+  el.innerHTML=words.map(w=>`<span class="w"><span>${w}</span></span>`).join(" ");
+  const inner=el.querySelectorAll(".w>span");
+  if(inner.length)inner[inner.length-1].style.color="var(--accent)";
+  return inner;
+}
+function countUp(g,b){
+  const raw=(b.textContent||"").trim();
+  if(!/^\d+([.,]\d+)?$/.test(raw))return;
+  const num=parseFloat(raw.replace(",",".")), dec=/[.,]/.test(raw)?1:0, o={v:0};
+  g.to(o,{v:num,duration:1.2,ease:"power1.out",scrollTrigger:{trigger:b,start:"top 92%"},onUpdate:()=>{b.textContent=dec?o.v.toFixed(1):Math.round(o.v);}});
+}
 function animateView(){
   const v=$("#view"), g=window.gsap, ST=window.ScrollTrigger;
-  if(!g){reveal(v);return;}                       /* gsap failed to load -> just show via IO */
+  if(!g){reveal(v);return;}
   const reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
   if(ST){g.registerPlugin(ST);ST.getAll().forEach(t=>t.kill());}
   v.querySelectorAll(".reveal").forEach(e=>e.classList.add("in"));
   const ease="power3.out";
-  const Y=reduced?0:40, DUR=reduced?0.5:0.85;     /* reduced-motion: fade only, no movement */
   const hero=v.querySelector(".hero");
   if(hero){
-    g.from(hero.querySelectorAll(".eyebrow,.hero-h,.hero-sub,.facts,.gallery"),{y:Y,autoAlpha:0,duration:DUR,ease,stagger:.1,clearProps:"transform"});
+    const h=hero.querySelector(".hero-h");
+    if(h&&!reduced){const sp=splitWords(h);g.from(sp,{yPercent:120,duration:.9,ease:"power4.out",stagger:.05,delay:.05});}
+    g.from(hero.querySelectorAll(".eyebrow,.hero-sub,.facts"),{y:reduced?0:30,autoAlpha:0,duration:.8,ease,stagger:.08,delay:.15});
+    const gal=hero.querySelector(".gallery");
+    if(gal){g.from(gal,{autoAlpha:0,y:reduced?0:30,duration:.9,ease,delay:.2});
+      const mi=gal.querySelector(".main .ph-img");if(mi&&!reduced)g.from(mi,{scale:1.28,duration:1.7,ease,delay:.2});}
     const card=hero.querySelector(".book-card");
-    if(card)g.from(card,{y:Y+8,autoAlpha:0,duration:DUR+.1,ease,delay:.15,clearProps:"transform"});
+    if(card)g.from(card,{y:reduced?0:42,autoAlpha:0,duration:.9,ease,delay:.25,clearProps:"transform"});
+    hero.querySelectorAll(".facts b").forEach(b=>countUp(g,b));
   }
-  v.querySelectorAll(".section .sec-head, .page-head, section:not(.hero) .detail-grid, .band").forEach(el=>{
-    g.from(el,{y:Y,autoAlpha:0,duration:DUR,ease,clearProps:"transform",scrollTrigger:{trigger:el,start:"top 88%"}});
+  const ph=v.querySelector(".page-head");
+  if(ph)g.from(ph,{autoAlpha:0,duration:.55,ease:"power1.out"});
+  v.querySelectorAll(".section .sec-head, section:not(.hero) .detail-grid, .band").forEach(el=>{
+    g.from(el,{y:reduced?0:36,autoAlpha:0,duration:.7,ease,clearProps:"transform",scrollTrigger:{trigger:el,start:"top 86%"}});
   });
   [[".feat-grid",".feat"],[".steps",".step"],[".faq",".faq-item"],[".pstrip",".g-cell"]].forEach(([wrap,child])=>{
     const w=v.querySelector(wrap);if(!w)return;
-    g.from(w.querySelectorAll(child),{y:reduced?0:24,autoAlpha:0,duration:reduced?.45:.6,ease,stagger:.08,clearProps:"transform",scrollTrigger:{trigger:w,start:"top 90%"}});
+    g.from(w.querySelectorAll(child),{y:reduced?0:24,autoAlpha:0,duration:.55,ease,stagger:.07,clearProps:"transform",scrollTrigger:{trigger:w,start:"top 90%"}});
   });
+  if(!reduced){
+    v.querySelectorAll(".pstrip .g-cell, section:not(.hero) .detail-grid .g-cell").forEach(cell=>{
+      const img=cell.querySelector(".ph-img");if(!img)return;
+      g.set(img,{scale:1.16});
+      g.fromTo(img,{yPercent:-7},{yPercent:7,ease:"none",scrollTrigger:{trigger:cell,start:"top bottom",end:"bottom top",scrub:true}});
+    });
+  }
   if(ST)requestAnimationFrame(()=>ST.refresh());
 }
 
