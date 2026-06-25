@@ -508,15 +508,15 @@ function leadFormHTML(){return `
   <aside class="book-card" id="leadform">
     <div style="font-size:19px;font-weight:700;letter-spacing:-.02em;">Оставить заявку</div>
     <div class="faint" style="margin:3px 0 16px;">Ответим в течение дня</div>
-    <div class="bkf"><label>Имя <span style="color:#B23A28">*</span></label><input id="lName" placeholder="Как тебя зовут"></div>
-    <div class="bkf"><label>Телефон <span style="color:#B23A28">*</span></label><input id="lPhone" inputmode="tel" placeholder="+995 555 12 34 56"></div>
-    <label class="bkf-label">Способ связи <span style="color:#B23A28">*</span></label>
+    <div class="bkf"><label>Имя <span style="color:#B23A28;font-size:12px;vertical-align:1px;">*</span></label><input id="lName" placeholder="Как тебя зовут"></div>
+    <div class="bkf"><label>Телефон <span style="color:#B23A28;font-size:12px;vertical-align:1px;">*</span></label><input id="lPhone" inputmode="tel" placeholder="+995 555 12 34 56"></div>
+    <label class="bkf-label">Способ связи</label>
     <div style="display:flex;gap:6px;margin-bottom:8px;" id="kindRow">
       <button class="amen-chip sel" data-kind="telegram" style="flex:1;justify-content:center;">Telegram</button>
       <button class="amen-chip" data-kind="whatsapp" style="flex:1;justify-content:center;">WhatsApp</button>
       <button class="amen-chip" data-kind="email" style="flex:1;justify-content:center;">Email</button>
     </div>
-    <div class="bkf"><input id="lContact" placeholder="@username"><p class="faint" style="margin-top:5px;">WhatsApp — номер телефона, Email — почта</p></div>
+    <div class="bkf"><label>Контакт <span style="color:#B23A28;font-size:12px;vertical-align:1px;">*</span></label><input id="lContact" placeholder="@username"><p class="faint" style="margin-top:5px;">WhatsApp — номер телефона, Email — почта</p></div>
     <div style="display:flex;gap:10px;">
       <div class="bkf" style="flex:1;"><label>Желаемая дата</label><input type="date" id="lDate" min="${todayStr()}"></div>
       <div class="bkf" style="flex:1;"><label>Гостей</label><input id="lGuests" inputmode="numeric" placeholder="напр. 12"></div>
