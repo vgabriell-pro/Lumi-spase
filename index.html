@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
-<title>Lumi Space — аренда пространства в Тбилиси по часам</title>
+<title>Lumi Space — аренда пространства в Тбилиси</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -371,26 +371,18 @@
     <a class="brand" href="#" data-go="home"><span class="mark"></span>Lumi&nbsp;Space</a>
     <nav class="nav-links" style="display:flex;gap:2px;">
       <a class="nlink" href="#" data-go="about">О пространстве</a>
-      <a class="nlink" href="#" data-go="how">Как забронировать</a>
-      <a class="nlink" href="#" data-go="events">Для мероприятий</a>
       <a class="nlink" href="#" data-go="faq">Вопросы</a>
     </nav>
     <div class="nav-sp"></div>
     <div class="nav-r">
-      <button class="btn btn-ghost" id="loginBtn">Войти</button>
-      <button class="btn btn-ghost" id="dashBtn" style="display:none;">Кабинет</button>
-      <button class="btn btn-primary" id="navBook">Забронировать</button>
+      <button class="btn btn-primary" id="navLead">Оставить заявку</button>
     </div>
     <button class="burger" id="burger" aria-label="Меню">☰</button>
   </div>
   <div class="mmenu" id="mmenu">
     <a class="mlink" href="#" data-go="about">О пространстве</a>
-    <a class="mlink" href="#" data-go="how">Как забронировать</a>
-    <a class="mlink" href="#" data-go="events">Для мероприятий</a>
     <a class="mlink" href="#" data-go="faq">Вопросы</a>
-    <button class="btn btn-ghost" id="mLogin">Войти</button>
-    <button class="btn btn-ghost" id="mDash" style="display:none;">Кабинет</button>
-    <button class="btn btn-primary" id="mBook">Забронировать</button>
+    <button class="btn btn-primary" id="mLead">Оставить заявку</button>
   </div>
 </header>
 
@@ -401,12 +393,11 @@
     <div class="foot">
       <div style="max-width:320px;">
         <a class="brand" href="#" data-go="home"><span class="mark"></span>Lumi&nbsp;Space</a>
-        <p class="foot-note">Светлое творческое пространство в Тбилиси. Бронируй по часам — для съёмок, занятий, встреч и праздников.</p>
+        <p class="foot-note">Светлое творческое пространство в Тбилиси (Ваке). Съёмки, занятия, встречи и праздники — бронирование через менеджера.</p>
       </div>
       <div class="foot-cols">
-        <div class="foot-col"><h5>Бронирование</h5><a href="#" data-go="book">Забронировать</a><a href="#" data-go="how">Как это работает</a><a href="#" data-go="faq">Вопросы</a></div>
-        <div class="foot-col"><h5>Пространство</h5><a href="#" data-go="about">О пространстве</a><a href="#" data-go="events">Для мероприятий</a></div>
-        <div class="foot-col"><h5>Контакты</h5><a href="#" data-go="events">Связаться с нами</a><a href="#">Telegram</a></div>
+        <div class="foot-col"><h5>Пространство</h5><a href="#" data-go="about">О пространстве</a><a href="#" data-go="faq">Вопросы</a></div>
+        <div class="foot-col"><h5>Контакты</h5><a href="#" data-go="home" id="footLead">Оставить заявку</a></div>
       </div>
     </div>
     <div class="foot-bot">
@@ -416,377 +407,176 @@
   </div>
 </footer>
 
-<div id="dash" class="dash"></div>
-<div class="scrim" id="authScrim"><div class="authcard" id="authCard"></div></div>
 <div class="toast" id="toast"></div>
 
 <script>
+/* ============================================================
+   ВПИШИ СЮДА АДРЕС СВОЕЙ CRM НА RAILWAY (без / в конце).
+   Пример:  const CRM_API = "https://lumi-crm-production.up.railway.app";
+   ============================================================ */
+const CRM_API = "https://web-production-b503d.up.railway.app";
+
 const $=s=>document.querySelector(s);
-const API="https://lumi-spase-production.up.railway.app";
-function plural(n,a,b,c){n=Math.abs(n)%100;const n1=n%10;if(n>10&&n<20)return c;if(n1>1&&n1<5)return b;if(n1===1)return a;return c;}
-function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2600);}
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2800);}
 const _io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");_io.unobserve(e.target);}}),{threshold:.06,rootMargin:"0px 0px -30px 0px"});
 function reveal(scope){(scope||document).querySelectorAll(".reveal:not(.in)").forEach(el=>_io.observe(el));}
-const HCV=["#1E5DFF","#1F6B52","#C7432E","#9B5DE5","#0EA5E9","#2A9D8F"];
 
-/* ---------- api ---------- */
-let token=localStorage.getItem("lumi_token")||null, user=null;
-let VENUE=null, myBookingsCache=[];
-async function api(path,{method="GET",body,auth=false}={}){
-  const h={"Content-Type":"application/json"};
-  if(auth&&token)h["Authorization"]="Bearer "+token;
-  const r=await fetch(API+path,{method,headers:h,body:body?JSON.stringify(body):undefined});
-  let data={};try{data=await r.json();}catch(e){}
-  if(!r.ok)throw new Error(data.detail||"Ошибка сервера");
-  return data;
-}
-async function refreshMine(){if(!token)return;try{myBookingsCache=await api("/api/my/bookings",{auth:true});}catch(e){}}
-async function loadVenue(){try{VENUE=await api("/api/space");}catch(e){VENUE=null;}}
-
-/* ---------- visuals ---------- */
-function room(hue,seed){
-  const r=n=>{const x=Math.sin((seed+1)*9301+n*49297)*233280;return x-Math.floor(x);};
-  return `<svg class="room" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g${seed}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="hsl(${hue},20%,93%)"/><stop offset="1" stop-color="hsl(${hue},18%,84%)"/></linearGradient></defs><rect width="400" height="300" fill="url(#g${seed})"/><rect x="0" y="205" width="400" height="95" fill="hsl(${hue},14%,${76+r(1)*8}%)"/><rect x="${40+r(2)*40}" y="${70+r(3)*30}" width="${70+r(4)*40}" height="${90+r(5)*30}" rx="6" fill="hsl(${hue},14%,72%)" opacity=".8"/><circle cx="${300+r(6)*50}" cy="${90+r(7)*30}" r="${24+r(8)*14}" fill="hsl(${(hue+20)%360},22%,80%)" opacity=".7"/><rect x="${250+r(9)*40}" y="150" width="${60+r(10)*30}" height="55" rx="6" fill="hsl(${hue},12%,66%)" opacity=".75"/></svg>`;
-}
+/* visuals */
+function room(hue,seed){const r=n=>{const x=Math.sin((seed+1)*9301+n*49297)*233280;return x-Math.floor(x);};
+  return `<svg class="room" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g${seed}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="hsl(${hue},20%,93%)"/><stop offset="1" stop-color="hsl(${hue},18%,84%)"/></linearGradient></defs><rect width="400" height="300" fill="url(#g${seed})"/><rect x="0" y="205" width="400" height="95" fill="hsl(${hue},14%,${76+r(1)*8}%)"/><rect x="${40+r(2)*40}" y="${70+r(3)*30}" width="${70+r(4)*40}" height="${90+r(5)*30}" rx="6" fill="hsl(${hue},14%,72%)" opacity=".8"/><circle cx="${300+r(6)*50}" cy="${90+r(7)*30}" r="${24+r(8)*14}" fill="hsl(${(hue+20)%360},22%,80%)" opacity=".7"/></svg>`;}
 const PX=id=>`https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=1000&h=750&fit=crop`;
-const GAL=[30243614,5570222,11419079,30599531,17807715,2089698];
+const GAL=[30243614,5570222,11419079,30599531];
 const VHUE=268;
-function galleryHTML(){
-  const cell=(idx,seed,main)=>{const u=GAL[idx]?PX(GAL[idx]):null;return `<div class="g-cell ${main?'main':''}"><div class="ph-bg">${room(VHUE,seed)}</div>${u?`<img class="ph-img" src="${u}" onerror="this.remove()">`:""}</div>`;};
-  return `<div class="gallery">${cell(0,1,true)}<div class="g-side">${cell(1,2)}${cell(2,3)}</div></div>`;
-}
-
-/* ---------- helpers ---------- */
-function vals(){const v=VENUE;const sub=v.rate*bk.hours,dep=Math.max(50,Math.round(v.rate*0.8/10)*10);return{sub,dep,total:sub+dep};}
+function galleryHTML(){const cell=(i,seed,main)=>{const u=GAL[i]?PX(GAL[i]):null;return `<div class="g-cell ${main?'main':''}"><div class="ph-bg">${room(VHUE,seed)}</div>${u?`<img class="ph-img" src="${u}" onerror="this.remove()">`:""}</div>`;};
+  return `<div class="gallery">${cell(0,1,true)}<div class="g-side">${cell(1,2)}${cell(2,3)}</div></div>`;}
+const AMEN=["Дневной свет","Wi-Fi","Звук","Кухня","Мебель","Кондиционер","Проектор","Туалет"];
 function todayStr(){return new Date().toISOString().slice(0,10);}
-function tomorrowStr(){return new Date(Date.now()+864e5).toISOString().slice(0,10);}
-function myBookings(){return myBookingsCache.slice().sort((a,b)=>a.date.localeCompare(b.date));}
-function syncNav(){
-  $("#loginBtn").style.display=user?"none":"";
-  $("#dashBtn").style.display=user?"":"none";
-  if(user)$("#dashBtn").textContent=user.name.split(" ")[0];
-  const ml=$("#mLogin"),md=$("#mDash");
-  if(ml)ml.style.display=user?"none":"";
-  if(md){md.style.display=user?"":"none";if(user)md.textContent=user.name.split(" ")[0]+" · Кабинет";}
-}
-function closeMenu(){const m=$("#mmenu");if(m)m.classList.remove("open");}
 
-/* ---------- router ---------- */
-let bk={date:"",slot:null,hours:2,guests:2},detailView="book";
+/* router */
 function go(page){history.pushState({},"",page==="home"?location.pathname:("?page="+page));route();window.scrollTo(0,0);}
-function setActive(page){document.querySelectorAll(".nlink").forEach(a=>a.classList.toggle("active",a.dataset.go===page));}
-function route(){
-  const page=new URLSearchParams(location.search).get("page")||"home";
-  renderView(page);setActive(page==="home"?null:page);
-}
+function setActive(p){document.querySelectorAll(".nlink").forEach(a=>a.classList.toggle("active",a.dataset.go===p));}
+function closeMenu(){$("#mmenu").classList.remove("open");}
+function goForm(){if((new URLSearchParams(location.search).get("page")||"home")!=="home"){go("home");}closeMenu();setTimeout(()=>{const f=$("#leadform");if(f)f.scrollIntoView({behavior:"smooth",block:"center"});},120);}
+function route(){const p=new URLSearchParams(location.search).get("page")||"home";renderView(p);setActive(p==="home"?null:p);}
 window.addEventListener("popstate",route);
-function renderView(page){
-  const v=$("#view");
-  if(!VENUE){v.innerHTML='<div class="wrap" style="padding:80px 0;text-align:center;color:var(--muted);">Загружаем пространство… <br><br>Если не грузится — обнови страницу.</div>';return;}
-  if(page==="about"){v.innerHTML=viewAbout();wireAbout();}
-  else if(page==="how"){v.innerHTML=viewHow();}
-  else if(page==="events"){v.innerHTML=viewEvents();wireEvents();}
-  else if(page==="faq"){v.innerHTML=viewFaq();wireFaq();}
-  else if(page==="book"){detailView="book";bk={date:tomorrowStr(),slot:null,hours:2,guests:2};renderBook();return;}
-  else {v.innerHTML=viewHome();wireHome();}
-  reveal(v);
-}
+function renderView(p){const v=$("#view");
+  if(p==="about"){v.innerHTML=viewAbout();}
+  else if(p==="faq"){v.innerHTML=viewFaq();wireFaq();}
+  else{v.innerHTML=viewHome();wireForm();}
+  reveal(v);}
 
-/* ---------- home ---------- */
-function factsRow(){const v=VENUE;return `<div class="facts">★ <b>${v.rating||5.0}</b> · <span>до <b>${v.cap}</b> чел.</span><span>~<b>${v.cap*4}</b> м²</span><span><b>${v.loc}</b>, Тбилиси</span><span>от <b>2 ч</b></span></div>`;}
-function viewHome(){
-  const v=VENUE;
-  return `
+/* home */
+function viewHome(){return `
   <section class="hero wrap">
-    <span class="eyebrow">${v.loc}, Тбилиси · ${v.catName}</span>
-    <h1 class="hero-h">${v.name}.<br>Бронируй по часам.</h1>
-    <p class="hero-sub">${v.use ? "Светлое пространство для "+v.use+"." : "Светлое творческое пространство для съёмок, занятий, встреч и праздников."} Выбирай дату и время — остальное берём на себя.</p>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:26px;">
-      <button class="btn btn-primary" data-go="book" style="padding:13px 24px;">Забронировать</button>
-      <button class="btn btn-ghost" data-go="about" style="padding:13px 24px;">О пространстве</button>
+    <div class="detail-grid" style="align-items:start;">
+      <div>
+        <span class="eyebrow">Ваке, Тбилиси · по часам</span>
+        <h1 class="hero-h" style="font-size:clamp(34px,5.2vw,56px);">Пространство под твоё событие.</h1>
+        <p class="hero-sub">Съёмки, классы, встречи и праздники до 30 человек. Бронируем через менеджера — оставь заявку, и мы свяжемся с тобой в течение дня.</p>
+        <div class="facts" style="margin-top:26px;">★ <b>5.0</b><span>до <b>30</b> чел.</span><span><b>Ваке</b>, центр</span><span>от <b>2 ч</b></span></div>
+        <div style="margin-top:24px;">${galleryHTML()}</div>
+      </div>
+      ${leadFormHTML()}
     </div>
-    <div style="margin-top:30px;">${factsRow()}</div>
   </section>
-  <section class="section wrap" style="padding-top:30px;">${galleryHTML()}</section>
-  <section class="section wrap" style="padding-top:0;">
-    <div class="sec-head"><div><h2>Что внутри</h2><p>Всё, чтобы провести съёмку, класс или встречу.</p></div></div>
-    <div class="feat-grid">${(v.amen&&v.amen.length?v.amen:["Дневной свет","Wi-Fi","Звук","Кухня","Мебель","Кондиционер"]).map(a=>`<div class="feat">✓ ${a}</div>`).join("")}</div>
+  <section class="section wrap" style="padding-top:14px;">
+    <div class="sec-head"><div><h2>Что внутри</h2><p>Всё, чтобы провести съёмку, класс или вечер.</p></div></div>
+    <div class="feat-grid">${AMEN.map(a=>`<div class="feat">✓ ${a}</div>`).join("")}</div>
   </section>
   <section class="section wrap" style="padding-top:0;">
-    <div class="sec-head"><div><h2>Как забронировать</h2></div><a class="link" href="#" data-go="how">Подробнее →</a></div>
+    <div class="sec-head"><div><h2>Как забронировать</h2></div></div>
     <div class="steps">
-      <div class="step reveal"><div class="num">1</div><h4>Выбери время</h4><p>Дата, час начала и сколько часов нужно. Цену увидишь сразу.</p></div>
-      <div class="step reveal"><div class="num">2</div><h4>Оплати онлайн</h4><p>Бронь закрепляется за тобой. Возвратный залог вернётся после встречи.</p></div>
-      <div class="step reveal"><div class="num">3</div><h4>Приходи</h4><p>Адрес и детали — в кабинете и на почте. Напомним за день.</p></div>
+      <div class="step reveal"><div class="num">1</div><h4>Оставь заявку</h4><p>Заполни форму выше — имя и удобный способ связи. Это пара минут.</p></div>
+      <div class="step reveal"><div class="num">2</div><h4>Согласуем детали</h4><p>Менеджер свяжется, уточнит дату, время и формат, подскажет по условиям.</p></div>
+      <div class="step reveal"><div class="num">3</div><h4>Подтверждаем бронь</h4><p>Фиксируем дату — и ждём тебя в Lumi Space.</p></div>
     </div>
   </section>
   <section class="section wrap" style="padding-top:0;">
     <div class="band reveal">
-      <div><h2>Проводишь своё мероприятие?</h2><p>Мастер-класс, съёмочный день, вечеринка или лекция — поможем с форматом, расскажем про условия аренды на день и под событие.</p><button class="btn btn-blue" data-go="events">Связаться с нами</button></div>
-      <div class="band-stats"><div><b>по часам</b><span>или на день</span></div><div><b>до ${v.cap}</b><span>гостей</span></div></div>
+      <div><h2>Готов забронировать?</h2><p>Оставь заявку — ответим в течение дня и поможем с форматом любого события.</p><button class="btn btn-blue" id="bandLead">Оставить заявку</button></div>
+      <div class="band-stats"><div><b>до 30</b><span>гостей</span></div><div><b>Ваке</b><span>центр Тбилиси</span></div></div>
     </div>
-  </section>`;
-}
-function wireHome(){reveal($("#view"));}
+  </section>`;}
 
-/* ---------- about ---------- */
-const FACETS=[["Парковка","Бесплатная на улице рядом"],["Доступ","Удобный вход, лифт"],["Звук","Можно с музыкой до 22:00"],["Электрика","Розетки по периметру, 220В"],["Интернет","Быстрый Wi-Fi, бесплатно"],["Правила","Без уличной обуви, уборка после себя"]];
-function viewAbout(){
-  const v=VENUE,d=v.desc||`${v.name} — светлое пространство в ${v.loc}.`;
-  return `
-  <section class="page-head wrap"><h1>${v.name}</h1><p>${v.loc}, Тбилиси · ${v.catName} · до ${v.cap} человек</p></section>
+function leadFormHTML(){return `
+  <aside class="book-card" id="leadform">
+    <div style="font-size:19px;font-weight:700;letter-spacing:-.02em;">Оставить заявку</div>
+    <div class="faint" style="margin:3px 0 16px;">Ответим в течение дня</div>
+    <div class="bkf"><label>Имя</label><input id="lName" placeholder="Как тебя зовут"></div>
+    <div class="bkf"><label>Телефон</label><input id="lPhone" inputmode="tel" placeholder="+995 555 12 34 56"></div>
+    <label class="bkf-label">Как ещё с тобой связаться</label>
+    <div style="display:flex;gap:6px;margin-bottom:8px;" id="kindRow">
+      <button class="amen-chip sel" data-kind="telegram" style="flex:1;justify-content:center;">Telegram</button>
+      <button class="amen-chip" data-kind="whatsapp" style="flex:1;justify-content:center;">WhatsApp</button>
+      <button class="amen-chip" data-kind="email" style="flex:1;justify-content:center;">Email</button>
+    </div>
+    <div class="bkf"><input id="lContact" placeholder="@username"><p class="faint" style="margin-top:5px;">WhatsApp — номер телефона, Email — почта</p></div>
+    <div style="display:flex;gap:10px;">
+      <div class="bkf" style="flex:1;"><label>Желаемая дата</label><input type="date" id="lDate" min="${todayStr()}"></div>
+      <div class="bkf" style="flex:1;"><label>Гостей</label><input id="lGuests" inputmode="numeric" placeholder="напр. 12"></div>
+    </div>
+    <div class="bkf"><label>Комментарий</label><textarea id="lMsg" rows="3" style="width:100%;border:1px solid var(--line-2);background:#fff;border-radius:10px;padding:11px 13px;font-family:inherit;font-size:15px;color:var(--ink);outline:none;resize:vertical;" placeholder="Во сколько, сколько часов, что нужно"></textarea></div>
+    <input id="lHp" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
+    <button class="btn btn-primary bkcta" id="lSend">Отправить заявку</button>
+    <div id="lErr" style="color:#B23A28;font-size:13.5px;margin-top:9px;display:none;font-weight:600;"></div>
+  </aside>`;}
+
+let kind="telegram";
+const PH={telegram:"@username",whatsapp:"+995 555 12 34 56",email:"you@mail.com"};
+function wireForm(){
+  kind="telegram";
+  $("#view").querySelectorAll("#kindRow .amen-chip").forEach(b=>b.onclick=()=>{
+    kind=b.dataset.kind;
+    $("#view").querySelectorAll("#kindRow .amen-chip").forEach(x=>x.classList.toggle("sel",x===b));
+    const c=$("#lContact");c.placeholder=PH[kind];c.setAttribute("inputmode",kind==="whatsapp"?"tel":(kind==="email"?"email":"text"));
+  });
+  const band=$("#bandLead");if(band)band.onclick=goForm;
+  $("#lSend").onclick=submitLead;
+  reveal($("#view"));
+}
+async function submitLead(){
+  const err=m=>{const e=$("#lErr");e.style.display="block";e.textContent=m;};
+  const name=($("#lName").value||"").trim();
+  const phone=($("#lPhone").value||"").trim();
+  const contact=($("#lContact").value||"").trim();
+  if(!name)return err("Впиши имя.");
+  if(!phone&&!contact)return err("Оставь телефон или другой способ связи.");
+  if(!CRM_API)return err("Форма ещё не подключена. (Нужно вписать адрес CRM в начале файла.)");
+  const b=$("#lSend");b.disabled=true;b.textContent="Отправляем…";
+  try{
+    const r=await fetch(CRM_API.replace(/\/+$/,"")+"/api/public/lead",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({name,phone,contactKind:kind,contact,date:$("#lDate").value||"",guests:($("#lGuests").value||"").trim(),message:($("#lMsg").value||"").trim(),hp:$("#lHp").value||""})});
+    const data=await r.json().catch(()=>({}));
+    if(!r.ok)throw new Error(data.detail||"Не удалось отправить");
+    $("#leadform").innerHTML='<div style="text-align:center;padding:20px 6px;"><div class="ico2">✓</div><div style="font-size:19px;font-weight:700;">Заявка отправлена</div><p class="faint" style="margin-top:8px;">Спасибо! Свяжемся с тобой в течение дня по указанному контакту.</p></div>';
+  }catch(e){b.disabled=false;b.textContent="Отправить заявку";err(e.message||"Не удалось отправить");}
+}
+
+/* about */
+function viewAbout(){return `
+  <section class="page-head wrap"><h1>Lumi Space</h1><p>Ваке, Тбилиси · творческое пространство · до 30 человек</p></section>
   <section class="wrap" style="padding-bottom:10px;">${galleryHTML()}</section>
   <section class="wrap" style="padding-bottom:46px;">
     <div class="detail-grid">
       <div class="detail-main">
-        <section class="detail-sec reveal" style="border-top:none;padding-top:0;"><h3 class="detail-h3">О месте</h3><p class="detail-desc">${d}</p><div class="facet-grid">${FACETS.map(f=>`<div class="facet"><div class="facet-k">${f[0]}</div><div class="facet-v">${f[1]}</div></div>`).join("")}</div></section>
-        <section class="detail-sec reveal"><h3 class="detail-h3">Что включено</h3><div class="feat-grid">${(v.amen&&v.amen.length?v.amen:["Дневной свет","Wi-Fi","Звук","Кухня","Мебель","Кондиционер"]).map(a=>`<div class="feat">✓ ${a}</div>`).join("")}</div></section>
-        <section class="detail-sec reveal"><h3 class="detail-h3">Расположение</h3>${v.lat?`<div id="amap" class="mapcard live"></div>${v.addr?`<p style="margin-top:10px;font-weight:600;">${v.addr}</p>`:""}`:`<div class="mapcard"><div class="map-grid"></div><div class="map-pin">📍</div><div class="map-lbl">${v.loc}, Тбилиси</div></div>`}<div class="hours"><b>Часы работы</b><span>Пн–Вс · 09:00–22:00</span></div></section>
-        <section class="detail-sec reveal"><h3 class="detail-h3">Важно знать</h3><div class="know"><div><b>Отмена</b><p class="faint">Бесплатно за 24 часа до начала — вернём оплату и залог полностью.</p></div><div><b>Залог</b><p class="faint">Возвратный, вернётся в течение суток после встречи.</p></div><div><b>Чистота</b><p class="faint">Убираем между бронями. Оставь место таким же.</p></div></div></section>
+        <section class="detail-sec reveal" style="border-top:none;padding-top:0;"><h3 class="detail-h3">О месте</h3><p class="detail-desc">Светлое творческое пространство в районе Ваке. Большие окна, дневной свет и гибкая рассадка — подходит для съёмок, классов, встреч и небольших праздников до 30 человек.</p></section>
+        <section class="detail-sec reveal"><h3 class="detail-h3">Что включено</h3><div class="feat-grid">${AMEN.map(a=>`<div class="feat">✓ ${a}</div>`).join("")}</div></section>
+        <section class="detail-sec reveal"><h3 class="detail-h3">Важно знать</h3><div class="know"><div><b>Бронь</b><p class="faint">Через менеджера — оставь заявку, согласуем дату и время.</p></div><div><b>Часы</b><p class="faint">Пн–Вс, 09:00–22:00. Особые часы — по договорённости.</p></div><div><b>Формат</b><p class="faint">Съёмки, классы, встречи, праздники. Поможем с подготовкой.</p></div></div></section>
       </div>
       <aside class="book-card">
-        <div class="bc-price"><b>₾${v.rate}</b> / час · от 2 часов</div>
-        <p class="faint" style="margin-bottom:14px;">До ${v.cap} человек · ${v.loc}</p>
-        <button class="btn btn-primary bkcta" data-go="book">Забронировать</button>
-        <button class="btn btn-ghost bkcta" data-go="events" style="margin-top:8px;">Снять под мероприятие</button>
+        <div class="bc-price"><b>до 30</b> гостей · Ваке</div>
+        <p class="faint" style="margin-bottom:14px;">Оставь заявку — менеджер свяжется и подберёт время.</p>
+        <button class="btn btn-primary bkcta" id="aboutLead">Оставить заявку</button>
       </aside>
     </div>
-  </section>`;
-}
-function wireAbout(){if(VENUE.lat)showMap("amap",VENUE.lat,VENUE.lon);reveal($("#view"));}
+  </section>`;}
 
-/* ---------- how ---------- */
-function viewHow(){
-  return `
-  <section class="page-head wrap"><h1>Как забронировать</h1><p>Три шага — и пространство твоё.</p></section>
-  <section class="section wrap">
-    <div class="steps">
-      <div class="step reveal"><div class="num">1</div><h4>Выбери дату и время</h4><p>На странице бронирования укажи день, час начала и сколько часов нужно. Минимум — 2 часа. Цену и залог увидишь сразу.</p></div>
-      <div class="step reveal"><div class="num">2</div><h4>Оплати онлайн</h4><p>Оплата закрепляет бронь за тобой. Возвратный залог вернётся в течение суток после встречи, если всё в порядке.</p></div>
-      <div class="step reveal"><div class="num">3</div><h4>Приходи и пользуйся</h4><p>Подтверждение и адрес придут на почту и появятся в кабинете. Напомним за день до встречи.</p></div>
-    </div>
-    <div style="margin-top:26px;display:flex;gap:10px;flex-wrap:wrap;"><button class="btn btn-primary" data-go="book">Забронировать</button><button class="btn btn-ghost" data-go="faq">Частые вопросы</button></div>
-  </section>`;
-}
-
-/* ---------- booking ---------- */
-function bookHTML(){
-  const v=VENUE,slots=[];for(let h=9;h<=21;h++)slots.push(h);
-  return `
-  <div class="wrap">
-    <div class="back-row"><button data-go="home" style="font-weight:600;color:var(--muted);">← На главную</button></div>
-    <section class="page-head" style="padding-top:6px;"><h1>Бронирование</h1><p>${v.name} · ${v.loc}, Тбилиси · до ${v.cap} человек</p></section>
-    <div class="detail-grid">
-      <div class="detail-main">
-        ${galleryHTML()}
-        <section class="detail-sec reveal" style="border-top:none;"><h3 class="detail-h3">Что включено</h3><div class="feat-grid">${(v.amen&&v.amen.length?v.amen:["Дневной свет","Wi-Fi","Звук","Кухня","Мебель","Кондиционер"]).map(a=>`<div class="feat">✓ ${a}</div>`).join("")}</div></section>
-      </div>
-      <aside class="book-card">
-        <div class="bc-price"><b>₾${v.rate}</b> / час · от 2 часов</div>
-        <div class="bkf"><label>Дата</label><input type="date" id="bkd" value="${bk.date}" min="${todayStr()}"></div>
-        <label class="bkf-label">Время начала</label>
-        <div class="slots" id="slots">${slots.map(h=>`<button class="slot ${bk.slot===h?'on':''}" data-h="${h}">${h}:00</button>`).join("")}</div>
-        <div class="bkf"><label>Часов</label><select id="bkh">${[1,2,3,4,5,6,8].map(h=>`<option value="${h}" ${h===bk.hours?'selected':''}>${h} ${plural(h,"час","часа","часов")}</option>`).join("")}</select></div>
-        <div class="bkf"><label>Сколько человек</label><input id="bkg" inputmode="numeric" value="${bk.guests||''}" placeholder="до ${v.cap}"></div>
-        <div class="calc" id="calc"></div>
-        <button class="btn btn-primary bkcta" id="bkB">Забронировать</button>
-        <p class="faint" style="text-align:center;margin-top:8px;">Бесплатная отмена за 24 ч</p>
-      </aside>
-    </div>
-  </div>`;
-}
-function payHTML(){const v=VENUE,x=vals();return `<div class="wrap"><div class="back-row"><button id="payBack" style="font-weight:600;color:var(--muted);">← Назад</button></div><div class="pay-wrap"><h1 class="detail-h1">Оплата брони</h1><div class="pay-sum"><div class="ps-row"><span>${v.name}</span><span>${v.loc}</span></div><div class="ps-row"><span>${bk.date.split("-").reverse().join(".")} · ${bk.slot}:00–${bk.slot+bk.hours}:00</span><span>${bk.guests||1} чел.</span></div><div class="crow2"><span>Аренда</span><b>₾${x.sub}</b></div><div class="crow2"><span>Залог (вернётся)</span><b>₾${x.dep}</b></div><div class="crow2 tot"><span>Итого</span><b>₾${x.total}</b></div></div><div class="pay-methods"><button class="pm sel" data-m="card">Карта</button><button class="pm" data-m="apple">Apple Pay</button><button class="pm" data-m="tg">Telegram Pay</button></div><div id="cardForm"><div class="bkf"><label>Номер карты</label><input id="cNum" inputmode="numeric" placeholder="0000 0000 0000 0000"></div><div class="cardgrid"><div class="bkf"><label>Срок</label><input id="cExp" placeholder="ММ/ГГ"></div><div class="bkf"><label>CVC</label><input id="cCvc" inputmode="numeric" placeholder="123"></div></div></div><button class="btn btn-primary bkcta" id="payB">Оплатить ₾${x.total}</button></div></div>`;}
-function confirmHTML(){const v=VENUE,x=vals();return `<div class="wrap"><div class="confirm"><div class="ico2">✓</div><h1 class="detail-h1">Бронь подтверждена</h1><p class="faint" style="margin-top:8px;">${v.name} · ${bk.date.split("-").reverse().join(".")} · ${bk.slot}:00–${bk.slot+bk.hours}:00 · ${bk.guests||1} чел.</p><div class="pay-sum" style="text-align:left;"><div class="crow2"><span>Оплачено</span><b>₾${x.total}</b></div></div><p class="faint">Подтверждение и адрес пришли на почту. Бронь уже в кабинете → «Мои брони». Напомним за день до встречи.</p><div style="display:flex;gap:10px;margin-top:18px;justify-content:center;"><button class="btn btn-ghost" data-go="home">На главную</button><button class="btn btn-primary" id="cDash">Открыть кабинет</button></div></div></div>`;}
-function renderBook(){
-  const view=$("#view");
-  view.innerHTML=detailView==="pay"?payHTML():detailView==="confirm"?confirmHTML():bookHTML();
-  if(detailView==="book"){
-    $("#bkd").onchange=e=>{bk.date=e.target.value;};
-    $("#slots").querySelectorAll(".slot").forEach(b=>b.onclick=()=>{bk.slot=+b.dataset.h;$("#slots").querySelectorAll(".slot").forEach(x=>x.classList.remove("on"));b.classList.add("on");});
-    $("#bkh").onchange=e=>{bk.hours=+e.target.value;calc();};
-    $("#bkg").addEventListener("input",e=>{e.target.value=e.target.value.replace(/\D/g,"").slice(0,4);bk.guests=parseInt(e.target.value)||0;});
-    $("#bkB").onclick=()=>{if(!bk.slot)return toast("Выбери время начала");detailView="pay";renderBook();window.scrollTo(0,0);};
-    calc();
-  }else if(detailView==="pay"){
-    $("#payBack").onclick=()=>{detailView="book";renderBook();window.scrollTo(0,0);};
-    view.querySelectorAll(".pm").forEach(b=>b.onclick=()=>{view.querySelectorAll(".pm").forEach(x=>x.classList.remove("sel"));b.classList.add("sel");$("#cardForm").style.display=b.dataset.m==="card"?"":"none";});
-    const cn=$("#cNum");if(cn)cn.addEventListener("input",e=>{e.target.value=e.target.value.replace(/\D/g,"").slice(0,16).replace(/(.{4})/g,"$1 ").trim();});
-    const ce=$("#cExp");if(ce)ce.addEventListener("input",e=>{let x=e.target.value.replace(/\D/g,"").slice(0,4);if(x.length>2)x=x.slice(0,2)+"/"+x.slice(2);e.target.value=x;});
-    $("#payB").onclick=async()=>{
-      if(!user){openAuth("login");toast("Войди, чтобы завершить бронь");return;}
-      const b=$("#payB");b.disabled=true;b.textContent="Обработка…";
-      try{await recordBooking();detailView="confirm";renderBook();window.scrollTo(0,0);}
-      catch(e){b.disabled=false;b.textContent="Оплатить ₾"+vals().total;toast(e.message||"Не удалось забронировать");}
-    };
-  }else{
-    const cd=$("#cDash");if(cd)cd.onclick=()=>openDash("bookings");
-  }
-  reveal(view);
-}
-function calc(){const x=vals(),c=$("#calc");if(!c)return;c.innerHTML=`<div class="crow2"><span>₾${VENUE.rate} × ${bk.hours} ${plural(bk.hours,"час","часа","часов")}</span><b>₾${x.sub}</b></div><div class="crow2"><span>Залог (вернётся)</span><b>₾${x.dep}</b></div><div class="crow2 tot"><span>Итого</span><b>₾${x.total}</b></div>`;}
-async function recordBooking(){
-  await api("/api/bookings",{method:"POST",auth:true,body:{spaceId:VENUE.id,date:bk.date,slot:bk.slot,hours:bk.hours,guests:bk.guests||1}});
-  await refreshMine();
-}
-
-/* ---------- events / contact ---------- */
-function viewEvents(){
-  const v=VENUE;
-  return `
-  <section class="page-head wrap"><h1>Своё мероприятие в ${v.name}</h1><p>Мастер-класс, съёмочный день, лекция, вечеринка или съезд команды — расскажи, что планируешь, и мы поможем с форматом и условиями аренды.</p></section>
-  <section class="section wrap">
-    <div class="detail-grid">
-      <div class="detail-main">
-        <div class="steps" style="grid-template-columns:1fr 1fr;">
-          <div class="step reveal"><div class="num">${ic('calendar')}</div><h4>Аренда на день или под событие</h4><p>Если нужны нестандартные часы, весь день или особые условия — договоримся индивидуально.</p></div>
-          <div class="step reveal"><div class="num">${ic('chat')}</div><h4>Поможем с подготовкой</h4><p>Подскажем по рассадке, технике, кейтерингу и таймингу под твой формат.</p></div>
-        </div>
-        <p class="muted" style="margin-top:18px;">Для обычной брони по часам подготовка не нужна — просто <a class="link" href="#" data-go="book">забронируй онлайн</a>.</p>
-      </div>
-      <aside class="book-card">
-        <h3 class="detail-h3" style="margin-bottom:14px;">Оставь заявку</h3>
-        <div class="bkf"><label>Имя</label><input id="cName" placeholder="Как тебя зовут"></div>
-        <div class="bkf"><label>Как связаться</label><input id="cContact" placeholder="Telegram, телефон или e-mail"></div>
-        <div class="bkf"><label>Желаемая дата</label><input id="cDate" type="date" min="${todayStr()}"></div>
-        <div class="bkf"><label>Что планируешь</label><input id="cKind" placeholder="мастер-класс, съёмка, праздник…"></div>
-        <div class="bkf"><label>Комментарий</label><textarea id="cMsg" rows="3" style="width:100%;border:1px solid var(--line-2);background:#fff;border-radius:10px;padding:11px 13px;font-family:inherit;font-size:15px;color:var(--ink);outline:none;resize:vertical;" placeholder="Сколько гостей, во сколько, что нужно"></textarea></div>
-        <button class="btn btn-primary bkcta" id="cSend">Отправить заявку</button>
-        <div id="cErr" style="color:#B23A28;font-size:13.5px;margin-top:9px;display:none;font-weight:600;"></div>
-        <p class="faint" style="text-align:center;margin-top:8px;">Ответим в течение дня</p>
-      </aside>
-    </div>
-  </section>`;
-}
-function wireEvents(){
-  reveal($("#view"));
-  $("#cSend").onclick=async()=>{
-    const name=($("#cName").value||"").trim(),contact=($("#cContact").value||"").trim(),err=m=>{const e=$("#cErr");e.style.display="block";e.textContent=m;};
-    if(!name||!contact)return err("Заполни имя и как с тобой связаться.");
-    const b=$("#cSend");b.disabled=true;b.textContent="Отправляем…";
-    try{
-      await api("/api/contact",{method:"POST",body:{name,contact,date:$("#cDate").value||"",kind:($("#cKind").value||"").trim(),message:($("#cMsg").value||"").trim()}});
-      $("#view").querySelector(".book-card").innerHTML='<div style="text-align:center;padding:14px 4px;"><div class="ico2" style="width:52px;height:52px;font-size:22px;">✓</div><h3 class="detail-h3">Заявка отправлена</h3><p class="faint">Спасибо! Свяжемся с тобой по указанному контакту в течение дня.</p></div>';
-    }catch(e){b.disabled=false;b.textContent="Отправить заявку";err(e.message||"Не удалось отправить");}
-  };
-}
-
-/* ---------- faq ---------- */
+/* faq */
 const FAQS=[
-  ["Как забронировать пространство?","Открой «Забронировать», выбери дату, время начала и число часов — цену увидишь сразу. Нажми «Забронировать» и оплати. Подтверждение придёт на почту."],
-  ["Какой минимальный срок брони?","Минимум 2 часа. Дальше — любое число часов в пределах часов работы (09:00–22:00)."],
-  ["Что с оплатой и залогом?","Оплата закрепляет бронь. Возвратный залог возвращается в течение суток после встречи, если всё в порядке."],
-  ["Можно ли отменить бронь?","Да. При отмене за 24 часа до начала оплата и залог возвращаются полностью."],
-  ["Нужно ли регистрироваться?","Смотреть пространство можно без регистрации. Чтобы забронировать — нужен короткий профиль: имя, почта, пароль. Это нужно для брони и напоминаний."],
-  ["А если я хочу провести своё мероприятие?","Если нужен весь день или особые условия (мастер-класс, съёмочный день, праздник) — оставь заявку в разделе «Для мероприятий», и мы свяжемся с тобой."],
-  ["Где находится пространство?","В районе "+(VENUE?VENUE.loc:"Ваке")+", Тбилиси. Точный адрес придёт после подтверждения брони и есть в кабинете."],
-  ["Придёт ли напоминание?","Да — мы пришлём напоминание за день до брони на почту и покажем его в кабинете."]
+  ["Как забронировать пространство?","Оставь заявку на сайте — укажи имя и удобный способ связи. Менеджер свяжется с тобой, уточнит дату, время и формат и подтвердит бронь."],
+  ["Сколько стоит аренда?","Стоимость зависит от даты, времени и формата события. Менеджер назовёт точную цену при согласовании заявки."],
+  ["Какой минимальный срок?","Обычно от 2 часов. Нужен весь день или особые часы — обсудим индивидуально."],
+  ["Сколько человек помещается?","До 30 человек, в зависимости от формата (съёмка, класс, встреча, праздник)."],
+  ["Где находится пространство?","Район Ваке, Тбилиси. Точный адрес менеджер пришлёт после подтверждения брони."],
+  ["Можно провести своё мероприятие?","Да — мастер-класс, съёмочный день, лекция или праздник. Оставь заявку, и мы поможем с форматом и условиями."]
 ];
-function viewFaq(){
-  return `
-  <section class="page-head wrap"><h1>Частые вопросы</h1><p>Не нашёл ответ — напиши нам через «Для мероприятий».</p></section>
-  <section class="section wrap"><div class="faq">${FAQS.map(f=>`<div class="faq-item"><button class="faq-q">${f[0]}<span class="pl"></span></button><div class="faq-a"><div>${f[1]}</div></div></div>`).join("")}</div></section>`;
-}
+function viewFaq(){return `
+  <section class="page-head wrap"><h1>Частые вопросы</h1><p>Не нашёл ответ — оставь заявку, ответим лично.</p></section>
+  <section class="section wrap"><div class="faq">${FAQS.map(f=>`<div class="faq-item"><button class="faq-q">${f[0]}<span class="pl"></span></button><div class="faq-a"><div>${f[1]}</div></div></div>`).join("")}</div>
+  <div style="margin-top:24px;"><button class="btn btn-primary" id="faqLead">Оставить заявку</button></div></section>`;}
 function wireFaq(){document.querySelectorAll(".faq-item").forEach(it=>{it.querySelector(".faq-q").onclick=()=>{const open=it.classList.toggle("open");const a=it.querySelector(".faq-a");a.style.maxHeight=open?a.scrollHeight+"px":"0";};});}
 
-/* ---------- auth ---------- */
-let authMode="login";
-function openAuth(m){authMode=m||"login";renderAuth();$("#authScrim").classList.add("open");document.body.style.overflow="hidden";}
-function closeAuth(){$("#authScrim").classList.remove("open");if(!$("#dash").classList.contains("open"))document.body.style.overflow="";}
-function renderAuth(){
-  $("#authCard").innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;"><h2>${authMode==="login"?"С возвращением":"Создать профиль"}</h2><button class="x" id="aClose">✕</button></div><div class="auth-tabs"><button class="auth-tab ${authMode==="login"?"active":""}" id="tabL">Вход</button><button class="auth-tab ${authMode==="reg"?"active":""}" id="tabR">Регистрация</button></div>${authMode==="reg"?`<div class="bkf"><label>Имя</label><input id="aName" placeholder="Как тебя зовут"></div>`:""}<div class="bkf"><label>Почта</label><input id="aEmail" type="email" placeholder="you@mail.com"></div><div class="bkf"><label>Пароль</label><input id="aPass" type="password" placeholder="••••••••"></div><button class="btn btn-primary bkcta" id="aGo">${authMode==="login"?"Войти":"Зарегистрироваться"}</button><div id="aErr" style="color:#B23A28;font-size:13.5px;margin-top:9px;display:none;font-weight:600;"></div>`;
-  $("#aClose").onclick=closeAuth;$("#tabL").onclick=()=>{authMode="login";renderAuth();};$("#tabR").onclick=()=>{authMode="reg";renderAuth();};$("#aGo").onclick=submitAuth;
-}
-async function submitAuth(){
-  const email=($("#aEmail").value||"").trim().toLowerCase(),pass=$("#aPass").value||"",err=m=>{const e=$("#aErr");e.style.display="block";e.textContent=m;};
-  if(!email||!pass)return err("Заполни почту и пароль.");
-  const go2=$("#aGo");go2.disabled=true;
-  try{
-    let res;
-    if(authMode==="reg"){const name=($("#aName").value||"").trim();if(!name){go2.disabled=false;return err("Как тебя зовут?");}res=await api("/api/auth/register",{method:"POST",body:{email,name,password:pass}});}
-    else res=await api("/api/auth/login",{method:"POST",body:{email,password:pass}});
-    token=res.token;localStorage.setItem("lumi_token",token);user=res.user;
-    closeAuth();syncNav();toast(`Привет, ${user.name.split(" ")[0]}!`);
-    await refreshMine();remindTomorrow();
-  }catch(e){go2.disabled=false;err(e.message||"Не удалось войти");}
-}
-function logout(){token=null;localStorage.removeItem("lumi_token");user=null;myBookingsCache=[];syncNav();closeDash();toast("Ты вышел из профиля.");}
-function remindTomorrow(){const t=tomorrowStr(),b=myBookings().find(x=>x.date===t);if(b)setTimeout(()=>toast(`Напоминание: завтра у тебя бронь в ${b.spaceName}`),1400);}
-
-/* ---------- maps ---------- */
-let leafletReady=null;
-function loadLeaflet(){if(leafletReady)return leafletReady;leafletReady=new Promise((res,rej)=>{if(window.L)return res(window.L);const css=document.createElement("link");css.rel="stylesheet";css.href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";document.head.appendChild(css);const sc=document.createElement("script");sc.src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";sc.onload=()=>res(window.L);sc.onerror=rej;document.head.appendChild(sc);});return leafletReady;}
-async function showMap(elId,lat,lon){try{const L=await loadLeaflet();const el=document.getElementById(elId);if(!el)return;el.innerHTML="";const map=L.map(el,{zoomControl:true,scrollWheelZoom:false,attributionControl:false}).setView([lat,lon],15);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(map);L.marker([lat,lon]).addTo(map);setTimeout(()=>map.invalidateSize(),120);}catch(e){}}
-
-/* ---------- dashboard ---------- */
-function ic(name){
-  const p={
-    grid:'<rect x="3" y="3" width="7" height="7" rx="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.6"/><rect x="3" y="14" width="7" height="7" rx="1.6"/><rect x="14" y="14" width="7" height="7" rx="1.6"/>',
-    ticket:'<path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2 2 2 0 0 0 0 4 2 2 0 0 1-2 2H6a2 2 0 0 1-2-2 2 2 0 0 0 0-4Z"/><path d="M14 6v12"/>',
-    user:'<circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3.1-5.6 7-5.6s7 2 7 5.6"/>',
-    bell:'<path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z"/><path d="M10.2 20a2 2 0 0 0 3.6 0"/>',
-    calendar:'<rect x="3.5" y="5" width="17" height="15.5" rx="2.2"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/>',
-    chat:'<path d="M20.5 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 20.5 12Z"/>',
-    spark:'<path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2 2-6Z"/>'
-  };
-  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="18" height="18" style="display:block;">${p[name]||''}</svg>`;
-}
-
-let dashTab="overview";
-async function openDash(tab){if(!user)return openAuth("login");dashTab=tab||"overview";$("#dash").classList.add("open");document.body.style.overflow="hidden";renderDash();await refreshMine();renderDash();}
-function closeDash(){$("#dash").classList.remove("open");document.body.style.overflow="";}
-function bookingItem(b,isTom){const u=PX(GAL[0]);return `<div class="bk-item"><div class="bk-thumb"><div class="ph-bg">${room(VHUE,7)}</div><img class="ph-img" src="${u}" onerror="this.remove()"></div><div style="flex:1;"><div style="font-weight:600;">${b.spaceName||(VENUE?VENUE.name:"Lumi Space")}${isTom?`<span class="tom">завтра</span>`:""}</div><div class="muted" style="font-size:14px;">${b.date.split("-").reverse().join(".")} · ${b.slot}:00–${b.slot+b.hours}:00 · ${b.guests} чел.</div></div><div style="font-weight:700;">₾${b.total||b.sub}</div></div>`;}
-function renderDash(){
-  if(!user){closeDash();return;}
-  const mine=myBookings().filter(b=>b.date>=todayStr()),past=myBookings().filter(b=>b.date<todayStr()),t=tomorrowStr();
-  const nav=[["overview","Обзор","grid"],["bookings","Мои брони","ticket"],["profile","Профиль","user"]];
-  let main="";
-  if(dashTab==="overview"){
-    main=`<h1 class="dash-h1">Привет, ${user.name.split(" ")[0]}</h1><div class="stat-grid"><div class="stat"><b>${mine.length}</b><span>предстоящих броней</span></div><div class="stat"><b>${past.length}</b><span>уже прошло</span></div><div class="stat"><b>${myBookings().reduce((a,b)=>a+(b.total||b.sub),0)}</b><span>₾ всего</span></div></div>${mine.some(b=>b.date===t)?`<div class="reminder"><span style="display:inline-flex;vertical-align:-4px;margin-right:7px;">${ic('bell')}</span>Завтра у тебя бронь — не забудь!</div>`:""}${user.isMaster?`<div class="reminder" style="background:var(--soft);border-color:var(--line-2);color:var(--ink);">Ты отмечен как мастер. <a class="link" href="#" data-go="events">Оставить заявку на мероприятие →</a></div>`:""}<div class="quick"><button class="btn btn-primary" data-book="1">Забронировать</button><button class="btn btn-ghost" data-go="about">О пространстве</button></div>`;
-  }else if(dashTab==="bookings"){
-    main=`<h1 class="dash-h1">Мои брони</h1>${mine.some(b=>b.date===t)?`<div class="reminder"><span style="display:inline-flex;vertical-align:-4px;margin-right:7px;">${ic('bell')}</span>Завтра у тебя бронь!</div>`:""}${mine.length?mine.map(b=>bookingItem(b,b.date===t)).join(""):`<p class="empty2">Пока нет броней. Забронируй пространство — оно появится здесь.</p>`}${past.length?`<h3 class="detail-h3" style="margin-top:24px;">Прошедшие</h3>${past.map(b=>bookingItem(b,false)).join("")}`:""}`;
-  }else{
-    main=`<h1 class="dash-h1">Профиль</h1><div class="form-wrap"><div class="bkf"><label>Имя</label><input id="pfName" value="${user.name||''}" placeholder="Как тебя зовут"></div><div class="bkf"><label>Телефон</label><input id="pfPhone" value="${user.phone||''}" placeholder="+995 555 12 34 56"></div><div class="bkf"><label>Telegram</label><input id="pfTg" value="${user.telegram||''}" placeholder="@username"></div><div class="bkf"><label>Почта</label><input value="${user.email}" disabled><p class="faint" style="margin-top:6px;">Почта используется для входа — её менять нельзя.</p></div><div class="bkf"><label>Статус</label><button class="amen-chip ${user.isMaster?'sel':''}" id="masterToggle">${user.isMaster?'✓ Я мастер':'Отметить, что я мастер'}</button><p class="faint" style="margin-top:8px;">Мастера проводят свои мероприятия в пространстве. Отметь — и в обзоре появится быстрая кнопка для заявки на аренду под событие.</p></div><div style="display:flex;gap:10px;margin-top:6px;flex-wrap:wrap;"><button class="btn btn-primary" id="pfSave">Сохранить</button><button class="btn btn-ghost" id="logoutBtn">Выйти из профиля</button></div></div>`;
-  }
-  $("#dash").innerHTML=`<div class="dash-top"><a class="brand" href="#" id="dashLogo"><span class="mark"></span>Lumi&nbsp;Space</a><div style="flex:1"></div><div class="dash-user"><div class="dash-av">${user.name[0]}</div></div><button class="btn btn-ghost" id="dashExit">На сайт</button></div><div class="dash-shell"><nav class="dash-side">${nav.map(([k,l,icn])=>`<button class="dnav ${dashTab===k?"active":""}" data-tab="${k}"><span style="display:inline-flex;">${ic(icn)}</span>${l}</button>`).join("")}</nav><main class="dash-main">${main}</main></div>`;
-  $("#dashExit").onclick=closeDash;$("#dashLogo").onclick=e=>{e.preventDefault();closeDash();};
-  $("#dash").querySelectorAll(".dnav").forEach(b=>b.onclick=()=>{dashTab=b.dataset.tab;renderDash();});
-  $("#dash").querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{closeDash();go(b.dataset.go);});
-  $("#dash").querySelectorAll("[data-book]").forEach(b=>b.onclick=()=>{closeDash();go("book");});
-  const lb=$("#logoutBtn");if(lb)lb.onclick=logout;
-  const mt=$("#masterToggle");if(mt)mt.onclick=()=>setMaster(!user.isMaster);
-  const ps=$("#pfSave");if(ps)ps.onclick=saveProfile;
-}
-async function saveProfile(){
-  const name=($("#pfName").value||"").trim();if(!name)return toast("Впиши имя");
-  const b=$("#pfSave");b.disabled=true;b.textContent="Сохраняем…";
-  try{const res=await api("/api/me/update",{method:"POST",auth:true,body:{name,phone:($("#pfPhone").value||"").trim(),telegram:($("#pfTg").value||"").trim()}});user=Object.assign(user||{},res);syncNav();}
-  catch(e){b.disabled=false;b.textContent="Сохранить";return toast(e.message||"Не удалось сохранить");}
-  renderDash();toast("Профиль обновлён");
-}
-async function setMaster(val){
-  try{const res=await api("/api/me/master",{method:"POST",auth:true,body:{isMaster:val}});user.isMaster=res.isMaster;}
-  catch(e){return toast(e.message||"Не удалось сохранить");}
-  renderDash();toast(user.isMaster?"Отмечено: ты мастер":"Статус снят");
-}
-
-/* ---------- init ---------- */
-document.addEventListener("click",e=>{const g=e.target.closest("[data-go]");if(g&&!g.closest("#dash")){e.preventDefault();closeMenu();go(g.dataset.go);}});
-$("#navBook").onclick=()=>go("book");
-$("#mBook").onclick=()=>{closeMenu();go("book");};
-$("#loginBtn").onclick=()=>openAuth("login");
-$("#dashBtn").onclick=()=>openDash();
+/* init */
+document.addEventListener("click",e=>{
+  const lead=e.target.closest("#aboutLead,#faqLead,#footLead");
+  if(lead){e.preventDefault();goForm();return;}
+  const g=e.target.closest("[data-go]");
+  if(g){e.preventDefault();closeMenu();go(g.dataset.go);}
+});
+$("#navLead").onclick=goForm;
+$("#mLead").onclick=goForm;
 $("#burger").onclick=()=>$("#mmenu").classList.toggle("open");
-$("#mLogin").onclick=()=>{closeMenu();openAuth("login");};
-$("#mDash").onclick=()=>{closeMenu();openDash();};
-$("#authScrim").addEventListener("click",e=>{if(e.target===$("#authScrim"))closeAuth();});
-document.addEventListener("keydown",e=>{if(e.key==="Escape"){if($("#authScrim").classList.contains("open"))closeAuth();else if($("#dash").classList.contains("open"))closeDash();}});
-
-async function boot(){
-  await loadVenue();
-  if(token){try{user=await api("/api/me",{auth:true});await refreshMine();}catch(e){token=null;localStorage.removeItem("lumi_token");user=null;}}
-  syncNav();route();if(user)remindTomorrow();
-}
-boot();
+route();
 </script>
 </body>
 </html>
